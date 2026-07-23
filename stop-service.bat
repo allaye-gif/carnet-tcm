@@ -2,13 +2,16 @@
 chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
-set "NSSM=%~dp0tools\nssm.exe"
-if not exist "%NSSM%" (
-  echo NSSM introuvable - installez d'abord le service avec install-service.bat
+
+net session >nul 2>nul
+if not %errorlevel%==0 (
+  echo Ce script doit etre execute EN TANT QU'ADMINISTRATEUR.
+  echo Clic droit sur stop-service.bat -^> "Executer en tant qu'administrateur".
   pause
   exit /b 1
 )
-echo Arret du service MeteoCarnetMali...
-"%NSSM%" stop MeteoCarnetMali
-echo Fait. (Pour le redemarrer : restart-service.bat, ou services.msc)
+
+echo Arret de MeteoCarnet Mali...
+powershell -NoProfile -Command "Stop-ScheduledTask -TaskName 'MeteoCarnetMali' -ErrorAction SilentlyContinue; Get-Process node -ErrorAction SilentlyContinue | Where-Object { (Get-CimInstance Win32_Process -Filter ('ProcessId = ' + $_.Id)).CommandLine -like '*server.js*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
+echo Fait. (Pour le redemarrer : restart-service.bat, ou le Planificateur de taches)
 pause

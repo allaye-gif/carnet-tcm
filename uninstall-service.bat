@@ -5,23 +5,15 @@ setlocal
 net session >nul 2>nul
 if not %errorlevel%==0 (
   echo Ce script doit etre execute EN TANT QU'ADMINISTRATEUR.
+  echo Clic droit sur uninstall-service.bat -^> "Executer en tant qu'administrateur".
   pause
   exit /b 1
 )
 
 cd /d "%~dp0"
-set "SERVICE_NAME=MeteoCarnetMali"
-set "NSSM=%~dp0tools\nssm.exe"
 
-if not exist "%NSSM%" (
-  echo NSSM introuvable ^(%NSSM%^) - le service n'a peut-etre jamais ete installe.
-  pause
-  exit /b 1
-)
-
-echo Arret et suppression du service "%SERVICE_NAME%"...
-"%NSSM%" stop %SERVICE_NAME% >nul 2>nul
-"%NSSM%" remove %SERVICE_NAME% confirm
+echo Arret et suppression des taches planifiees "MeteoCarnetMali"...
+powershell -NoProfile -Command "Stop-ScheduledTask -TaskName 'MeteoCarnetMali' -ErrorAction SilentlyContinue; Unregister-ScheduledTask -TaskName 'MeteoCarnetMali' -Confirm:$false -ErrorAction SilentlyContinue; Unregister-ScheduledTask -TaskName 'MeteoCarnetMali-Watchdog' -Confirm:$false -ErrorAction SilentlyContinue; Get-Process node -ErrorAction SilentlyContinue | Where-Object { (Get-CimInstance Win32_Process -Filter ('ProcessId = ' + $_.Id)).CommandLine -like '*server.js*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
 
 echo.
 echo (Les regles de pare-feu ne sont pas supprimees automatiquement. Pour les
@@ -29,5 +21,5 @@ echo  retirer si besoin : Pare-feu Windows Defender avec fonctions avancees de
 echo  securite -^> Regles de trafic entrant -^> supprimez celles nommees
 echo  "MeteoCarnetMali-...")
 echo.
-echo Service supprime.
+echo Taches planifiees supprimees.
 pause

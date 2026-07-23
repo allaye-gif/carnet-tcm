@@ -66,9 +66,11 @@ Pour que l'application démarre **toute seule** à chaque redémarrage du serveu
 
 1. Faites un clic droit sur **`install-service.bat`** → *Exécuter en tant
    qu'administrateur*.
-2. C'est tout : le script installe l'outil `NSSM` (gestionnaire de service),
-   crée le service Windows « MeteoCarnet Mali », l'ouvre dans le pare-feu, et
-   le démarre immédiatement.
+2. C'est tout : le script crée une tâche planifiée Windows « MeteoCarnetMali »
+   (démarrage automatique + relance toutes les 5 min si arrêtée) ainsi qu'une
+   tâche de surveillance « MeteoCarnetMali-Watchdog » qui vérifie toutes les
+   3 minutes que le site **répond vraiment** (pas juste que le processus
+   existe), ouvre le pare-feu, et démarre immédiatement.
 3. À partir de là, l'application tourne en permanence en arrière-plan (vous
    n'avez plus besoin de `start.bat`, ni de garder une fenêtre ouverte).
 
@@ -76,14 +78,14 @@ Scripts fournis pour gérer ce service au quotidien :
 
 | Script | Effet |
 |---|---|
-| `service-status.bat` | Affiche si le service tourne |
+| `service-status.bat` | Affiche si la tâche planifiée tourne |
 | `restart-service.bat` | Redémarre l'application (après une modif du `.env` par ex.) |
 | `stop-service.bat` | Arrête l'application |
 | `view-logs.bat` | Affiche les dernières lignes des journaux (`logs/out.log`, `logs/err.log`) |
-| `uninstall-service.bat` | Supprime le service (à exécuter en administrateur) |
+| `uninstall-service.bat` | Supprime les tâches planifiées (à exécuter en administrateur) |
 
-Vous pouvez aussi le gérer via **`services.msc`** de Windows (nom affiché :
-« MeteoCarnet Mali »).
+Vous pouvez aussi le gérer via le **Planificateur de tâches** de Windows
+(`taskschd.msc`, tâches « MeteoCarnetMali » et « MeteoCarnetMali-Watchdog »).
 
 **Port utilisé : 2000** par défaut (configuré dans `server/.env`, réglé volontairement
 sur 2000 plutôt que 3000 pour éviter les conflits avec les autres applications déjà

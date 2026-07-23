@@ -1,5 +1,9 @@
 node_modules/
 server/.env
+
+# genere automatiquement par install-service.bat a chaque execution
+# (chemins absolus propres a la machine - ne jamais versionner)
+run-service.bat
 server/certs/
 *.log
 tools/
