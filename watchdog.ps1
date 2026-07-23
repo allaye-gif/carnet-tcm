@@ -9,7 +9,7 @@ function Write-Log([string]$msg) {
     Add-Content -Path $logFile -Value $line
 }
 
-$port = 2000
+$port = 9555
 $envFile = Join-Path $root 'server\.env'
 if (Test-Path $envFile) {
     foreach ($line in Get-Content $envFile) {

@@ -122,8 +122,8 @@ rem --- Cree le petit script qui lance le serveur avec le bon dossier et les log
 >> "%ROOT%\run-service.bat" echo "%NODE_EXE%" server.js ^>^> "%ROOT%\logs\out.log" 2^>^> "%ROOT%\logs\err.log"
 
 rem --- Lecture du port et du mode HTTPS dans .env (pour le pare-feu) ---
-set "PORT_VALUE=2000"
-set "HTTPS_PORT_VALUE=2443"
+set "PORT_VALUE=9555"
+set "HTTPS_PORT_VALUE=9556"
 set "ENABLE_HTTPS_VALUE=false"
 for /f "usebackq tokens=1,2 delims==" %%A in ("%SERVERDIR%\.env") do (
   if /I "%%A"=="PORT" if not "%%B"=="" set "PORT_VALUE=%%B"

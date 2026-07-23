@@ -87,12 +87,12 @@ Scripts fournis pour gérer ce service au quotidien :
 Vous pouvez aussi le gérer via le **Planificateur de tâches** de Windows
 (`taskschd.msc`, tâches « MeteoCarnetMali » et « MeteoCarnetMali-Watchdog »).
 
-**Port utilisé : 2000** par défaut (configuré dans `server/.env`, réglé volontairement
-sur 2000 plutôt que 3000 pour éviter les conflits avec les autres applications déjà
+**Port utilisé : 9555** par défaut (configuré dans `server/.env`, réglé volontairement
+sur 9555 plutôt que 3000 pour éviter les conflits avec les autres applications déjà
 présentes sur ce serveur). Le pare-feu Windows est ouvert automatiquement sur ce port
 par `install-service.bat` (et par `start.bat` si lancé en administrateur), afin que
 l'application soit accessible depuis **toutes les machines du réseau du serveur**,
-à l'adresse `http://<IP_DU_SERVEUR>:2000`.
+à l'adresse `http://<IP_DU_SERVEUR>:9555`.
 
 Si PostgreSQL tourne sur ce même serveur, `install-service.bat` affiche une commande
 optionnelle pour faire dépendre le service de celui de PostgreSQL, afin qu'il démarre
@@ -123,7 +123,7 @@ et `ADMIN_USERNAME`). Connectez-vous, puis créez les comptes de votre équipe d
 ## 6. Activer le HTTPS (nécessaire pour la géolocalisation hors de ce serveur)
 
 Par défaut (`ENABLE_HTTPS=false`), l'application tourne en HTTP simple sur le port
-2000 — le plus simple pour un usage sur réseau local. Les navigateurs bloquent
+9555 — le plus simple pour un usage sur réseau local. Les navigateurs bloquent
 cependant la géolocalisation sur un site non sécurisé (sauf `localhost`) : si vous
 voulez que la fonction « qui/où/quand a saisi une heure » (visible par les admins)
 fonctionne aussi **depuis d'autres postes** que le serveur lui-même, activez le HTTPS.
@@ -132,15 +132,15 @@ Dans `server/.env` :
 
 ```
 ENABLE_HTTPS=true
-HTTPS_PORT=2443
+HTTPS_PORT=9556
 ```
 
 Puis relancez le service (`restart-service.bat`, ou relancez `install-service.bat`
-en administrateur pour que le pare-feu s'ouvre aussi automatiquement sur le port 2443).
+en administrateur pour que le pare-feu s'ouvre aussi automatiquement sur le port 9556).
 
 Un certificat auto-signé est généré automatiquement au premier démarrage (dossier
-`server/certs/`, jamais envoyé sur Git). Ouvrez ensuite **https://<IP_DU_SERVEUR>:2443**
-depuis un autre poste. L'ancien port 2000 continue de fonctionner mais redirige
+`server/certs/`, jamais envoyé sur Git). Ouvrez ensuite **https://<IP_DU_SERVEUR>:9556**
+depuis un autre poste. L'ancien port 9555 continue de fonctionner mais redirige
 automatiquement vers HTTPS.
 
 La première fois, le navigateur affichera un avertissement ("connexion non privée") car
@@ -231,7 +231,7 @@ meteocarnet-server/
 │   ├── db.js              (connexion PostgreSQL)
 │   ├── schema.sql        (à exécuter une fois dans pgAdmin)
 │   ├── package.json
-│   └── .env.example      (copier en .env et remplir — port 2000 par défaut)
+│   └── .env.example      (copier en .env et remplir — port 9555 par défaut)
 ├── public/
 │   └── index.html        (l'application, servie par server.js)
 ├── start.bat              (test rapide manuel)
