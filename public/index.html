@@ -1,0 +1,2724 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>MétéoCarnet Mali</title>
+<link rel="icon" type="image/png" href="/logo-mali-meteo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16233B; --ink-soft:#4C596F;
+  --bg:#EEEBE2; --surface:#FFFFFF; --surface-2:#F7F4EC;
+  --border:#DAD3C0; --border-strong:#C2B89C;
+  --sky:#1C6E8C; --sky-deep:#0D4A5C; --sky-pale:#E3EEF1;
+  --brass:#B9803A; --brass-pale:#F5E9D4;
+  --ok:#3E7A5C; --ok-pale:#E3EFE7;
+  --danger:#AF4A3A; --danger-pale:#F6E4E0;
+  --radius:10px;
+  --font-display:'Fraunces',serif;
+  --font-sans:'IBM Plex Sans',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:14px;line-height:1.5;}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;color:var(--ink);}
+button{font-family:var(--font-sans);cursor:pointer;}
+input,select,textarea{font-family:var(--font-mono);font-size:13px;}
+
+#app{max-width:1360px;margin:0 auto;padding:20px 24px 60px;}
+.topbar{display:flex;align-items:center;gap:18px;padding:18px 22px;background:var(--sky-deep);border-radius:16px;color:#fff;margin-bottom:18px;}
+.topbar .brand{display:flex;align-items:center;gap:14px;flex:1;}
+.topbar h1{color:#fff;font-size:22px;letter-spacing:.2px;}
+.topbar .sub{font-size:12px;color:#BFD9E1;font-family:var(--font-sans);margin-top:2px;}
+.station-picker{display:flex;align-items:center;gap:10px;}
+.station-picker select{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px 10px;min-width:190px;}
+.station-picker select option{color:#111;}
+.btn{border:1px solid var(--border-strong);background:var(--surface);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--ink);transition:transform .08s;}
+.btn:hover{background:var(--surface-2);}
+.btn:active{transform:scale(.97);}
+.btn.primary{background:var(--sky);border-color:var(--sky-deep);color:#fff;}
+.btn.primary:hover{background:var(--sky-deep);}
+.btn.brass{background:var(--brass);border-color:#8f5f26;color:#fff;}
+.btn.brass:hover{background:#9c6a2e;}
+.btn.ghost{background:transparent;border-color:rgba(255,255,255,.4);color:#fff;}
+.btn.ghost:hover{background:rgba(255,255,255,.12);}
+.btn.sm{padding:5px 10px;font-size:12px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+.tabs{display:flex;gap:6px;margin-bottom:18px;}
+.tab{padding:10px 18px;border-radius:9px 9px 0 0;background:var(--surface-2);border:1px solid var(--border);border-bottom:none;color:var(--ink-soft);font-weight:500;font-size:13.5px;}
+.tab.active{background:var(--surface);color:var(--sky-deep);border-color:var(--border-strong);position:relative;top:1px;}
+
+.panel{background:var(--surface);border:1px solid var(--border-strong);border-radius:0 12px 12px 12px;padding:22px;}
+.card{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:16px;}
+.card h3{font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:end;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:11.5px;color:var(--ink-soft);font-family:var(--font-sans);text-transform:uppercase;letter-spacing:.4px;}
+.field input,.field select,.field textarea{border:1px solid var(--border-strong);border-radius:7px;padding:7px 9px;background:#fff;color:var(--ink);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--sky);outline-offset:1px;}
+.field input[type=text],.field input[type=number]{width:110px;}
+
+.cachet{width:46px;height:46px;border-radius:50%;border:2px solid #BFD9E1;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;background:#fff;}
+.cachet::before{content:'';position:absolute;inset:4px;border:1px dashed rgba(255,255,255,.55);border-radius:50%;}
+.cachet span{font-family:var(--font-display);font-weight:600;font-size:15px;color:#fff;}
+.cachet img{width:100%;height:100%;object-fit:cover;border-radius:50%;position:relative;z-index:1;}
+.cachet.logo-badge::before{display:none;}
+.cachet.stamp-anim{animation:stampdown .45s cubic-bezier(.2,1.6,.4,1);}
+@keyframes stampdown{0%{transform:scale(1.8) rotate(-14deg);opacity:0;}60%{transform:scale(.94) rotate(2deg);opacity:1;}100%{transform:scale(1) rotate(0);}}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;}
+table.grid{border-collapse:collapse;width:100%;font-family:var(--font-mono);font-size:12.5px;}
+table.grid th,table.grid td{border:1px solid var(--border);padding:4px 5px;text-align:center;white-space:nowrap;}
+table.grid thead th{background:var(--sky-pale);color:var(--sky-deep);font-family:var(--font-sans);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2;}
+table.grid td input, table.grid td select{width:100%;min-width:50px;border:none;background:transparent;text-align:center;padding:3px 2px;font-family:var(--font-mono);font-size:12.5px;color:var(--ink);}
+table.grid td input:focus, table.grid td select:focus{outline:2px solid var(--sky);border-radius:4px;}
+td.triplet-cell{padding:3px 3px;white-space:nowrap;}
+td.triplet-cell .triplet-part{width:32px;min-width:32px;display:inline-block;border:1px solid var(--border);border-radius:3px;margin:0 1px;padding:3px 0;text-align:center;background:var(--surface);}
+td.triplet-cell .triplet-part:focus{outline:2px solid var(--sky);}
+table.grid tr.total-row td{background:var(--brass-pale);font-weight:600;}
+table.grid tr:hover td{background:#FBFAF6;}
+table.grid tr.total-row:hover td{background:var(--brass-pale);}
+table.grid tr.std-hour td.rowhead{background:var(--sky-pale);color:var(--sky-deep);font-weight:600;}
+table.grid td.rowhead{background:var(--surface-2);font-family:var(--font-sans);font-weight:500;color:var(--ink-soft);}
+
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.metric .label{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-soft);margin-bottom:5px;}
+.metric .value{font-family:var(--font-mono);font-size:19px;font-weight:500;color:var(--sky-deep);}
+.metric .sub{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--sky-pale);color:var(--sky-deep);font-size:11.5px;border:1px solid #C9DEE4;cursor:pointer;}
+.pill.saved{background:var(--ok-pale);color:var(--ok);border-color:#C7DFCF;}
+.pill.missing{background:var(--surface-2);color:var(--ink-soft);border-color:var(--border);}
+.calendar-row{display:flex;flex-wrap:wrap;gap:6px;}
+
+.toast{position:fixed;bottom:22px;right:22px;background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.2);z-index:50;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:all .25s;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.err{background:var(--danger);}
+
+.mode-toggle{display:flex;gap:0;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden;}
+.mode-toggle button{border:none;background:var(--surface);padding:8px 16px;font-size:13px;color:var(--ink-soft);}
+.mode-toggle button.active{background:var(--sky);color:#fff;}
+
+.scan-drop{border:2px dashed var(--border-strong);border-radius:12px;padding:20px;text-align:center;color:var(--ink-soft);background:var(--surface-2);}
+.scan-drop.drag{border-color:var(--sky);background:var(--sky-pale);}
+.thumb-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.thumb{width:70px;height:70px;object-fit:cover;border-radius:6px;border:1px solid var(--border-strong);}
+
+textarea.wide{width:100%;min-height:60px;resize:vertical;font-family:var(--font-sans);font-size:13px;}
+.help{font-size:12px;color:var(--ink-soft);margin-top:6px;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--sky-pale);border-top-color:var(--sky);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.small-x{background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:2px 6px;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--ink-soft);}
+.empty-state h3{color:var(--ink-soft);margin-bottom:8px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(22,35,59,.55);display:flex;align-items:center;justify-content:center;z-index:100;}
+.modal-card{background:var(--surface);border-radius:14px;padding:24px 26px;width:360px;box-shadow:0 20px 50px rgba(0,0,0,.3);}
+.modal-card h3{margin-bottom:16px;}
+.modal-card .field{margin-bottom:12px;width:100%;}
+.modal-card .field input{width:100%;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;}
+
+details.section{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+details.section summary{cursor:pointer;padding:12px 16px;background:var(--surface-2);font-family:var(--font-sans);font-weight:500;color:var(--ink);list-style:none;display:flex;align-items:center;justify-content:space-between;}
+details.section summary::-webkit-details-marker{display:none;}
+details.section summary::after{content:'▸';color:var(--sky);transition:transform .15s;}
+details.section[open] summary::after{transform:rotate(90deg);}
+details.section .section-body{padding:14px 16px;}
+.badge-count{font-size:11px;background:var(--sky-pale);color:var(--sky-deep);border-radius:999px;padding:2px 8px;margin-left:8px;}
+
+.event-card{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--surface-2);position:relative;}
+.event-card .row{margin-bottom:0;}
+.event-card .field input{width:100px;}
+.event-del{position:absolute;top:6px;right:8px;}
+
+.check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;}
+.check-item{display:flex;align-items:center;gap:8px;font-family:var(--font-sans);font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.check-item input{width:auto;}
+code.mono-block{display:block;white-space:pre-wrap;background:var(--ink);color:#DCE8ED;padding:12px 14px;border-radius:8px;font-family:var(--font-mono);font-size:12px;line-height:1.6;}
+#codeHint{position:fixed;display:none;background:var(--ink);color:#fff;padding:6px 11px;border-radius:7px;font-size:12.5px;font-family:var(--font-sans);z-index:300;pointer-events:none;white-space:nowrap;box-shadow:0 6px 16px rgba(0,0,0,.28);}
+#codeHint.unknown{background:var(--danger);}
+input[list]{background-image:none;}
+/* ---- Vue carnet papier (4 pages conformes au formulaire ASECNA/Mali Météo) ---- */
+.paper-view{background:#dfe4e8;padding:24px 0;margin:0 -20px;}
+.paper-page{background:#fff;width:277mm;min-height:190mm;margin:0 auto 28px;padding:8mm 9mm;
+  box-shadow:0 6px 18px rgba(0,0,0,.22);font-family:var(--font-mono);font-size:9.5px;color:#111;box-sizing:border-box;}
+.paper-page h2{text-align:center;font-size:13px;margin:0 0 2px;font-family:var(--font-sans);font-weight:700;letter-spacing:.02em;}
+.paper-page .paper-sub{text-align:center;font-size:10.5px;margin-bottom:8px;font-family:var(--font-sans);}
+.paper-page h3{text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.03em;
+  background:#eef2f4;border:1px solid #333;border-bottom:none;margin:10px 0 0;padding:3px 0;font-family:var(--font-sans);}
+.paper-page table{width:100%;border-collapse:collapse;margin-bottom:6px;table-layout:fixed;}
+.paper-page th, .paper-page td{border:1px solid #333;padding:1.5px 2px;text-align:center;overflow:hidden;white-space:nowrap;}
+.paper-page th{background:#eef2f4;font-weight:600;font-family:var(--font-sans);font-size:8.5px;line-height:1.15;}
+.paper-page td.rh{background:#f6f6f6;font-weight:600;width:24px;}
+.paper-page .colnum{font-size:7.5px;color:#666;font-weight:400;display:block;}
+.paper-page .paper-toolbar{max-width:277mm;margin:0 auto 14px;display:flex;gap:10px;justify-content:flex-end;}
+.paper-page .mini-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:4px 10px;margin:6px 0 10px;font-family:var(--font-sans);}
+.paper-page .mini-grid div{border-bottom:1px dotted #999;padding:1px 0;font-size:9.5px;}
+.paper-page .mini-grid b{font-weight:600;}
+.paper-page .free-text-box{border:1px solid #333;min-height:60px;padding:4px;font-family:var(--font-sans);font-size:10px;white-space:pre-wrap;}
+@media print{
+  body *{visibility:hidden;}
+  .paper-view, .paper-view *{visibility:visible;}
+  .paper-view{position:absolute;top:0;left:0;width:100%;margin:0;padding:0;background:#fff;}
+  .paper-page{box-shadow:none;margin:0;width:100%;min-height:0;page-break-after:always;}
+  .paper-page:last-child{page-break-after:auto;}
+  .paper-toolbar{display:none;}
+  @page{size:A4 landscape;margin:8mm;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+<div id="codeHint"></div>
+<div id="datalists"></div>
+
+<script>
+/* =========================================================
+   MétéoCarnet Mali — numérisation intégrale du carnet
+   d'observations et du tableau climatologique mensuel.
+   ========================================================= */
+
+function padHour(n){ return String(n).padStart(2,'0'); }
+const ALL_HOURS = Array.from({length:24}, (_,i)=>padHour(i));
+const STANDARD_HOURS = ['00','03','06','09','12','15','18','21'];
+
+/* ---- Tables de codes officielles OMM (traductions françaises) ---- */
+const WW_CODES = [
+['00','Aucun développement nuageux observé ou observable'],['01','Nuages en dissolution ou moins développés'],
+['02','État du ciel dans son ensemble inchangé'],['03','Nuages en formation ou en développement'],
+['04','Visibilité réduite par la fumée'],['05','Brume sèche (haze)'],
+['06','Poussière étendue en suspension, non soulevée par le vent'],['07','Poussière/sable soulevé par le vent, sans tourbillon développé'],
+['08','Tourbillon(s) de poussière ou de sable bien développé(s)'],['09','Tempête de poussière ou de sable en vue'],
+['10','Brume légère (mist)'],['11','Bancs de brouillard peu épais'],
+['12','Brouillard peu épais, plus ou moins continu'],['13','Éclairs visibles, tonnerre non entendu'],
+['14','Précipitation en vue, n\u2019atteignant pas le sol'],['15','Précipitation en vue au sol, éloignée (>5km)'],
+['16','Précipitation en vue au sol, proche de la station'],['17','Orage sans précipitation'],
+['18','Grains à la station ou en vue'],['19','Trombe(s) / nuage en entonnoir'],
+['20','Bruine ou neige en grains, cessée depuis <1h'],['21','Pluie, cessée depuis <1h'],
+['22','Neige, cessée depuis <1h'],['23','Pluie et neige mêlées ou grésil, cessée'],
+['24','Bruine ou pluie verglaçante, cessée'],['25','Averse(s) de pluie, cessée'],
+['26','Averse(s) de neige ou pluie/neige, cessée'],['27','Averse(s) de grêle, cessée'],
+['28','Brouillard, cessé depuis <1h'],['29','Orage, cessé depuis <1h'],
+['30','Tempête poussière/sable faible-modérée, en diminution'],['31','Tempête poussière/sable faible-modérée, stationnaire'],
+['32','Tempête poussière/sable faible-modérée, en augmentation'],['33','Tempête poussière/sable forte, en diminution'],
+['34','Tempête poussière/sable forte, stationnaire'],['35','Tempête poussière/sable forte, en augmentation'],
+['36','Chasse-neige faible ou modérée, basse'],['37','Chasse-neige basse, forte'],
+['38','Chasse-neige élevée, faible ou modérée'],['39','Chasse-neige élevée, forte'],
+['40','Brouillard à distance, non à la station'],['41','Brouillard en bancs'],
+['42','Brouillard, ciel visible, en diminution'],['43','Brouillard, ciel invisible, en diminution'],
+['44','Brouillard, ciel visible, sans changement'],['45','Brouillard, ciel invisible, sans changement'],
+['46','Brouillard, ciel visible, en formation/augmentation'],['47','Brouillard, ciel invisible, en formation/augmentation'],
+['48','Brouillard givrant, ciel visible'],['49','Brouillard givrant, ciel invisible'],
+['50','Bruine intermittente faible'],['51','Bruine continue faible'],
+['52','Bruine intermittente modérée'],['53','Bruine continue modérée'],
+['54','Bruine intermittente forte'],['55','Bruine continue forte'],
+['56','Bruine verglaçante faible'],['57','Bruine verglaçante modérée ou forte'],
+['58','Pluie et bruine faibles'],['59','Pluie et bruine modérées ou fortes'],
+['60','Pluie intermittente faible'],['61','Pluie continue faible'],
+['62','Pluie intermittente modérée'],['63','Pluie continue modérée'],
+['64','Pluie intermittente forte'],['65','Pluie continue forte'],
+['66','Pluie verglaçante faible'],['67','Pluie verglaçante modérée ou forte'],
+['68','Pluie ou bruine et neige, faibles'],['69','Pluie ou bruine et neige, modérées ou fortes'],
+['70','Neige intermittente faible'],['71','Neige continue faible'],
+['72','Neige intermittente modérée'],['73','Neige continue modérée'],
+['74','Neige intermittente forte'],['75','Neige continue forte'],
+['76','Poussière de diamant'],['77','Neige en grains'],
+['78','Cristaux de neige isolés (étoilés)'],['79','Granules de glace'],
+['80','Averse(s) de pluie faible'],['81','Averse(s) de pluie modérée ou forte'],
+['82','Averse(s) de pluie violente'],['83','Averse(s) de pluie et neige mêlées, faible'],
+['84','Averse(s) de pluie et neige mêlées, modérée ou forte'],['85','Averse(s) de neige faible'],
+['86','Averse(s) de neige modérée ou forte'],['87','Averse(s) de granules de neige/grêle faible'],
+['88','Averse(s) de granules de neige/grêle modérée ou forte'],['89','Averse(s) de grêle faible, sans tonnerre'],
+['90','Averse(s) de grêle modérée ou forte, sans tonnerre'],['91','Pluie faible + orage pendant l\u2019heure précédente'],
+['92','Pluie modérée/forte + orage pendant l\u2019heure précédente'],['93','Neige/pluie-neige/grêle faible + orage préc.'],
+['94','Neige/pluie-neige/grêle forte + orage préc.'],['95','Orage faible/modéré, sans grêle, avec pluie/neige'],
+['96','Orage faible/modéré, avec grêle'],['97','Orage fort, sans grêle, avec pluie/neige'],
+['98','Orage combiné à tempête de poussière/sable'],['99','Orage fort avec grêle']
+];
+const W_CODES = [
+['0','Nébulosité ≤ 4/8 pendant toute la période'],['1','Nébulosité > 4/8 une partie, ≤4/8 le reste'],
+['2','Nébulosité > 4/8 pendant toute la période'],['3','Tempête de sable, de poussière ou chasse-neige'],
+['4','Brouillard ou brume épaisse'],['5','Bruine'],['6','Pluie'],
+['7','Neige, ou pluie et neige mêlées'],['8','Averse(s)'],['9','Orage(s), avec ou sans précipitation']
+];
+const CL_CODES = [
+['/','Non observable (obscurci)'],['0','Pas de Sc/St/Cu/Cb'],
+['1','Cumulus peu développé ou déchiqueté'],['2','Cumulus modérément ou fortement développé'],
+['3','Cumulonimbus, sommet non fibreux, sans enclume nette'],['4','Stratocumulus formé par étalement de Cumulus'],
+['5','Stratocumulus non issu d\u2019étalement de Cumulus'],['6','Stratus en couche ou lambeaux'],
+['7','Stratus/Cumulus fractus de mauvais temps'],['8','Cumulus et Stratocumulus à niveaux différents'],
+['9','Cumulonimbus à sommet fibreux (enclume nette)']
+];
+const CM_CODES = [
+['/','Non observable'],['0','Pas d\u2019Ac/As/Ns'],
+['1','Altostratus semi-transparent'],['2','Altostratus épais ou Nimbostratus'],
+['3','Altocumulus semi-transparent, niveau unique'],['4','Altocumulus en bancs (amande/poisson)'],
+['5','Altocumulus semi-transparent en bandes, envahissant'],['6','Altocumulus issu d\u2019étalement de Cumulus'],
+['7','Altocumulus en couches opaques, n\u2019envahissant pas'],['8','Altocumulus en tourelles ou chaotique'],
+['9','Altocumulus à plusieurs niveaux, ciel chaotique']
+];
+const CH_CODES = [
+['/','Non observable'],['0','Pas de Ci/Cc/Cs'],
+['1','Cirrus en filaments/crochets, n\u2019envahissant pas'],['2','Cirrus dense en bancs (restes de Cb)'],
+['3','Cirrus dense en enclume (restes de Cb)'],['4','Cirrus en crochets/filaments, envahissant progressivement'],
+['5','Cirrus/Cirrostratus envahissant, voile <45°'],['6','Cirrus/Cirrostratus envahissant, voile >45°'],
+['7','Voile de Cirrostratus couvrant tout le ciel'],['8','Cirrostratus n\u2019envahissant pas tout le ciel'],
+['9','Cirrocumulus prédominant']
+];
+const N_CODES = [
+['/','Ciel non observable'],['0','Ciel clair (0 octa)'],['1','1 octa (1-2/10)'],['2','2 octas (2-3/10)'],
+['3','3 octas (4/10)'],['4','4 octas (5/10)'],['5','5 octas (6/10)'],['6','6 octas (7-8/10)'],
+['7','7 octas (9/10, pas 10/10)'],['8','8 octas — couvert (10/10)'],['9','Ciel obscurci (brouillard, etc.)']
+];
+// Table OMM 0500 — genre du nuage (C5), utilisée pour les couches nuageuses significatives.
+// Contrairement à CL/CM/CH (classification bas/moyen/haut), ce code identifie directement
+// l'un des 10 genres, quel que soit l'étage.
+const C5_CODES = [
+['/','Genre inconnu / non identifiable'],
+['0','Ci — Cirrus'],['1','Cc — Cirrocumulus'],['2','Cs — Cirrostratus'],
+['3','Ac — Altocumulus'],['4','As — Altostratus'],['5','Ns — Nimbostratus'],
+['6','Sc — Stratocumulus'],['7','St — Stratus'],['8','Cu — Cumulus'],['9','Cb — Cumulonimbus']
+];
+// Table OMM 1677 — hauteur de la base du nuage (h5).
+const H5_CODES = [
+['/','Hauteur inconnue / pas de nuage'],
+['0','0 – 49 m'],['1','50 – 99 m'],['2','100 – 199 m'],['3','200 – 299 m'],
+['4','300 – 599 m'],['5','600 – 999 m'],['6','1000 – 1499 m'],['7','1500 – 1999 m'],
+['8','2000 – 2499 m'],['9','2500 m ou plus']
+];
+const VISIBILITE_CODES = (function(){
+  const arr = [];
+  for(let i=0;i<=50;i++){
+    const km = i/10;
+    arr.push([String(i).padStart(2,'0'), km<0.1 ? '< 0.1 km' : `${km.toFixed(1)} km`]);
+  }
+  const extra = {56:'6 km',57:'7 km',58:'8 km',59:'9 km',60:'10 km',61:'11 km',62:'12 km',63:'13 km',64:'14 km',
+    65:'15 km',66:'16 km',67:'17 km',68:'18 km',69:'19 km',70:'20 km',71:'21 km',72:'22 km',73:'23 km',74:'24 km',
+    75:'25 km',76:'26 km',77:'27 km',78:'28 km',79:'29 km',80:'30 km',81:'35 km',82:'40 km',83:'45 km',84:'50 km',
+    85:'55 km',86:'60 km',87:'65 km',88:'70 km',89:'> 70 km'};
+  Object.keys(extra).forEach(k=> arr.push([k, extra[k]]));
+  return arr;
+})();
+const DIRECTIONS_ROSE = [
+  ['N','Nord'],['NE','Nord-Est'],['E','Est'],['SE','Sud-Est'],
+  ['S','Sud'],['SW','Sud-Ouest'],['W','Ouest'],['NW','Nord-Ouest'],['Calme','Calme']
+];
+const DIZAINES_CODES = (function(){
+  const arr = [['00','Calme']];
+  for(let i=1;i<=36;i++) arr.push([String(i).padStart(2,'0'), `${i*10}°`]);
+  arr.push(['99','Direction variable']);
+  return arr;
+})();
+const COMBO_TABLES = {
+  ww: WW_CODES, w: W_CODES, cl: CL_CODES, cm: CM_CODES, ch: CH_CODES, n: N_CODES,
+  vis: VISIBILITE_CODES, dir: DIRECTIONS_ROSE, dz: DIZAINES_CODES, c5: C5_CODES, h5: H5_CODES
+};
+function parseKmLabel(label){ const m = label.match(/([\d.]+)/); return m ? parseFloat(m[1]) : null; }
+function nearestVisibiliteCode(km){
+  let best=null, bestDiff=Infinity;
+  VISIBILITE_CODES.forEach(([code,label])=>{
+    const num = parseKmLabel(label); if(num===null) return;
+    const diff = Math.abs(num-km);
+    if(diff<bestDiff){ bestDiff=diff; best=code; }
+  });
+  return best;
+}
+
+/* ---- Calculs physiques automatiques (Guide CIMO OMM-N°8, 2008/2010, chap. 4 annexe 4.B) ---- */
+// Tension de vapeur saturante — formule de Sonntag, adoptée par l'OMM : es = 6.112 * exp(17.62*t/(243.12+t)), t en °C, es en hPa
+function satVaporPressure(t){ return 6.112 * Math.exp(17.62*t/(243.12+t)); }
+// Inversion pour retrouver la température depuis une tension de vapeur (point de rosée)
+function tempFromVaporPressure(e){ if(e<=0) return null; const x = Math.log(e/6.112); return 243.12*x/(17.62-x); }
+// Constante psychrométrique A — OMM (Guide CIMO N°8) : 0,000662 K⁻¹ pour un psychromètre ventilé (type Assmann, ≥2,5 m/s).
+// Un psychromètre sous abri non ventilé donnerait une valeur légèrement plus élevée (≈0,0008) — écart généralement <3% d'humidité.
+// Vérifié contre l'exemple officiel du Guide CIMO (Tsec=20.2°C, Tw=14.6°C → U=54.39%, Td=10.70°C) : résultat obtenu ici à 0,1% près.
+const PSYCHRO_A = 0.000662;
+function autoComputeHygro(hourObj, pressionHpa){
+  const Tsec = toNum(hourObj.Tsec);
+  const Tw = toNum(hourObj.Tw);
+  const p = pressionHpa!==null ? pressionHpa : 1013.25;
+  if(Tsec!==null && Tw!==null){
+    const esTw = satVaporPressure(Tw), esT = satVaporPressure(Tsec);
+    const e = esTw - PSYCHRO_A*p*(Tsec-Tw);
+    if(e>0){
+      const U = Math.max(0, Math.min(100, 100*e/esT));
+      const td = tempFromVaporPressure(e);
+      hourObj.tensionVapeur = e.toFixed(1);
+      hourObj.humidite = String(Math.round(U));
+      if(td!==null) hourObj.pointRosee = td.toFixed(1);
+      return true;
+    }
+  } else if(Tsec!==null){
+    const U = toNum(hourObj.humidite);
+    if(U!==null && U>0){
+      const esT = satVaporPressure(Tsec);
+      const e = (U/100)*esT;
+      const td = tempFromVaporPressure(e);
+      hourObj.tensionVapeur = e.toFixed(1);
+      if(td!==null) hourObj.pointRosee = td.toFixed(1);
+      return true;
+    }
+  }
+  return false;
+}
+// Réduction de la pression station au niveau de la mer (formule hypsométrique standard, lapse rate 6.5K/km)
+function reducePressureToSeaLevel(pressionHpa, altitudeM, tempC){
+  if(pressionHpa===null || altitudeM===null || tempC===null) return null;
+  const L=0.0065, g=9.80665, R=287.05;
+  const expo = g/(R*L);
+  const Tk = tempC + 273.15;
+  const ratio = 1 - (L*altitudeM)/(Tk + L*altitudeM);
+  if(ratio<=0) return null;
+  return pressionHpa * Math.pow(ratio, -expo);
+}
+// Groupe OMM 8NCLCMCH (section 8 du message SYNOP) : composé automatiquement dès que
+// N (nébulosité), CL, CM et/ou CH sont renseignés. "/" = valeur manquante (convention OMM).
+function computeCloudGroup(hourObj){
+  const n = (hourObj.N||'').trim();
+  const cl = (hourObj.CL||'').trim();
+  const cm = (hourObj.CM||'').trim();
+  const ch = (hourObj.CH||'').trim();
+  if(!n && !cl && !cm && !ch) return '';
+  const part = v => v===''?'/':v;
+  return `8${part(n)}${part(cl)}${part(cm)}${part(ch)}`;
+}
+// Une couche nuageuse significative (N5C5h5) tient en 3 caractères : quantité, genre, hauteur.
+// On decompose le code stocke pour piloter 3 mini-champs guides, et on le recompose des que
+// l'un des 3 change — l'observateur n'a jamais a taper le code lui-meme.
+function parseTripletCode(val){
+  const s = (val||'').trim();
+  if(s.length===3) return {n:s[0], c:s[1], h:s[2]};
+  return {n:'', c:'', h:''};
+}
+function composeTripletCode(n, c, h){
+  n=(n||'').trim(); c=(c||'').trim(); h=(h||'').trim();
+  if(!n && !c && !h) return '';
+  const part = v => v===''?'/':v;
+  return `${part(n)}${part(c)}${part(h)}`;
+}
+// Format attendu dans le texte libre "hauteur/genre/espèce/secteur" : les abréviations
+// OFFICIELLES de l'OMM (Atlas international des nuages, Annexe I du Règlement technique
+// OMM-N°49, Tableau 3), par ex. "Cu con 3/8 600m" pour Cumulus congestus, 3 octas, 600m.
+// Si l'observateur respecte ce format, la reconnaissance est fiable — ce n'est plus une
+// devinette : ce sont des mots reconnus au sens exact du vocabulaire officiel.
+const CLOUD_GENUS_DICT = {
+  ci:'0', cirrus:'0', cc:'1', cirrocumulus:'1', cs:'2', cirrostratus:'2',
+  ac:'3', altocumulus:'3', as:'4', altostratus:'4', ns:'5', nimbostratus:'5',
+  sc:'6', stratocumulus:'6', st:'7', stratus:'7', cu:'8', cumulus:'8', cb:'9', cumulonimbus:'9'
+};
+// Espèces (Tableau 3) — reconnues mais non codées dans N5C5h5 (l'OMM n'a pas de digit pour
+// l'espèce dans ce groupe précis) ; utiles seulement pour valider que le mot est bien connu.
+const CLOUD_SPECIES_DICT = {
+  fib:'fibratus', unc:'uncinus', spi:'spissatus', cas:'castellanus', flo:'floccus',
+  str:'stratiformis', neb:'nebulosus', len:'lenticularis', vol:'volutus', fra:'fractus',
+  hum:'humilis', med:'mediocris', con:'congestus', cal:'calvus', cap:'capillatus'
+};
+function nearestHeightCode5(meters){
+  const ranges = [[0,49,'0'],[50,99,'1'],[100,199,'2'],[200,299,'3'],[300,599,'4'],
+                  [600,999,'5'],[1000,1499,'6'],[1500,1999,'7'],[2000,2499,'8'],[2500,999999,'9']];
+  for(const [lo,hi,code] of ranges) if(meters>=lo && meters<=hi) return code;
+  return '9';
+}
+// "as", "st" et "ci" sont des abréviations OMM valides mais aussi des mots français très
+// courants ("tu as", "ci-dessus", nom de lieu abrégé "St-..."). Pour éviter les faux positifs,
+// on ne les accepte que si une espèce reconnue suit juste après, ou si un chiffre (quantité
+// ou hauteur) apparaît juste à côté — signe qu'il s'agit bien d'un vrai code nuage.
+const CLOUD_GENUS_AMBIGUOUS = { as:1, st:1, ci:1 };
+function parseCloudCodesFromText(text){
+  if(!text || !text.trim()) return [];
+  const words = [...text.matchAll(/[A-Za-zÀ-ÿ]+/g)];
+  const found = [];
+  words.forEach((m, idx)=>{
+    const w = m[0].toLowerCase();
+    if(CLOUD_GENUS_DICT[w] === undefined) return;
+    if(CLOUD_GENUS_AMBIGUOUS[w]){
+      const next = words[idx+1];
+      const nextWord = next ? next[0].toLowerCase() : '';
+      const followedBySpecies = CLOUD_SPECIES_DICT[nextWord] !== undefined;
+      const nearbyText = text.slice(m.index, m.index+18);
+      const followedByNumber = /\d/.test(nearbyText);
+      if(!followedBySpecies && !followedByNumber) return;
+    }
+    found.push({code: CLOUD_GENUS_DICT[w], index: m.index});
+  });
+  const fracMatches = [...text.matchAll(/(\d)\s*\/\s*8/g)].map(m=>({n:m[1], index:m.index}));
+  const heightMatches = [...text.matchAll(/(\d{2,5})\s*m\b/gi)].map(m=>({m:parseInt(m[1],10), index:m.index}));
+  const closest = (arr, idx) => arr.length ? arr.reduce((best,cur)=> Math.abs(cur.index-idx)<Math.abs(best.index-idx)?cur:best, arr[0]) : null;
+  return found.slice(0,4).map(f=>{
+    const fr = closest(fracMatches, f.index);
+    const ht = closest(heightMatches, f.index);
+    return { n: fr ? fr.n : '', c: f.code, h: ht ? nearestHeightCode5(ht.m) : '' };
+  });
+}
+
+const FIELDS_TOUR = [
+  {k:'ventDirLettres', label:'Vent dir. (rose)', type:'combo', combo:'dir', quick:true},
+  {k:'ventVitMs', label:'Vent vit. m/s', quick:true},
+  {k:'ventDirDizaines', label:'Vent dir. (dizaines°)', type:'combo', combo:'dz'},
+  {k:'ventVitNoeuds', label:'Vent vit. (noeuds)'},
+  {k:'visibiliteDam', label:'Visib. (dam)', quick:true},
+  {k:'visibiliteCode', label:'Visib. code', type:'combo', combo:'vis'},
+  {k:'phenomenes', label:'Phénomènes', quick:true},
+  {k:'tempsPresent', label:'Temps présent (ww)', type:'combo', combo:'ww', quick:true},
+  {k:'tempsPasse', label:'Temps passé W1', type:'combo', combo:'w'},
+  {k:'tempsPasse2', label:'Temps passé W2', type:'combo', combo:'w'},
+  {k:'CL', label:'CL', type:'combo', combo:'cl', quick:true},
+  {k:'CM', label:'CM', type:'combo', combo:'cm', quick:true},
+  {k:'CH', label:'CH', type:'combo', combo:'ch', quick:true},
+  {k:'N', label:'Nébul. N', type:'combo', combo:'n', quick:true},
+  {k:'groupeNhClCmCh', label:'Groupe 8NCLCMCH (auto)', computed:true, quick:true},
+  {k:'notes', label:'Notes'}
+];
+const FIELDS_NUAGES = [
+  {k:'nuagesDesc', label:'Hauteur / genre / espèce / secteur'},
+  {k:'groupeNuages1', label:'N5C5h5 #1', type:'triplet'},
+  {k:'groupeNuages2', label:'N5C5h5 #2', type:'triplet'},
+  {k:'groupeNuages3', label:'N5C5h5 #3', type:'triplet'},
+  {k:'groupeNuages4', label:'N5C5h5 #4', type:'triplet'}
+];
+const FIELDS_PRECIP_TEMP = [
+  {k:'intensitePrecip', label:'Intensité (mm/h)'},
+  {k:'mesuresIntermediaires', label:'Mesures interm. (1/10mm)'},
+  {k:'Tsec', label:'T sec °C', quick:true},
+  {k:'Tw', label:'T mouillé °C', quick:true},
+  {k:'humidite', label:'Humidité %', quick:true},
+  {k:'tensionVapeur', label:'Tension vapeur (mb)'},
+  {k:'pointRosee', label:'Pt de rosée °C', quick:true},
+  {k:'thermoEnregT', label:'Thermo enreg. T'},
+  {k:'hygroEnregU', label:'Hygro enreg. U'}
+];
+const FIELDS_PRESSION = [
+  {k:'pressionEnregLue', label:'Press. enreg. lue'},
+  {k:'reperesMinutes', label:'Repères (min)'},
+  {k:'tempBarometre', label:'T° baromètre'},
+  {k:'pressionLue', label:'Pression lue (mb)', quick:true},
+  {k:'pressionReduite0', label:'Press. réduite 0°'},
+  {k:'tempMoyT12', label:'(t+t-12)/2'},
+  {k:'niveauMerPression', label:'Niveau mer (mb)', quick:true},
+  {k:'evolution24h', label:'Évolution 24h'},
+  {k:'initialesObs', label:'Initiales obs.'}
+];
+const GRAIN_FIELDS = [
+  {k:'heureCrochet', label:'Heure crochet baro'},
+  {k:'dirApparitionCb', label:'Dir. apparition Cb', combo:'dir'},
+  {k:'coupVentDirAvant', label:'Coup de vent — dir. avant', combo:'dz'},
+  {k:'coupVentDirLettres', label:'Coup de vent — dir. (rose)', combo:'dir'},
+  {k:'coupVentVitMax', label:'Coup de vent — vit. max m/s'},
+  {k:'dirVentApres', label:'Dir. vent après', combo:'dir'},
+  {k:'dirDisparitionCb', label:'Dir. disparition Cb', combo:'dir'},
+  {k:'baroVariation', label:'Baro ± variation'},
+  {k:'baroValeurFinale', label:'Baro valeur finale'},
+  {k:'hygroVariation', label:'Hygro ± variation'},
+  {k:'hygroValeurFinale', label:'Hygro valeur finale'},
+  {k:'thermoVariation', label:'Thermo ± variation'},
+  {k:'thermoValeurFinale', label:'Thermo valeur finale'},
+  {k:'diametreGrelons', label:'Diamètre grêlons (mm)'},
+  {k:'signes', label:'Signes'}
+];
+const OBS_SPECIALE_FIELDS = [
+  {k:'heure', label:'Heure'},
+  {k:'description', label:'Observation'}
+];
+const DIRECTIONS_18 = ['02','04','06','08','10','12','14','16','18','20','22','24','26','28','30','32','34','36'];
+const MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const PHEN_CHECKS = [
+  {k:'phenGrele', label:'Chute de grêle'},
+  {k:'phenOrageSansTonnerre', label:'Orage sans tonnerre'},
+  {k:'phenOrageAvecTonnerre', label:'Orage avec tonnerre'},
+  {k:'phenEclairsSansTonnerre', label:'Éclairs sans tonnerre'},
+  {k:'phenBrouillard', label:'Brouillard'},
+  {k:'phenBrumeHumide', label:'Brume humide'},
+  {k:'phenBrumeSeche', label:'Brume sèche'},
+  {k:'phenChasseSable', label:'Chasse de sable'},
+  {k:'phenRosee', label:'Rosée'},
+  {k:'phenGeleeBlanche', label:'Gelée blanche'},
+  {k:'phenVentContinu', label:'Vent continu'},
+  {k:'phenVentFort16', label:'Vent ≥ 16 m/s'}
+];
+
+/* ---------------- state ---------------- */
+var state = {
+  currentUser: null,
+  authChecked: false,
+  authView: 'login',
+  publicStations: [],
+  loginError: null,
+  loginBusy: false,
+  registerError: null,
+  registerBusy: false,
+  usersList: [],
+  userDraft: {username:'', password:'', role:'observateur'},
+  stations: [],
+  currentStationId: null,
+  view: 'rapide',
+  carnetDate: todayStr(),
+  carnetRecord: null,
+  carnetMode: 'manuel',
+  carnetSavedDays: [],
+  scanFiles: [],
+  scanLoading: false,
+  mensuelYear: new Date().getFullYear(),
+  mensuelMonth: new Date().getMonth()+1,
+  mensuelData: null,
+  mensuelComputing: false,
+  stationModalOpen: false,
+  paperView: false,
+  mensuelPaperView: false,
+  stationDraft: {name:'', lat:'', lon:'', alt:''},
+  openSections: new Set(['tourHorizon']),
+  carnetDirty: false,
+  carnetLastSaved: null,
+  backupBusy: false,
+  archivedStations: [],
+  rapideHour: nearestStandardHour(),
+  rapideShowAdvanced: false
+};
+
+function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+async function apiFetch(url, opts){
+  const r = await fetch(url, opts);
+  if(r.status===401){
+    state.currentUser = null;
+    render();
+    throw new Error('Session expirée — reconnectez-vous.');
+  }
+  return r;
+}
+function nearestStandardHour(){
+  const h = new Date().getUTCHours();
+  let best = STANDARD_HOURS[0], bestDiff = 24;
+  STANDARD_HOURS.forEach(sh=>{
+    const shN = parseInt(sh,10);
+    const diff = Math.min(Math.abs(shN-h), 24-Math.abs(shN-h));
+    if(diff<bestDiff){ bestDiff = diff; best = sh; }
+  });
+  return best;
+}
+function toNum(v){ if(v===null||v===undefined||v==='') return null; const n=parseFloat(String(v).replace(',','.')); return isNaN(n)?null:n; }
+function daysInMonth(year,month){ return new Date(year,month,0).getDate(); }
+function initials(name){ return (name||'??').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+/* ---------------- storage helpers (API HTTP -> serveur Node -> PostgreSQL) ---------------- */
+async function loadUsers(){
+  try{ const r = await apiFetch('/api/users'); if(!r.ok) return []; return await r.json(); }
+  catch(e){ return []; }
+}
+async function createUserApi(u){
+  try{
+    const r = await apiFetch('/api/users', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(u)});
+    const data = await r.json();
+    return {ok:r.ok, data};
+  }catch(e){ return {ok:false, data:{error:'Erreur réseau.'}}; }
+}
+async function deleteUserApi(id){
+  try{ const r = await apiFetch(`/api/users/${id}`, {method:'DELETE'}); return r.ok; }
+  catch(e){ return false; }
+}
+async function loadStations(){
+  try{ const r = await apiFetch('/api/stations'); if(!r.ok) return []; return await r.json(); }
+  catch(e){ console.error(e); return []; }
+}
+async function loadPublicStations(){
+  try{ const r = await fetch('/api/stations/public'); if(!r.ok) return []; return await r.json(); }
+  catch(e){ console.error(e); return []; }
+}
+async function addStationApi(st){
+  try{
+    const r = await apiFetch('/api/stations', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(st)});
+    return r.ok;
+  }catch(e){ console.error(e); return false; }
+}
+async function archiveStationApi(id){
+  try{
+    const r = await apiFetch(`/api/stations/${encodeURIComponent(id)}/archive`, {method:'PATCH'});
+    return r.ok;
+  }catch(e){ console.error(e); return false; }
+}
+async function restoreStationApi(id){
+  try{
+    const r = await apiFetch(`/api/stations/${encodeURIComponent(id)}/restore`, {method:'PATCH'});
+    return r.ok;
+  }catch(e){ console.error(e); return false; }
+}
+async function loadArchivedStations(){
+  try{ const r = await apiFetch('/api/stations/archived'); if(!r.ok) return []; return await r.json(); }
+  catch(e){ console.error(e); return []; }
+}
+async function loadCarnet(stationId, date){
+  try{
+    const r = await apiFetch(`/api/carnet/${encodeURIComponent(stationId)}/${date}`);
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(e){ console.error(e); return null; }
+}
+async function saveCarnetRecord(rec){
+  try{
+    Object.keys(rec.hours).forEach(h=>{ rec.hours[h].groupeNhClCmCh = computeCloudGroup(rec.hours[h]); });
+    const r = await apiFetch(`/api/carnet/${encodeURIComponent(rec.stationId)}/${rec.date}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({hours: rec.hours, extras: rec.extras, grainsOrages: rec.grainsOrages, observationsSpeciales: rec.observationsSpeciales})
+    });
+    return r.ok;
+  }catch(e){ console.error(e); return false; }
+}
+async function listCarnetForMonth(stationId, year, month){
+  try{
+    const r = await apiFetch(`/api/carnet/${encodeURIComponent(stationId)}?year=${year}&month=${pad2(month)}`);
+    if(!r.ok) return [];
+    return await r.json();
+  }catch(e){ console.error(e); return []; }
+}
+async function listCarnetAll(stationId){
+  try{
+    const r = await apiFetch(`/api/carnet/${encodeURIComponent(stationId)}`);
+    if(!r.ok) return [];
+    return await r.json();
+  }catch(e){ console.error(e); return []; }
+}
+async function loadMensuel(stationId, year, month){
+  try{
+    const r = await apiFetch(`/api/mensuel/${encodeURIComponent(stationId)}/${year}/${month}`);
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(e){ console.error(e); return null; }
+}
+async function saveMensuel(data){
+  try{
+    const r = await apiFetch(`/api/mensuel/${encodeURIComponent(data.stationId)}/${data.year}/${data.month}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({days: data.days, dominantText: data.dominantText})
+    });
+    return r.ok;
+  }catch(e){ console.error(e); return false; }
+}
+async function listMensuelAll(stationId){
+  try{
+    const r = await apiFetch(`/api/mensuel/${encodeURIComponent(stationId)}`);
+    if(!r.ok) return [];
+    return await r.json();
+  }catch(e){ console.error(e); return []; }
+}
+
+/* ---------------- empty record builders ---------------- */
+function emptyHour(){
+  const h={};
+  [...FIELDS_TOUR, ...FIELDS_NUAGES, ...FIELDS_PRECIP_TEMP, ...FIELDS_PRESSION].forEach(f=>h[f.k]='');
+  return h;
+}
+function emptyExtras(){
+  return {
+    precip18h6h:'', precip6h18h:'', precipitation24h:'', duree18h6h:'', duree6h18h:'', duree24h:'',
+    evapPicheLecturePrecedente:'', evapPicheLecture:'', evapPiche:'',
+    sol10_6h:'', sol10_12h:'', sol10_18h:'', sol20:'', sol50:'', sol100:'',
+    bac06_h1:'', bac06_h2:'', bac06_diff:'', bac06_nouvLecture:'', bac06_evap:'', bac06_tempEau:'',
+    bac18_h1:'', bac18_h2:'', bac18_diff:'', bac18_nouvLecture:'', bac18_evap:'', bac18_tempEau:'',
+    evapBac:'',
+    insolationMatin:'', insolationSoir:'', insolationTotal:'',
+    rayonnementMatin:'', rayonnementSoir:'', rayonnementTotal:'',
+    tempSolMini:'', tempSolMaxi:'',
+    tempMiniAbri:'', tempMiniAbriHeure:'', tempMaxiAbri:'', tempMaxiAbriHeure:'',
+    humiditeMaxJour:'', humiditeMaxJourHeure:'', humiditeMinJour:'', humiditeMinJourHeure:'',
+    pressMatinMinValeur:'', pressMatinMinHeure:'', pressMatinMaxValeur:'', pressMatinMaxHeure:'',
+    pressSoirMinValeur:'', pressSoirMinHeure:'', pressSoirMaxValeur:'', pressSoirMaxHeure:'',
+    lectureCorrigeeEnreg:'',
+    ventMaxInstDir:'', ventMaxInstVit:'', ventMaxInstHeure:'',
+    ventMoyenDir:'', ventMoyenVit:'', ventMoyenHeure:'',
+    visibiliteMin:'', visibiliteMinHeure:'', hauteurNuagesMin:'', hauteurNuagesMinHeure:'',
+    phenGrele:false, phenOrageSansTonnerre:false, phenOrageAvecTonnerre:false, phenEclairsSansTonnerre:false,
+    phenBrouillard:false, phenBrumeHumide:false, phenBrumeSeche:false, phenChasseSable:false,
+    phenRosee:false, phenGeleeBlanche:false, phenVentContinu:false, phenVentFort16:false,
+    phenomenesRemarquables:'', resumeTempsClair:''
+  };
+}
+function emptyCarnet(stationId, date){
+  const hours={}; ALL_HOURS.forEach(h=>hours[h]=emptyHour());
+  return {stationId, date, hours, extras: emptyExtras(), grainsOrages: [], observationsSpeciales: []};
+}
+function withDefaults(rec, stationId, date){
+  const base = emptyCarnet(stationId, date);
+  const out = {...base, ...rec};
+  out.hours = {...base.hours};
+  ALL_HOURS.forEach(h=>{ out.hours[h] = {...base.hours[h], ...(rec.hours && rec.hours[h] ? rec.hours[h] : {})}; });
+  out.extras = {...base.extras, ...(rec.extras||{})};
+  out.grainsOrages = rec.grainsOrages || [];
+  out.observationsSpeciales = rec.observationsSpeciales || [];
+  return out;
+}
+function emptyDayAgg(date){
+  return { date, Tn:'', Tx:'', tempSolMini:'', tempSolMaxi:'', sol10:'', sol20:'',
+           humiditeMaxJour:'', humiditeMinJour:'',
+           precipitation24h:'', dureePrecip:'', evapPiche:'', evapBac:'', insolationTotal:'', rayonnementTotal:'',
+           ventMaxInstDir:'', ventMaxInstVit:'', resumeTempsClair:'' };
+}
+
+/* ---------------- toast ---------------- */
+let toastTimer=null;
+function toast(msg, isErr){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.className='toast'; }, 3200);
+}
+
+/* ---------------- calculation engine ---------------- */
+function cloudWord(N){
+  const n = toNum(N); if(n===null) return null;
+  if(n<=2) return 'ciel clair'; if(n<=4) return 'ciel peu nuageux';
+  if(n<=6) return 'ciel nuageux'; return 'ciel très nuageux';
+}
+function dailyResume(rec){
+  if(!rec) return '';
+  const Ns = ALL_HOURS.map(h=> toNum(rec.hours[h] && rec.hours[h].N)).filter(v=>v!==null);
+  const maxN = Ns.length ? Math.max(...Ns) : null;
+  const cloudTxt = maxN!==null ? cloudWord(maxN) : 'ciel non renseigné';
+  const dirs = ALL_HOURS.map(h=> rec.hours[h] && rec.hours[h].ventDirLettres).filter(Boolean);
+  const uniqDirs = [...new Set(dirs)];
+  const ventTxt = uniqDirs.length ? `vent ${uniqDirs.join('/')}` : 'vent non renseigné';
+  const phenList = PHEN_CHECKS.filter(p=> rec.extras && rec.extras[p.k]).map(p=>p.label.toLowerCase());
+  const phenFree = ((rec.extras && rec.extras.phenomenesRemarquables) || '').trim();
+  const phenAll = [...phenList, ...(phenFree?[phenFree]:[])].join(', ');
+  return `${cloudTxt}, ${ventTxt}${phenAll ? ', '+phenAll : ''}.`;
+}
+// Tableau des vents (formulaire ASECNA/OMM) : pour chaque direction et chaque seuil de
+// vitesse, on compte le nombre d'observations dont la vitesse a été ÉGALE OU SUPÉRIEURE
+// à ce seuil (cumulatif, pas un histogramme par valeur exacte — c'est ce que demande le
+// tableau papier "Nombre de fois que ... la vitesse du vent a été ... égale ou supérieure
+// à Xm/s"). Les lignes vont de 1 jusqu'à la vitesse max observée, sans trou.
+function computeWindFreq18(records){
+  const exact = {}; DIRECTIONS_18.forEach(d=>exact[d]={});
+  let total=0, under1=0, under2=0, calme=0, maxSpeed=1;
+  records.forEach(rec=>{
+    ALL_HOURS.forEach(h=>{
+      const hr = rec.hours[h]; if(!hr) return;
+      const dz = (hr.ventDirDizaines||'').trim();
+      const dzPadded = dz ? dz.padStart(2,'0') : '';
+      const vitRaw = toNum(hr.ventVitMs);
+      const dirLettres = (hr.ventDirLettres||'').trim().toLowerCase();
+      if(!dzPadded && vitRaw===null && !dirLettres) return;
+      const isCalme = dirLettres==='calme' || (vitRaw!==null && vitRaw===0 && !dzPadded);
+      total++;
+      if(vitRaw!==null){ if(vitRaw<1) under1++; if(vitRaw<2) under2++; }
+      if(isCalme){ calme++; return; }
+      if(!DIRECTIONS_18.includes(dzPadded)) return;
+      const speed = vitRaw===null? 0 : Math.round(vitRaw);
+      if(speed>maxSpeed) maxSpeed = speed;
+      exact[dzPadded][speed] = (exact[dzPadded][speed]||0) + 1;
+    });
+  });
+  const rows = []; for(let s=maxSpeed; s>=1; s--) rows.push(s);
+  const table = {};
+  DIRECTIONS_18.forEach(d=>{
+    table[d] = {};
+    let running = 0;
+    for(let s=maxSpeed; s>=1; s--){ running += (exact[d][s]||0); table[d][s] = running; }
+  });
+  return {table, rows, total, under1, under2, calme};
+}
+function computeHourlyMeans(records){
+  const sums={}; ALL_HOURS.forEach(h=>sums[h]={t:0,tc:0, p:0,pc:0, n:0,nc:0, mer:0,merc:0, tens:0,tensc:0});
+  records.forEach(rec=>{
+    ALL_HOURS.forEach(h=>{
+      const hr = rec.hours[h]; if(!hr) return;
+      const t = toNum(hr.Tsec); if(t!==null){ sums[h].t+=t; sums[h].tc++; }
+      const p = toNum(hr.pressionLue); if(p!==null){ sums[h].p+=p; sums[h].pc++; }
+      const n = toNum(hr.N); if(n!==null){ sums[h].n+=n; sums[h].nc++; }
+      const mer = toNum(hr.niveauMerPression); if(mer!==null){ sums[h].mer+=mer; sums[h].merc++; }
+      const tens = toNum(hr.tensionVapeur); if(tens!==null){ sums[h].tens+=tens; sums[h].tensc++; }
+    });
+  });
+  let pAll=0,pAllC=0, merAll=0,merAllC=0, tensAll=0, tensAllC=0, nAll=0, nAllC=0;
+  ALL_HOURS.forEach(h=>{ pAll+=sums[h].p; pAllC+=sums[h].pc; merAll+=sums[h].mer; merAllC+=sums[h].merc; tensAll+=sums[h].tens; tensAllC+=sums[h].tensc; nAll+=sums[h].n; nAllC+=sums[h].nc; });
+  return {
+    perHourTemp: Object.fromEntries(STANDARD_HOURS.map(h=>[h, sums[h].tc? sums[h].t/sums[h].tc : null])),
+    pressionMoy: pAllC? pAll/pAllC : null,
+    pressionMerMoy: merAllC? merAll/merAllC : null,
+    tensionVapeurMoy: tensAllC? tensAll/tensAllC : null,
+    nebulositeMoy: nAllC? nAll/nAllC : null
+  };
+}
+function dayMeans(rec){
+  if(!rec) return {humMoy:null, pressMoy:null, nebMoy:null};
+  let hs=0,hc=0, ps=0,pc=0, ns=0,nc=0;
+  ALL_HOURS.forEach(h=>{
+    const hr = rec.hours[h]; if(!hr) return;
+    const hu = toNum(hr.humidite); if(hu!==null){ hs+=hu; hc++; }
+    const p = toNum(hr.pressionLue); if(p!==null){ ps+=p; pc++; }
+    const n = toNum(hr.N); if(n!==null){ ns+=n; nc++; }
+  });
+  return { humMoy: hc? hs/hc : null, pressMoy: pc? ps/pc : null, nebMoy: nc? ns/nc : null };
+}
+function countPhenDays(records, byDate){
+  const counts = {}; PHEN_CHECKS.forEach(p=>counts[p.k]=0);
+  records.forEach(rec=>{ PHEN_CHECKS.forEach(p=>{ if(rec.extras && rec.extras[p.k]) counts[p.k]++; }); });
+  return counts;
+}
+function computeMonthly(records, year, month, existingDays){
+  const dim = daysInMonth(year, month);
+  const byDate = {}; records.forEach(r=> byDate[r.date]=r);
+  const days = [];
+  for(let d=1; d<=dim; d++){
+    const dateStr = `${year}-${pad2(month)}-${pad2(d)}`;
+    const rec = byDate[dateStr] || null;
+    const prevAgg = (existingDays && existingDays[dateStr]) || null;
+    const agg = prevAgg ? {...prevAgg} : emptyDayAgg(dateStr);
+    if(rec){
+      if(!prevAgg){
+        agg.Tn = rec.extras.tempMiniAbri || '';
+        agg.Tx = rec.extras.tempMaxiAbri || '';
+        agg.tempSolMini = rec.extras.tempSolMini || '';
+        agg.tempSolMaxi = rec.extras.tempSolMaxi || '';
+        agg.sol10 = rec.extras.sol10_12h || '';
+        agg.sol20 = rec.extras.sol20 || '';
+        agg.humiditeMaxJour = rec.extras.humiditeMaxJour || '';
+        agg.humiditeMinJour = rec.extras.humiditeMinJour || '';
+        agg.precipitation24h = rec.extras.precipitation24h || '';
+        agg.dureePrecip = rec.extras.duree24h || '';
+        agg.evapPiche = rec.extras.evapPiche || '';
+        agg.evapBac = rec.extras.evapBac || '';
+        agg.insolationTotal = rec.extras.insolationTotal || '';
+        agg.rayonnementTotal = rec.extras.rayonnementTotal || '';
+        agg.ventMaxInstDir = rec.extras.ventMaxInstDir || '';
+        agg.ventMaxInstVit = rec.extras.ventMaxInstVit || '';
+        agg.resumeTempsClair = dailyResume(rec);
+      }
+      agg._hasCarnet = true;
+    } else { agg._hasCarnet = false; }
+    const dm = dayMeans(rec);
+    agg._humMoy = dm.humMoy; agg._pressMoy = dm.pressMoy; agg._nebMoy = dm.nebMoy;
+    days.push(agg);
+  }
+  return { days, byDate, hourly: computeHourlyMeans(records), windFreq: computeWindFreq18(records), phenCounts: countPhenDays(records, byDate), intensiteRemarquable: computeIntensiteRemarquable(records) };
+}
+// Intensité remarquable de précipitation (mm/h) : la plus forte valeur horaire du mois,
+// avec sa date et son heure.
+function computeIntensiteRemarquable(records){
+  let best=null, bestDate=null, bestHour=null;
+  records.forEach(rec=>{
+    ALL_HOURS.forEach(h=>{
+      const hr = rec.hours[h]; if(!hr) return;
+      const v = toNum(hr.intensitePrecip);
+      if(v!==null && (best===null || v>best)){ best=v; bestDate=rec.date; bestHour=h; }
+    });
+  });
+  return { value: best, date: bestDate, hour: bestHour };
+}
+function tempBins(days, key, edges){
+  const bins = edges.map((e,i)=> ({label: i===0? `< ${e}`: (i===edges.length? `≥ ${edges[i-1]}` : `${edges[i-1]} – ${e}`), count:0}));
+  bins.push({label:`≥ ${edges[edges.length-1]}`, count:0});
+  bins.shift();
+  const labels = [];
+  labels.push(`< ${edges[0]}`);
+  for(let i=1;i<edges.length;i++) labels.push(`${edges[i-1]} – ${edges[i]}`);
+  labels.push(`≥ ${edges[edges.length-1]}`);
+  const counts = labels.map(()=>0);
+  days.forEach(d=>{
+    const v = toNum(d[key]); if(v===null) return;
+    let idx = edges.findIndex(e=> v<e);
+    if(idx===-1) idx = labels.length-1;
+    counts[idx]++;
+  });
+  return labels.map((l,i)=>({label:l, count:counts[i]}));
+}
+function summarize(mensuel){
+  const days = mensuel.days;
+  let sumTn=0,cTn=0,sumTx=0,cTx=0,maxAbs=null,maxAbsDate=null,minAbs=null,minAbsDate=null;
+  let moyBasse=null,moyBasseDate=null,moyHaute=null,moyHauteDate=null;
+  let precipTotal=0,precipMax=null,precipMaxDate=null,jGE01=0,jGE1=0,jGE10=0,dureePrecipTotal=0;
+  let evapPicheTotal=0,evapBacTotal=0,insolTotal=0,rayonTotal=0;
+  let ventMax=null,ventMaxDate=null,ventMaxDir=null;
+  let humMin=null,humMinDate=null,humMax=null,humMaxDate=null;
+  let sol10Sum=0,sol10C=0, sol20Sum=0, sol20C=0;
+  days.forEach(d=>{
+    const tn=toNum(d.Tn), tx=toNum(d.Tx);
+    if(tn!==null){ sumTn+=tn; cTn++; if(minAbs===null||tn<minAbs){minAbs=tn;minAbsDate=d.date;} }
+    if(tx!==null){ sumTx+=tx; cTx++; if(maxAbs===null||tx>maxAbs){maxAbs=tx;maxAbsDate=d.date;} }
+    if(tn!==null&&tx!==null){
+      const mq=(tn+tx)/2;
+      if(moyBasse===null||mq<moyBasse){moyBasse=mq;moyBasseDate=d.date;}
+      if(moyHaute===null||mq>moyHaute){moyHaute=mq;moyHauteDate=d.date;}
+    }
+    const pr=toNum(d.precipitation24h);
+    if(pr!==null){ precipTotal+=pr; if(precipMax===null||pr>precipMax){precipMax=pr;precipMaxDate=d.date;}
+      if(pr>=0.1) jGE01++; if(pr>=1) jGE1++; if(pr>=10) jGE10++; }
+    const dp=toNum(d.dureePrecip); if(dp!==null) dureePrecipTotal+=dp;
+    const ep=toNum(d.evapPiche); if(ep!==null) evapPicheTotal+=ep;
+    const eb=toNum(d.evapBac); if(eb!==null) evapBacTotal+=eb;
+    const ins=toNum(d.insolationTotal); if(ins!==null) insolTotal+=ins;
+    const ray=toNum(d.rayonnementTotal); if(ray!==null) rayonTotal+=ray;
+    const s10=toNum(d.sol10); if(s10!==null){ sol10Sum+=s10; sol10C++; }
+    const s20=toNum(d.sol20); if(s20!==null){ sol20Sum+=s20; sol20C++; }
+    const vv=toNum(d.ventMaxInstVit);
+    if(vv!==null && (ventMax===null||vv>ventMax)){ ventMax=vv; ventMaxDate=d.date; ventMaxDir=d.ventMaxInstDir; }
+    const uMax = toNum(d.humiditeMaxJour); if(uMax!==null && (humMax===null||uMax>humMax)){ humMax=uMax; humMaxDate=d.date; }
+    const uMin = toNum(d.humiditeMinJour); if(uMin!==null && (humMin===null||uMin<humMin)){ humMin=uMin; humMinDate=d.date; }
+  });
+  return {
+    moyTn: cTn?sumTn/cTn:null, moyTx: cTx?sumTx/cTx:null,
+    amplitude: (cTn&&cTx)? (sumTx/cTx - sumTn/cTn) : null,
+    maxAbs, maxAbsDate, minAbs, minAbsDate, moyBasse, moyBasseDate, moyHaute, moyHauteDate,
+    precipTotal, precipMax, precipMaxDate, jGE01, jGE1, jGE10, dureePrecipTotal,
+    evapPicheTotal, evapBacTotal, insolTotal, rayonTotal,
+    ventMax, ventMaxDate, ventMaxDir, humMin, humMinDate, humMax, humMaxDate,
+    sol10Moy: sol10C? sol10Sum/sol10C : null, sol20Moy: sol20C? sol20Sum/sol20C : null
+  };
+}
+function dominantParagraph(mensuel, summary, stationName, monthLabel){
+  const freq = mensuel.windFreq;
+  let dominant=null, dominantCount=-1;
+  DIRECTIONS_18.forEach(d=>{
+    const c = freq.table[d][1] || 0; // total des observations non calmes dans cette direction (ligne seuil "≥1m/s")
+    if(c>dominantCount){ dominantCount=c; dominant=d; }
+  });
+  const nebMoy = mensuel.hourly.nebulositeMoy;
+  const cielTxt = nebMoy!==null ? cloudWord(nebMoy) : 'ciel non renseigné';
+  const phenDaysTotal = Object.values(mensuel.phenCounts).reduce((a,b)=>a+b,0);
+  let txt = `${monthLabel} à la station de ${stationName} est marqué par un ${cielTxt} dans l'ensemble, un vent dominant du secteur ${dominant||'variable'} (dizaines de degrés). `;
+  if(summary.precipTotal>0) txt += `Les précipitations ont totalisé ${summary.precipTotal.toFixed(1)} mm sur ${summary.jGE01} jour(s) mesurable(s). `;
+  else txt += `Aucune précipitation mesurable n'a été enregistrée. `;
+  if(phenDaysTotal>0) txt += `${phenDaysTotal} occurrence(s) de phénomène particulier ont été relevées sur le mois (brume, orage, grêle...). `;
+  txt += `Les écarts par rapport aux normales climatologiques ne sont pas évalués (aucune normale de référence enregistrée pour cette station).`;
+  return txt;
+}
+
+/* ---------------- CLIMAT message (best-effort draft) ---------------- */
+function buildClimatDraft(mensuel, summary, station, year, month){
+  const pressionStation = mensuel.hourly.pressionMoy;
+  const pressionMer = mensuel.hourly.pressionMerMoy;
+  const tempAbri = (summary.moyTn!==null && summary.moyTx!==null) ? (summary.moyTn+summary.moyTx)/2 : null;
+  const tension = mensuel.hourly.tensionVapeurMoy;
+  const jGE1 = summary.jGE1;
+  const precipTotal = summary.precipTotal;
+  const insolTotal = summary.insolTotal;
+  const fmt1 = v=> v===null? '/////' : v.toFixed(1);
+  return {
+    pressionStation, pressionMer, tempAbri, tension, jGE1, precipTotal, insolTotal,
+    text: `CLIMAT ${pad2(month)}${String(year).slice(2)} —— Station ${station? station.name : ''}
+A - Moyennes mensuelles : Pression station ${fmt1(pressionStation)} hPa · Pression mer ${fmt1(pressionMer)} hPa · Température sous abri ${fmt1(tempAbri)} °C · Tension de vapeur ${fmt1(tension)} hPa
+B - Précipitations : jours RR≥1mm = ${jGE1} · quantité totale = ${precipTotal.toFixed(1)} mm · quintile = non évalué (normales non enregistrées)
+C - Insolation : durée totale = ${insolTotal.toFixed(1)} h · proportion à la normale = non évaluée (normale non enregistrée)
+D - Chiffrement brut : NON GÉNÉRÉ AUTOMATIQUEMENT — le codage CLIMAT/CREX (groupes numériques OMM) nécessite une vérification experte avant toute transmission officielle ; utilisez les valeurs A/B/C ci-dessus comme base de saisie manuelle dans votre logiciel de codage habituel.`
+  };
+}
+
+/* ---------------- Claude vision scan ---------------- */
+async function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = ()=> resolve(r.result.split(',')[1]);
+    r.onerror = ()=> reject(new Error('lecture impossible'));
+    r.readAsDataURL(file);
+  });
+}
+function buildScanPrompt(){
+  return `Tu numérises un carnet d'observations météorologiques manuscrit du Mali (Mali Météo / ASECNA). Analyse les photos fournies (une ou plusieurs pages du même relevé journalier) et réponds UNIQUEMENT avec un JSON valide, sans texte avant/après, sans balises markdown.
+
+Structure attendue :
+{
+ "date": "AAAA-MM-JJ ou null",
+ "hours": { "HH": { ...champs ci-dessous... }, ... },
+ "grainsOrages": [ { "heureCrochet":"","dirApparitionCb":"","coupVentDirAvant":"","coupVentDirLettres":"","coupVentVitMax":"","dirVentApres":"","dirDisparitionCb":"","baroVariation":"","baroValeurFinale":"","hygroVariation":"","hygroValeurFinale":"","thermoVariation":"","thermoValeurFinale":"","diametreGrelons":"","signes":"" } ],
+ "observationsSpeciales": [ { "heure":"", "description":"" } ],
+ "extras": { ...champs ci-dessous... }
+}
+
+IMPORTANT : n'inclus dans "hours" QUE les heures (format "00".."23") où au moins une valeur est réellement lisible sur la photo — omets complètement les heures sans donnée visible. De même, "grainsOrages" et "observationsSpeciales" restent des tableaux vides [] s'il n'y a aucun événement visible.
+
+Champs de chaque heure (laisser "" si illisible) :
+ventDirLettres (N/NE/E/SE/S/SW/W/NW/Calme), ventVitMs, ventDirDizaines (dizaines de degrés, ex "04"), ventVitNoeuds, visibiliteDam, visibiliteCode, phenomenes (texte), tempsPresent (code W), tempsPasse (code W1/2), CL, CM, CH, N (nébulosité octas 0-8, 9=obscurci), nuagesDesc (hauteur/genre/espèce/secteur, texte libre), groupeNuages1..4 (codes N5C5h5 si présents), intensitePrecip (mm/h), mesuresIntermediaires, Tsec (°C), Tw (°C), humidite (%), tensionVapeur (mb), pointRosee (°C), thermoEnregT, hygroEnregU, pressionEnregLue, reperesMinutes, tempBarometre, pressionLue (mb), pressionReduite0, tempMoyT12, niveauMerPression (mb), evolution24h, initialesObs.
+
+Champs "extras" (données uniques du jour, laisser "" si illisible ; les champs phenXxx sont des booléens true/false selon si le phénomène a été observé/coché ce jour) :
+precip18h6h, precip6h18h, precipitation24h, duree18h6h, duree6h18h, duree24h,
+evapPicheLecturePrecedente, evapPicheLecture, evapPiche,
+sol10_6h, sol10_12h, sol10_18h, sol20, sol50, sol100,
+bac06_h1, bac06_h2, bac06_diff, bac06_nouvLecture, bac06_evap, bac06_tempEau,
+bac18_h1, bac18_h2, bac18_diff, bac18_nouvLecture, bac18_evap, bac18_tempEau, evapBac,
+insolationMatin, insolationSoir, insolationTotal, rayonnementMatin, rayonnementSoir, rayonnementTotal,
+tempSolMini, tempSolMaxi, tempMiniAbri, tempMiniAbriHeure, tempMaxiAbri, tempMaxiAbriHeure,
+humiditeMaxJour, humiditeMaxJourHeure, humiditeMinJour, humiditeMinJourHeure,
+pressMatinMinValeur, pressMatinMinHeure, pressMatinMaxValeur, pressMatinMaxHeure,
+pressSoirMinValeur, pressSoirMinHeure, pressSoirMaxValeur, pressSoirMaxHeure,
+lectureCorrigeeEnreg, ventMaxInstDir, ventMaxInstVit, ventMaxInstHeure, ventMoyenDir, ventMoyenVit, ventMoyenHeure,
+visibiliteMin, visibiliteMinHeure, hauteurNuagesMin, hauteurNuagesMinHeure,
+phenGrele, phenOrageSansTonnerre, phenOrageAvecTonnerre, phenEclairsSansTonnerre, phenBrouillard, phenBrumeHumide, phenBrumeSeche, phenChasseSable, phenRosee, phenGeleeBlanche, phenVentContinu, phenVentFort16,
+phenomenesRemarquables.
+
+N'invente jamais de valeur. Réponds uniquement avec le JSON.`;
+}
+async function analyzeScan(){
+  if(!state.scanFiles.length){ toast('Ajoutez au moins une photo à analyser.', true); return; }
+  state.scanLoading = true; render();
+  try{
+    const images = [];
+    for(const f of state.scanFiles){
+      const b64 = await fileToBase64(f);
+      images.push({ mediaType: f.type || 'image/jpeg', data: b64 });
+    }
+    const res = await apiFetch('/api/scan', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ images, prompt: buildScanPrompt() })
+    });
+    if(res.status===501){
+      toast('Scan IA non configuré sur ce serveur (voir ANTHROPIC_API_KEY dans le .env).', true);
+      state.scanLoading = false; render(); return;
+    }
+    const data = await res.json();
+    const textBlocks = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+    const cleaned = textBlocks.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(cleaned);
+    const rec = state.carnetRecord;
+    if(parsed.hours){
+      Object.keys(parsed.hours).forEach(h=>{
+        if(rec.hours[h] && parsed.hours[h]){
+          rec.hours[h] = { ...rec.hours[h], ...Object.fromEntries(Object.entries(parsed.hours[h]).filter(([k,v])=> v!==undefined && v!==null && v!=='')) };
+        }
+      });
+    }
+    if(parsed.extras){
+      const filtered = Object.fromEntries(Object.entries(parsed.extras).filter(([k,v])=> v!==undefined && v!==null && v!==''));
+      rec.extras = { ...rec.extras, ...filtered };
+    }
+    if(Array.isArray(parsed.grainsOrages) && parsed.grainsOrages.length){
+      rec.grainsOrages = rec.grainsOrages.concat(parsed.grainsOrages.map(g=>({id:uid(), ...g})));
+    }
+    if(Array.isArray(parsed.observationsSpeciales) && parsed.observationsSpeciales.length){
+      rec.observationsSpeciales = rec.observationsSpeciales.concat(parsed.observationsSpeciales.map(o=>({id:uid(), ...o})));
+    }
+    state.carnetDirty = true;
+    toast('Analyse terminée — vérifiez les valeurs avant d\u2019enregistrer.');
+  }catch(e){
+    console.error(e);
+    toast('Échec de l\u2019analyse. Réessayez ou saisissez manuellement.', true);
+  }
+  state.scanLoading = false; render();
+}
+
+/* ---------------- rendering ---------------- */
+function captureGeoStamp(){
+  return new Promise((resolve)=>{
+    const stamp = { savedAt: new Date().toISOString(), lat: null, lon: null, accuracy: null, error: null };
+    if(!('geolocation' in navigator)){ stamp.error = 'Géolocalisation non disponible dans ce navigateur.'; resolve(stamp); return; }
+    if(window.isSecureContext===false){ stamp.error = 'Site non sécurisé (HTTPS requis) — position non capturée.'; resolve(stamp); return; }
+    const timer = setTimeout(()=>{ stamp.error = 'Délai de localisation dépassé.'; resolve(stamp); }, 6000);
+    navigator.geolocation.getCurrentPosition(
+      (pos)=>{ clearTimeout(timer); stamp.lat = pos.coords.latitude; stamp.lon = pos.coords.longitude; stamp.accuracy = pos.coords.accuracy; resolve(stamp); },
+      (err)=>{ clearTimeout(timer); stamp.error = err && err.message ? err.message : 'Position refusée ou indisponible.'; resolve(stamp); },
+      { enableHighAccuracy:false, timeout:5500, maximumAge:60000 }
+    );
+  });
+}
+function formatGeoStamp(meta){
+  if(!meta) return '';
+  const d = new Date(meta.savedAt);
+  const dateStr = `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  if(meta.lat!==null && meta.lon!==null){
+    return `Saisi le ${dateStr} · ${meta.lat.toFixed(5)}°, ${meta.lon.toFixed(5)}° (±${Math.round(meta.accuracy||0)}m)`;
+  }
+  return `Saisi le ${dateStr} · position non disponible${meta.error?' ('+meta.error+')':''}`;
+}
+async function saveCurrentDay(successMessage, geoTarget){
+  if(geoTarget==='hour'){
+    const stamp = await captureGeoStamp();
+    state.carnetRecord.hours[state.rapideHour].meta = stamp;
+  } else if(geoTarget==='day'){
+    state.carnetRecord.meta = await captureGeoStamp();
+  }
+  const ok = await saveCarnetRecord(state.carnetRecord);
+  if(ok){
+    if(!state.carnetSavedDays.includes(state.carnetDate)) state.carnetSavedDays.push(state.carnetDate);
+    state.carnetDirty = false;
+    state.carnetLastSaved = new Date();
+    toast(successMessage);
+    const cachetEl = document.querySelector('.cachet'); if(cachetEl){ cachetEl.classList.remove('stamp-anim'); void cachetEl.offsetWidth; cachetEl.classList.add('stamp-anim'); }
+    render();
+  } else toast('Échec de l\u2019enregistrement — vos modifications restent affichées mais ne sont pas sauvegardées. Réessayez.', true);
+}
+function updateSaveIndicator(){
+  const el = document.getElementById('saveIndicator');
+  if(!el) return;
+  if(state.carnetDirty){
+    el.innerHTML = '<span style="color:var(--brass);font-size:12px;">● Modifications non enregistrées</span>';
+  } else if(state.carnetLastSaved){
+    const t = state.carnetLastSaved;
+    const hh = pad2(t.getHours ? t.getHours() : new Date(t).getHours());
+    const mm = pad2(t.getMinutes ? t.getMinutes() : new Date(t).getMinutes());
+    el.innerHTML = `<span style="color:var(--ok);font-size:12px;">✓ Enregistré à ${hh}:${mm}</span>`;
+  } else {
+    el.innerHTML = '';
+  }
+}
+function render(){
+  const app = document.getElementById('app');
+  if(!state.currentUser){
+    app.innerHTML = renderAuthScreen();
+    bindAuthEvents();
+    return;
+  }
+  const station = state.stations.find(s=>s.id===state.currentStationId);
+  app.innerHTML = `
+    ${renderTopbar(station)}
+    ${renderTabs()}
+    <div class="panel">${renderView(station)}</div>
+    ${state.stationModalOpen ? renderStationModal() : ''}
+  `;
+  bindEvents();
+  updateSaveIndicator();
+}
+function renderAuthScreen(){
+  return `
+  <div style="max-width:400px;margin:60px auto;">
+    <div class="card" style="text-align:center;">
+      <div class="cachet logo-badge" style="margin:0 auto 14px;"><img src="/logo-mali-meteo.png" alt="Mali Météo"></div>
+      <h2 style="margin-bottom:4px;">MétéoCarnet Mali</h2>
+      <p class="help" style="margin-bottom:18px;">${state.authView==='register' ? "Créer le compte de votre station" : "Connexion"}</p>
+      ${state.authView==='register' ? renderRegisterForm() : renderLoginForm()}
+      <p class="help" style="margin-top:16px;margin-bottom:0;">
+        ${state.authView==='register'
+          ? `Déjà un compte ? <a href="#" id="toLoginLink">Se connecter</a>`
+          : `Nouvelle station, pas encore de compte ? <a href="#" id="toRegisterLink">Créer un compte</a>`}
+      </p>
+    </div>
+  </div>`;
+}
+function renderLoginForm(){
+  return `
+  <div class="field" style="width:100%;margin-bottom:10px;"><label>Identifiant</label><input type="text" id="loginUsername" style="width:100%;font-family:var(--font-sans);" autofocus></div>
+  <div class="field" style="width:100%;margin-bottom:14px;"><label>Mot de passe</label><input type="password" id="loginPassword" style="width:100%;font-family:var(--font-sans);"></div>
+  ${state.loginError ? `<p style="color:var(--danger);font-size:13px;margin-bottom:12px;">${escapeHtml(state.loginError)}</p>` : ''}
+  <button class="btn primary" id="loginSubmitBtn" style="width:100%;" ${state.loginBusy?'disabled':''}>${state.loginBusy?'<span class="spinner"></span> Connexion…':'Se connecter'}</button>
+  `;
+}
+function renderRegisterForm(){
+  return `
+  <div class="field" style="width:100%;margin-bottom:10px;text-align:left;"><label>Votre station</label>
+    <select id="registerStationChoice" style="width:100%;font-family:var(--font-sans);">
+      <option value="__new__">+ Créer ma station (nouvelle)</option>
+      ${state.publicStations.map(s=>`<option value="${escapeAttr(s.id)}">${escapeHtml(s.name)} (déjà créée)</option>`).join('')}
+    </select>
+  </div>
+  <div id="newStationFields" style="text-align:left;">
+    <div class="field" style="width:100%;margin-bottom:10px;"><label>Nom de votre station</label><input type="text" id="registerNewStationName" style="width:100%;font-family:var(--font-sans);" placeholder="Sotuba, Sikasso..."></div>
+    <div class="row" style="margin-bottom:10px;">
+      <div class="field"><label>Latitude</label><input type="text" id="registerNewStationLat" placeholder="12°39'N"></div>
+      <div class="field"><label>Longitude</label><input type="text" id="registerNewStationLon" placeholder="7°56'W"></div>
+      <div class="field"><label>Altitude (m)</label><input type="text" id="registerNewStationAlt" placeholder="381"></div>
+    </div>
+  </div>
+  <div class="field" style="width:100%;margin-bottom:10px;"><label>Votre nom</label><input type="text" id="registerFullName" style="width:100%;font-family:var(--font-sans);" placeholder="Nom de l'observateur"></div>
+  <div class="field" style="width:100%;margin-bottom:10px;"><label>Identifiant (pour vous reconnecter)</label><input type="text" id="registerUsername" style="width:100%;font-family:var(--font-sans);"></div>
+  <div class="field" style="width:100%;margin-bottom:10px;"><label>Mot de passe (6 caractères minimum)</label><input type="password" id="registerPassword" style="width:100%;font-family:var(--font-sans);"></div>
+  <div class="field" style="width:100%;margin-bottom:14px;"><label>Confirmer le mot de passe</label><input type="password" id="registerPasswordConfirm" style="width:100%;font-family:var(--font-sans);"></div>
+  ${state.registerError ? `<p style="color:var(--danger);font-size:13px;margin-bottom:12px;">${escapeHtml(state.registerError)}</p>` : ''}
+  <button class="btn primary" id="registerSubmitBtn" style="width:100%;" ${state.registerBusy?'disabled':''}>${state.registerBusy?'<span class="spinner"></span> Création…':'Créer mon compte'}</button>
+  `;
+}
+function bindAuthEvents(){
+  const toRegister = document.getElementById('toRegisterLink');
+  if(toRegister) toRegister.onclick = async (e)=>{
+    e.preventDefault();
+    state.authView = 'register'; state.registerError = null;
+    if(!state.publicStations.length) state.publicStations = await loadPublicStations();
+    render();
+  };
+  const toLogin = document.getElementById('toLoginLink');
+  if(toLogin) toLogin.onclick = (e)=>{ e.preventDefault(); state.authView = 'login'; state.loginError = null; render(); };
+
+  if(state.authView==='register') bindRegisterEvents(); else bindLoginEvents();
+}
+function bindLoginEvents(){
+  const submit = async ()=>{
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if(!username || !password){ state.loginError = 'Identifiant et mot de passe requis.'; render(); return; }
+    state.loginBusy = true; state.loginError = null; render();
+    try{
+      const r = await fetch('/api/auth/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username, password})});
+      const data = await r.json();
+      if(!r.ok){ state.loginError = data.error || 'Échec de connexion.'; state.loginBusy = false; render(); return; }
+      state.currentUser = data;
+      state.loginBusy = false;
+      await bootAfterLogin();
+    }catch(e){ state.loginError = 'Erreur réseau — le serveur est-il démarré ?'; state.loginBusy = false; render(); }
+  };
+  const btn = document.getElementById('loginSubmitBtn'); if(btn) btn.onclick = submit;
+  const pwd = document.getElementById('loginPassword'); if(pwd) pwd.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  const usr = document.getElementById('loginUsername'); if(usr) usr.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+}
+function bindRegisterEvents(){
+  const stationChoice = document.getElementById('registerStationChoice');
+  const newStationFields = document.getElementById('newStationFields');
+  const syncNewStationVisibility = ()=>{
+    if(newStationFields) newStationFields.style.display = (stationChoice && stationChoice.value==='__new__') ? '' : 'none';
+  };
+  if(stationChoice){ stationChoice.onchange = syncNewStationVisibility; syncNewStationVisibility(); }
+
+  const submit = async ()=>{
+    const stationChoiceVal = document.getElementById('registerStationChoice').value;
+    const fullName = document.getElementById('registerFullName').value.trim();
+    const username = document.getElementById('registerUsername').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const confirmPwd = document.getElementById('registerPasswordConfirm').value;
+    if(!fullName || !username || !password){ state.registerError = 'Tous les champs sont requis.'; render(); return; }
+    if(password.length<6){ state.registerError = 'Mot de passe trop court (6 caractères minimum).'; render(); return; }
+    if(password!==confirmPwd){ state.registerError = 'Les deux mots de passe ne correspondent pas.'; render(); return; }
+    const body = { fullName, username, password };
+    if(stationChoiceVal==='__new__'){
+      const newName = document.getElementById('registerNewStationName').value.trim();
+      if(!newName){ state.registerError = 'Indiquez le nom de votre station.'; render(); return; }
+      body.newStation = {
+        name: newName,
+        lat: document.getElementById('registerNewStationLat').value.trim(),
+        lon: document.getElementById('registerNewStationLon').value.trim(),
+        alt: document.getElementById('registerNewStationAlt').value.trim()
+      };
+    } else {
+      body.stationId = stationChoiceVal;
+    }
+    state.registerBusy = true; state.registerError = null; render();
+    try{
+      const r = await fetch('/api/auth/register', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const data = await r.json();
+      if(!r.ok){ state.registerError = data.error || "Échec de l'inscription."; state.registerBusy = false; render(); return; }
+      state.currentUser = data;
+      state.registerBusy = false;
+      await bootAfterLogin();
+    }catch(e){ state.registerError = 'Erreur réseau — le serveur est-il démarré ?'; state.registerBusy = false; render(); }
+  };
+  const btn = document.getElementById('registerSubmitBtn'); if(btn) btn.onclick = submit;
+}
+async function logout(){
+  try{ await fetch('/api/auth/logout', {method:'POST'}); }catch(e){}
+  state.currentUser = null;
+  state.authView = 'login';
+  render();
+}
+function renderTopbar(station){
+  const isAdmin = state.currentUser && state.currentUser.role==='admin';
+  return `
+  <div class="topbar">
+    <div class="brand">
+      <div class="cachet logo-badge"><img src="/logo-mali-meteo.png" alt="Mali Météo"></div>
+      <div>
+        <h1>MétéoCarnet Mali</h1>
+        <div class="sub">Numérisation intégrale du carnet d'observations et du tableau climatologique mensuel</div>
+      </div>
+    </div>
+    <div class="station-picker">
+      ${isAdmin ? `
+        <select id="stationSelect" ${state.stations.length===0?'disabled':''}>
+          ${state.stations.map(s=>`<option value="${s.id}" ${s.id===state.currentStationId?'selected':''}>${escapeHtml(s.name)}</option>`).join('')}
+          ${state.stations.length===0 ? '<option>Aucune station</option>' : ''}
+        </select>
+        <button class="btn ghost sm" id="addStationBtn">+ Station</button>
+      ` : `
+        <span style="font-weight:600;color:var(--sky-deep);">${station?escapeHtml(station.name):'Aucune station rattachée à ce compte'}</span>
+      `}
+      <span style="color:#BFD9E1;font-size:12px;margin-left:6px;">${state.currentUser?escapeHtml(state.currentUser.fullName||state.currentUser.username):''}${isAdmin?' · admin':''}</span>
+      <button class="btn ghost sm" id="logoutBtn">Déconnexion</button>
+    </div>
+  </div>`;
+}
+function renderTabs(){
+  const tabs = [ ['rapide','Saisie rapide'], ['carnet','Carnet complet'], ['mensuel','Tableau mensuel'], ['stations','Stations'] ];
+  if(state.currentUser && state.currentUser.role==='admin') tabs.push(['utilisateurs','Utilisateurs']);
+  return `<div class="tabs">${tabs.map(([id,label])=>`<div class="tab ${state.view===id?'active':''}" data-tab="${id}">${label}</div>`).join('')}</div>`;
+}
+function renderNoStations(){
+  const isAdmin = state.currentUser && state.currentUser.role==='admin';
+  return `<div class="empty-state">
+    <h3>Aucune station enregistrée</h3>
+    <p>${isAdmin?'Ajoutez une première station (nom, coordonnées, altitude) pour commencer à numériser ses relevés.':'Aucune station disponible pour le moment — contactez un administrateur.'}</p>
+    ${isAdmin?'<button class="btn primary" id="addStationBtnEmpty">Ajouter une station</button>':''}
+  </div>`;
+}
+function renderView(station){
+  if(state.view==='utilisateurs' && state.currentUser && state.currentUser.role==='admin') return renderUtilisateursView();
+  if(state.view==='stations') return renderStationsView();
+  if(!station) return renderNoStations();
+  if(state.view==='mensuel') return renderMensuelView(station);
+  if(state.view==='carnet') return renderCarnetView(station);
+  return renderRapideView(station);
+}
+function renderUtilisateursView(){
+  return `
+  <h3 style="margin-bottom:14px;">Comptes utilisateurs</h3>
+  <p class="help" style="margin-top:0;">Les comptes <strong>admin</strong> voient qui a saisi chaque relevé, quand, et depuis où, sur toutes les stations. Les comptes <strong>observateur</strong> sont rattachés à une seule station et n'ont jamais accès aux autres, ni aux informations de localisation/horodatage.</p>
+  <div class="tbl-wrap" style="margin-bottom:16px;">
+    <table class="grid">
+      <thead><tr><th>Identifiant</th><th>Nom</th><th>Rôle</th><th>Station</th><th>Créé le</th><th></th></tr></thead>
+      <tbody>
+        ${state.usersList.map(u=>`
+          <tr>
+            <td class="rowhead">${escapeHtml(u.username)}</td>
+            <td>${escapeHtml(u.full_name||'')}</td>
+            <td>${u.role==='admin'?'Administrateur':'Observateur'}</td>
+            <td>${escapeHtml(u.station_name||(u.role==='admin'?'— (toutes)':'—'))}</td>
+            <td>${new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
+            <td>${state.currentUser.id!==u.id?`<button class="small-x" data-del-user="${u.id}" title="Supprimer">✕</button>`:'<span class="help">(vous)</span>'}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Ajouter un compte</h3>
+    <div class="row">
+      <div class="field"><label>Nom de la personne</label><input type="text" id="newUserFullName" style="font-family:var(--font-sans);"></div>
+      <div class="field"><label>Identifiant</label><input type="text" id="newUserUsername" style="font-family:var(--font-sans);"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="newUserPassword" style="font-family:var(--font-sans);"></div>
+      <div class="field"><label>Rôle</label>
+        <select id="newUserRole" style="font-family:var(--font-sans);">
+          <option value="observateur">Observateur (une seule station, sans localisation/horodatage visible)</option>
+          <option value="admin">Administrateur (voit tout, toutes stations, y compris qui/où/quand)</option>
+        </select>
+      </div>
+      <div class="field" id="newUserStationWrap"><label>Station (observateur uniquement)</label>
+        <select id="newUserStation" style="font-family:var(--font-sans);">
+          <option value="">— Choisir —</option>
+          ${state.stations.map(s=>`<option value="${escapeAttr(s.id)}">${escapeHtml(s.name)}</option>`).join('')}
+        </select>
+      </div>
+      <button class="btn primary" id="addUserBtn">Ajouter</button>
+    </div>
+  </div>
+  `;
+}
+function renderStationsView(){
+  const isAdmin = state.currentUser && state.currentUser.role==='admin';
+  return `
+  <h3 style="margin-bottom:14px;">Stations</h3>
+  <div class="tbl-wrap" style="margin-bottom:16px;">
+    <table class="grid">
+      <thead><tr><th>Nom</th><th>Latitude</th><th>Longitude</th><th>Altitude (m)</th><th></th></tr></thead>
+      <tbody>
+        ${state.stations.map(s=>`
+          <tr>
+            <td class="rowhead">${escapeHtml(s.name)}</td>
+            <td>${escapeHtml(s.lat||'—')}</td>
+            <td>${escapeHtml(s.lon||'—')}</td>
+            <td>${escapeHtml(s.alt||'—')}</td>
+            <td>${isAdmin?`<button class="btn sm" data-archive-station="${s.id}" title="Archiver (rien n'est supprimé, réactivable ensuite)">Archiver</button>`:''}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  ${isAdmin?'<button class="btn primary" id="addStationBtn2">+ Ajouter une station</button>':''}
+  <p class="help">Archiver une station la retire de la liste active sans rien effacer : tous ses jours et tableaux mensuels restent en base, et elle peut être réactivée à tout moment ci-dessous.</p>
+
+  ${isAdmin && state.archivedStations && state.archivedStations.length ? `
+  <div class="card" style="margin-top:18px;">
+    <h3>Stations archivées</h3>
+    <div class="tbl-wrap">
+      <table class="grid">
+        <thead><tr><th>Nom</th><th></th></tr></thead>
+        <tbody>
+          ${state.archivedStations.map(s=>`
+            <tr>
+              <td class="rowhead">${escapeHtml(s.name)}</td>
+              <td><button class="btn sm primary" data-restore-station="${s.id}">Réactiver</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>` : ''}
+
+  <div class="card" style="margin-top:18px;">
+    <h3>Sauvegarde de sécurité</h3>
+    <p class="help" style="margin-top:0;">Les données sont déjà enregistrées automatiquement dans votre base à chaque clic sur « Enregistrer ». Téléchargez en plus une copie complète de temps en temps, à garder de votre côté (clé USB, e-mail, ordinateur) — au cas où.</p>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn brass" id="exportBackupBtn" ${state.backupBusy?'disabled':''}>${state.backupBusy?'<span class="spinner"></span> Préparation…':'Télécharger une sauvegarde complète'}</button>
+      <label class="btn" style="cursor:pointer;">Restaurer une sauvegarde<input type="file" id="importBackupInput" accept="application/json" style="display:none;"></label>
+    </div>
+  </div>
+  `;
+}
+
+/* ---- Carnet view ---- */
+function section(id, title, bodyHtml, countBadge){
+  const open = state.openSections.has(id) ? 'open' : '';
+  return `<details class="section" data-section="${id}" ${open}>
+    <summary>${title}${countBadge? `<span class="badge-count">${countBadge}</span>`:''}</summary>
+    <div class="section-body">${bodyHtml}</div>
+  </details>`;
+}
+function hourCell(rec, h, f){
+  const val = rec.hours[h][f.k];
+  if(f.computed){
+    const computedVal = computeCloudGroup(rec.hours[h]);
+    return `<td><input type="text" data-hour="${h}" data-field="${f.k}" value="${escapeAttr(computedVal)}" disabled title="Calculé automatiquement à partir de N, CL, CM, CH" style="background:var(--surface-2);font-weight:600;text-align:center;"></td>`;
+  }
+  if(f.type==='triplet'){
+    const p = parseTripletCode(val);
+    return `<td class="triplet-cell">
+      <input type="text" class="triplet-part" data-hour="${h}" data-triplet-field="${f.k}" data-triplet-part="n" data-combo="n" list="dl-n" autocomplete="off" value="${escapeAttr(p.n)}" title="N5 — quantité de la couche (octas)" placeholder="N5">
+      <input type="text" class="triplet-part" data-hour="${h}" data-triplet-field="${f.k}" data-triplet-part="c" data-combo="c5" list="dl-c5" autocomplete="off" value="${escapeAttr(p.c)}" title="C5 — genre du nuage" placeholder="C5">
+      <input type="text" class="triplet-part" data-hour="${h}" data-triplet-field="${f.k}" data-triplet-part="h" data-combo="h5" list="dl-h5" autocomplete="off" value="${escapeAttr(p.h)}" title="h5 — hauteur de la base" placeholder="h5">
+    </td>`;
+  }
+  if(f.k==='nuagesDesc'){
+    return `<td style="white-space:normal;min-width:250px;">
+      <div style="display:flex;gap:4px;align-items:center;">
+        <input type="text" class="nuages-desc-input" data-hour="${h}" data-field="${f.k}" value="${escapeAttr(val)}" style="flex:1;" placeholder="Ex: Cu con 3/8 600m, Ci fib 2/8 8000m" title="Format reconnu par l'app : abréviations officielles OMM (genre + espèce), quantité en X/8, hauteur en Xm">
+        <button type="button" class="btn ghost sm" data-suggest-clouds="${h}" title="Convertir ce texte en codes N5C5h5 (colonnes vides uniquement)" style="padding:3px 7px;font-size:12px;white-space:nowrap;">↻ Convertir</button>
+      </div>
+    </td>`;
+  }
+  if(f.type==='combo'){
+    return `<td><input type="text" data-hour="${h}" data-field="${f.k}" data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off" value="${escapeAttr(val)}"></td>`;
+  }
+  return `<td><input type="text" data-hour="${h}" data-field="${f.k}" value="${escapeAttr(val)}"></td>`;
+}
+function renderDatalists(){
+  return Object.entries(COMBO_TABLES).map(([key, table])=>
+    `<datalist id="dl-${key}">${table.map(([code,label])=>`<option value="${escapeAttr(code)}">${escapeHtml(code)} — ${escapeHtml(label)}</option>`).join('')}</datalist>`
+  ).join('');
+}
+function hourTable(rec, fields, extraHelp){
+  return `<div class="tbl-wrap" style="max-height:440px;overflow-y:auto;">
+    <table class="grid"><thead><tr><th>Heure</th>${fields.map(f=>`<th>${f.label}</th>`).join('')}</tr></thead>
+    <tbody>${ALL_HOURS.map(h=>`<tr class="${STANDARD_HOURS.includes(h)?'std-hour':''}">
+        <td class="rowhead">${h}h</td>
+        ${fields.map(f=>hourCell(rec, h, f)).join('')}
+      </tr>`).join('')}</tbody></table></div>
+    <p class="help">Lignes surlignées : les 8 heures synoptiques standard (00,03,06,09,12,15,18,21 TU) utilisées pour le tableau mensuel. Les menus déroulants (temps présent/passé, CL/CM/CH, nébulosité) affichent le code officiel OMM et son libellé. La colonne « Groupe 8NCLCMCH (auto) » se compose toute seule dès que N, CL, CM et/ou CH sont renseignés (« / » = valeur manquante, convention OMM) — vous n'avez rien à taper dedans.${extraHelp?' '+extraHelp:''}</p>`;
+}
+function extraField(key, label, rec, width, combo){
+  const val = rec.extras[key];
+  if(combo){
+    return `<div class="field"><label>${label}</label><input type="text" data-extra="${key}" data-combo="${combo}" list="dl-${combo}" autocomplete="off" value="${escapeAttr(val)}" ${width?`style="width:${width}px;"`:''}></div>`;
+  }
+  return `<div class="field"><label>${label}</label><input type="text" data-extra="${key}" value="${escapeAttr(val)}" ${width?`style="width:${width}px;"`:''}></div>`;
+}
+function renderEventList(list, fields, arrayKey, addLabel){
+  return `
+  ${list.map((ev,idx)=>`
+    <div class="event-card" data-event-idx="${idx}" data-event-array="${arrayKey}">
+      <button class="small-x event-del" data-del-event="${idx}" data-del-array="${arrayKey}" title="Supprimer">✕</button>
+      <div class="row">
+        ${fields.map(f=>`<div class="field"><label>${f.label}</label><input type="text" data-event-field="${f.k}" data-event-idx="${idx}" data-event-array="${arrayKey}" ${f.combo?`data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off"`:''} value="${escapeAttr(ev[f.k])}"></div>`).join('')}
+      </div>
+    </div>`).join('')}
+  <button class="btn sm" data-add-event="${arrayKey}">${addLabel}</button>
+  `;
+}
+function hourHasData(hourObj){
+  return Object.values(hourObj).some(v=> v!==undefined && v!==null && String(v).trim()!=='');
+}
+function rapideField(rec, f){
+  if(f.computed){
+    const computedVal = computeCloudGroup(rec.hours[state.rapideHour]);
+    return `<div class="field"><label>${f.label}</label><input type="text" data-hour="${state.rapideHour}" data-field="${f.k}" value="${escapeAttr(computedVal)}" disabled title="Calculé automatiquement à partir de N, CL, CM, CH" style="background:var(--surface-2);font-weight:600;text-align:center;"></div>`;
+  }
+  const val = rec.hours[state.rapideHour][f.k];
+  const comboAttrs = f.type==='combo' ? `data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off"` : '';
+  return `<div class="field"><label>${f.label}</label><input type="text" data-hour="${state.rapideHour}" data-field="${f.k}" ${comboAttrs} value="${escapeAttr(val)}"></div>`;
+}
+function renderRapideView(station){
+  const rec = state.carnetRecord || emptyCarnet(station.id, state.carnetDate);
+  const quickFieldsAll = [...FIELDS_TOUR, ...FIELDS_PRECIP_TEMP, ...FIELDS_PRESSION].filter(f=>f.k!=='notes');
+  const essential = quickFieldsAll.filter(f=>f.quick);
+  const advanced = quickFieldsAll.filter(f=>!f.quick);
+  const filledCount = STANDARD_HOURS.filter(h=>hourHasData(rec.hours[h])).length;
+  return `
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center;">
+      <div class="row">
+        <div class="field"><label>Station</label><input type="text" value="${escapeHtml(station.name)}" disabled style="width:150px;"></div>
+        <div class="field"><label>Date</label><input type="date" id="carnetDate" value="${state.carnetDate}"></div>
+      </div>
+      <span id="saveIndicator"></span>
+    </div>
+    <div class="calendar-row" style="margin-top:12px;">
+      ${STANDARD_HOURS.map(h=>`<span class="pill ${hourHasData(rec.hours[h])?'saved':'missing'}" data-jump-hour="${h}" style="${h===state.rapideHour?'box-shadow:0 0 0 2px var(--sky) inset;':''}cursor:pointer;">${h}h</span>`).join('')}
+    </div>
+    <p class="help">${filledCount}/8 heures synoptiques saisies aujourd'hui pour ${escapeHtml(station.name)}.</p>
+  </div>
+
+  <div class="card">
+    <h3>Relevé de ${state.rapideHour}h TU</h3>
+    ${rec.hours[state.rapideHour].meta ? `<p class="help" style="margin-top:-6px;">${escapeHtml(formatGeoStamp(rec.hours[state.rapideHour].meta))}</p>` : ''}
+    <div class="row">${essential.map(f=>rapideField(rec, f)).join('')}</div>
+    ${state.rapideShowAdvanced ? `<div class="row" style="margin-top:14px;border-top:1px dashed var(--border);padding-top:14px;">${advanced.map(f=>rapideField(rec, f)).join('')}</div>` : ''}
+    <div class="row" style="margin-top:16px;justify-content:space-between;">
+      <button class="btn sm" id="toggleAdvancedBtn">${state.rapideShowAdvanced?'Masquer les champs avancés':'+ Champs avancés (pression détaillée, tension de vapeur...)'}</button>
+      <button class="btn primary" id="saveRapideBtn">Enregistrer ${state.rapideHour}h</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="help" style="margin:0;">Grains/orages, sol, évaporation, extrêmes du jour, phénomènes remarquables... c'est dans <a href="#" data-goto-carnet="1" style="color:var(--sky);text-decoration:underline;">le Carnet complet</a> — à remplir tranquillement une fois par jour, pas à chaque heure.</p>
+  </div>
+  `;
+}
+function renderCarnetView(station){
+  const rec = state.carnetRecord || emptyCarnet(station.id, state.carnetDate);
+  return `
+  <div class="card">
+    <div class="row" style="justify-content:space-between;">
+      <div class="row">
+        <div class="field"><label>Station</label><input type="text" value="${escapeHtml(station.name)}" disabled style="width:150px;"></div>
+        <div class="field"><label>Date</label><input type="date" id="carnetDate" value="${state.carnetDate}"></div>
+        <div class="field"><label>&nbsp;</label>
+          <div class="mode-toggle">
+            <button data-mode="manuel" class="${state.carnetMode==='manuel'?'active':''}">Saisie manuelle</button>
+            <button data-mode="scan" class="${state.carnetMode==='scan'?'active':''}">Scanner des photos</button>
+          </div>
+        </div>
+      </div>
+      <div class="row"><span id="saveIndicator"></span><button class="btn" id="togglePaperViewBtn">${state.paperView?'← Retour à la saisie':'🖨️ Vue carnet papier (4 pages)'}</button><button class="btn primary" id="saveCarnetBtn">Enregistrer ce jour</button></div>
+    </div>
+    ${renderCalendarStrip(station)}
+    ${rec.meta ? `<p class="help">${escapeHtml(formatGeoStamp(rec.meta))} (dernier enregistrement global du jour — voir aussi l\u2019horodatage propre à chaque heure dans la Saisie rapide)</p>` : ''}
+  </div>
+
+  ${state.paperView ? renderPaperView(rec, station) : renderCarnetBody(rec)}
+  `;
+}
+function renderCarnetBody(rec){
+  return `
+  ${state.carnetMode==='scan' ? renderScanBox() : ''}
+
+  ${section('tourHorizon', '1. Tour d\u2019horizon — vent, visibilité, nébulosité, temps', hourTable(rec, FIELDS_TOUR))}
+  ${section('nuages', '2. Nuages — hauteur, genre, groupes significatifs', hourTable(rec, FIELDS_NUAGES, "Pour chaque couche significative (N5C5h5 #1 à #4) : les 3 petites cases se remplissent séparément (quantité, genre, hauteur) et se combinent toutes seules. Astuce : si vous décrivez le nuage dans la 1ère colonne avec les abréviations officielles OMM (ex. \"Cu con 3/8 600m\" = Cumulus congestus, 3 octas, 600m), l'app remplit les codes toute seule dès que vous quittez la case — vérifiez juste le résultat."))}
+  ${section('grains', '3. Grains, orages, grêles (événements)', renderEventList(rec.grainsOrages, GRAIN_FIELDS, 'grainsOrages', '+ Ajouter un événement'), rec.grainsOrages.length||'')}
+  ${section('obsSpeciales', '4. Observations spéciales (événements)', renderEventList(rec.observationsSpeciales, OBS_SPECIALE_FIELDS, 'observationsSpeciales', '+ Ajouter une observation'), rec.observationsSpeciales.length||'')}
+  ${section('precipTemp', '5. Précipitations, température et humidité', hourTable(rec, FIELDS_PRECIP_TEMP, 'Tension de vapeur, humidité et point de rosée se calculent automatiquement dès que T sec + T mouillé sont renseignés (ou T sec + humidité si vous utilisez un hygromètre direct) — formule OMM (Guide CIMO N°8, vérifiée contre l\u2019exemple officiel). Suppose un psychromètre ventilé ; un abri non ventilé peut donner une humidité réelle légèrement supérieure (~2-3%).'))}
+  ${section('pression', '6. Pression atmosphérique', hourTable(rec, FIELDS_PRESSION, 'Le niveau mer se calcule automatiquement depuis la pression lue, l\u2019altitude de la station et la température — formule hypsométrique standard (gradient 6,5°C/km). Précision typique : à 1-2 hPa près (la méthode officielle complète ajoute une correction d\u2019humidité et une moyenne sur 12h que cette version simplifiée n\u2019inclut pas) — vérifiez contre votre table de réduction habituelle pour un usage officiel. La pression réduite à 0° (correction du baromètre à mercure) reste à saisir à la main.'))}
+
+  ${section('hauteurEau', '7. Hauteur d\u2019eau recueillie (pluviométrie)', `
+    <div class="row">
+      ${extraField('precip18h6h','Précip. 18h (veille) → 6h (mm)', rec)}
+      ${extraField('precip6h18h','Précip. 6h → 18h (mm)', rec)}
+      ${extraField('precipitation24h','Précip. totale 0h → 24h (mm)', rec)}
+      ${extraField('duree18h6h','Durée 18h→6h (h, 1/10)', rec)}
+      ${extraField('duree6h18h','Durée 6h→18h (h, 1/10)', rec)}
+      ${extraField('duree24h','Durée totale 24h (h, 1/10)', rec)}
+    </div>`)}
+
+  ${section('evapPiche', '8. Évaporation sous abri (Piché)', `
+    <div class="row">
+      ${extraField('evapPicheLecturePrecedente','Lecture précédente (1/10mm)', rec)}
+      ${extraField('evapPicheLecture','Lecture (1/10mm)', rec)}
+      ${extraField('evapPiche','Évaporation Piché du jour (mm)', rec)}
+    </div>`)}
+
+  ${section('sol', '9. Température dans le sol', `
+    <div class="row">
+      ${extraField('sol10_6h','10cm à 6h TU (°C)', rec)}
+      ${extraField('sol10_12h','10cm à 12h TU (°C)', rec)}
+      ${extraField('sol10_18h','10cm à 18h TU (°C)', rec)}
+      ${extraField('sol20','20cm (°C)', rec)}
+      ${extraField('sol50','50cm (°C)', rec)}
+      ${extraField('sol100','100cm (°C)', rec)}
+    </div>`)}
+
+  ${section('bac', '10. Évaporation Bac classe A', `
+    <div class="tbl-wrap"><table class="grid"><thead><tr><th>Obs.</th><th>Lecture h1</th><th>Lecture h2</th><th>Différence D</th><th>Nouv. lecture R</th><th>Évaporation D+R</th><th>T° eau</th></tr></thead>
+    <tbody>
+      <tr><td class="rowhead">06h</td>
+        <td><input type="text" data-extra="bac06_h1" value="${escapeAttr(rec.extras.bac06_h1)}"></td>
+        <td><input type="text" data-extra="bac06_h2" value="${escapeAttr(rec.extras.bac06_h2)}"></td>
+        <td><input type="text" data-extra="bac06_diff" value="${escapeAttr(rec.extras.bac06_diff)}"></td>
+        <td><input type="text" data-extra="bac06_nouvLecture" value="${escapeAttr(rec.extras.bac06_nouvLecture)}"></td>
+        <td><input type="text" data-extra="bac06_evap" value="${escapeAttr(rec.extras.bac06_evap)}"></td>
+        <td><input type="text" data-extra="bac06_tempEau" value="${escapeAttr(rec.extras.bac06_tempEau)}"></td>
+      </tr>
+      <tr><td class="rowhead">18h</td>
+        <td><input type="text" data-extra="bac18_h1" value="${escapeAttr(rec.extras.bac18_h1)}"></td>
+        <td><input type="text" data-extra="bac18_h2" value="${escapeAttr(rec.extras.bac18_h2)}"></td>
+        <td><input type="text" data-extra="bac18_diff" value="${escapeAttr(rec.extras.bac18_diff)}"></td>
+        <td><input type="text" data-extra="bac18_nouvLecture" value="${escapeAttr(rec.extras.bac18_nouvLecture)}"></td>
+        <td><input type="text" data-extra="bac18_evap" value="${escapeAttr(rec.extras.bac18_evap)}"></td>
+        <td><input type="text" data-extra="bac18_tempEau" value="${escapeAttr(rec.extras.bac18_tempEau)}"></td>
+      </tr>
+    </tbody></table></div>
+    <div class="row" style="margin-top:10px;">${extraField('evapBac','Évaporation Bac totale du jour (mm)', rec)}</div>`)}
+
+  ${section('insolation', '11. Insolation et rayonnement global', `
+    <div class="row">
+      ${extraField('insolationMatin','Insolation matin (h)', rec)}
+      ${extraField('insolationSoir','Insolation soir (h)', rec)}
+      ${extraField('insolationTotal','Insolation totale (h)', rec)}
+      ${extraField('rayonnementMatin','Rayonnement matin', rec)}
+      ${extraField('rayonnementSoir','Rayonnement soir', rec)}
+      ${extraField('rayonnementTotal','Rayonnement total', rec)}
+    </div>`)}
+
+  ${section('tempExtremes', '12. Températures extrêmes (sol et sous abri)', `
+    <div class="row">
+      ${extraField('tempSolMini','Tn au sol (°C)', rec)}
+      ${extraField('tempSolMaxi','Tx au sol (°C)', rec)}
+      ${extraField('tempMiniAbri','Tn sous abri (°C)', rec)}
+      ${extraField('tempMiniAbriHeure','Heure Tn', rec)}
+      ${extraField('tempMaxiAbri','Tx sous abri (°C)', rec)}
+      ${extraField('tempMaxiAbriHeure','Heure Tx', rec)}
+      ${extraField('humiditeMaxJour','Ux — humidité max (%)', rec)}
+      ${extraField('humiditeMaxJourHeure','Heure Ux', rec)}
+      ${extraField('humiditeMinJour','Un — humidité min (%)', rec)}
+      ${extraField('humiditeMinJourHeure','Heure Un', rec)}
+    </div>`)}
+
+  ${section('pressExtremes', '13. Pressions extrêmes (matin / soir)', `
+    <p class="help">Max de jour ≈ 10h locales · Min de jour ≈ 16h locales · Max de nuit ≈ 22h locales · Min de nuit ≈ 4h locales.</p>
+    <div class="row">
+      ${extraField('pressMatinMinValeur','Matin — min valeur', rec)}
+      ${extraField('pressMatinMinHeure','Matin — min heure', rec)}
+      ${extraField('pressMatinMaxValeur','Matin — max valeur', rec)}
+      ${extraField('pressMatinMaxHeure','Matin — max heure', rec)}
+      ${extraField('pressSoirMinValeur','Soir — min valeur', rec)}
+      ${extraField('pressSoirMinHeure','Soir — min heure', rec)}
+      ${extraField('pressSoirMaxValeur','Soir — max valeur', rec)}
+      ${extraField('pressSoirMaxHeure','Soir — max heure', rec)}
+    </div>`)}
+
+  ${section('valeursExtremes', '14. Valeurs extrêmes du jour (vent, visibilité, nuages)', `
+    <div class="row">
+      ${extraField('lectureCorrigeeEnreg','Lecture corrigée enregistreur', rec)}
+      ${extraField('ventMaxInstDir','Vent max instantané — dir.', rec, null, 'dir')}
+      ${extraField('ventMaxInstVit','Vent max instantané — vit. (m/s)', rec)}
+      ${extraField('ventMaxInstHeure','Vent max instantané — heure', rec)}
+      ${extraField('ventMoyenDir','Vent moyen (2/10mn) — dir.', rec, null, 'dir')}
+      ${extraField('ventMoyenVit','Vent moyen (2/10mn) — vit.', rec)}
+      ${extraField('ventMoyenHeure','Vent moyen — heure', rec)}
+      ${extraField('visibiliteMin','Visibilité minimale (dam)', rec)}
+      ${extraField('visibiliteMinHeure','Heure visib. min.', rec)}
+      ${extraField('hauteurNuagesMin','Hauteur min. des nuages (dam)', rec)}
+      ${extraField('hauteurNuagesMinHeure','Heure hauteur min.', rec)}
+    </div>`)}
+
+  ${section('phenomenesJour', '15. Phénomènes observés ce jour (pour comptage mensuel)', `
+    <div class="check-grid">
+      ${PHEN_CHECKS.map(p=>`<label class="check-item"><input type="checkbox" data-phen="${p.k}" ${rec.extras[p.k]?'checked':''}> ${p.label}</label>`).join('')}
+    </div>`)}
+
+  ${section('remarques', '16. Phénomènes remarquables et résumé du jour', `
+    <div class="field" style="margin-bottom:12px;">
+      <label>Phénomènes remarquables (notes libres)</label>
+      <textarea class="wide" id="phenomenesRemarquables">${escapeHtml(rec.extras.phenomenesRemarquables)}</textarea>
+    </div>
+    <div class="field">
+      <label>Résumé du temps en clair</label>
+      <textarea class="wide" id="resumeTempsClair">${escapeHtml(rec.extras.resumeTempsClair)}</textarea>
+    </div>
+    <button class="btn sm" id="genDayResumeBtn" style="margin-top:8px;">Générer le résumé automatiquement</button>`)}
+  `;
+}
+/* ================= Vue carnet papier (4 pages conformes au formulaire ASECNA) ================= */
+/* ================= Vue carnet papier (4 pages conformes, ENTIÈREMENT ÉDITABLE) =================
+   Réutilise directement hourCell()/extraField()/renderEventList() : toute case modifiée ici
+   déclenche exactement les mêmes sauvegardes que la saisie normale — aucune logique dupliquée,
+   donc aucun risque que les deux vues se désynchronisent. */
+function paperHeader(rec, station, pageNum){
+  const dateObj = new Date(rec.date+'T00:00:00');
+  const dateLabel = dateObj.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  const circled = ['①','②','③','④'][pageNum-1] || pageNum;
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;font-family:var(--font-sans);font-size:9.5px;">
+    <div><b>MétéoCarnet Mali</b> — ${escapeHtml(station.name)}</div>
+    <div>Page ${pageNum}/4</div>
+  </div>
+  <h2>${circled} DATE : ${escapeHtml(dateLabel)}</h2>`;
+}
+const PAPER_COLNUM = {
+  ventDirLettres:'2', ventVitMs:'3', ventDirDizaines:'4', ventVitNoeuds:'5',
+  visibiliteDam:'6', visibiliteCode:'7', phenomenes:'8', tempsPresent:'9', tempsPasse:'10',
+  CL:'11', CM:'12', CH:'13', N:'14',
+  nuagesDesc:'16', groupeNuages1:'17', groupeNuages2:'18', groupeNuages3:'19', groupeNuages4:'20',
+  intensitePrecip:'46', mesuresIntermediaires:'47/48', Tsec:'49', Tw:'50', humidite:'51',
+  tensionVapeur:'52', pointRosee:'53', thermoEnregT:'54', reperesMinutes:'55', hygroEnregU:'56',
+  pressionEnregLue:'57', tempBarometre:'59', pressionLue:'60/61', pressionReduite0:'62',
+  tempMoyT12:'63', niveauMerPression:'64', evolution24h:'65', initialesObs:'66/67'
+};
+function paperFieldsHeadRow(fields){
+  return `<tr><th style="width:32px;">Heure<br>TU</th>${fields.map(f=>`<th>${f.label}<span class="colnum">${PAPER_COLNUM[f.k]||''}</span></th>`).join('')}</tr>`;
+}
+function paperHourTable(rec, fields, extraHeadRow){
+  return `<table>
+    <thead>${extraHeadRow || paperFieldsHeadRow(fields)}</thead>
+    <tbody>
+      ${ALL_HOURS.map(h=> `<tr><td class="rh">${h}</td>${fields.map(f=> hourCell(rec, h, f)).join('')}</tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+function extraFieldBare(key, rec){
+  return `<input type="text" data-extra="${key}" value="${escapeAttr(rec.extras[key])}" style="width:100%;">`;
+}
+function paperPage1(rec, station){
+  const fields = FIELDS_TOUR.filter(f=> f.k!=='groupeNhClCmCh' && f.k!=='notes');
+  const head = `
+    <tr><th rowspan="2" style="width:32px;">Heure<br>TU<span class="colnum">1</span></th>
+      <th colspan="4">Vents (d et f)</th><th colspan="2">V — Visibilité</th>
+      <th rowspan="2">Phénomènes<span class="colnum">8</span></th>
+      <th rowspan="2">W<span class="colnum">9</span></th><th rowspan="2">W½<span class="colnum">10</span></th>
+      <th rowspan="2">C<sub>L</sub><span class="colnum">11</span></th><th rowspan="2">C<sub>M</sub><span class="colnum">12</span></th>
+      <th rowspan="2">C<sub>H</sub><span class="colnum">13</span></th><th rowspan="2">N<span class="colnum">14</span></th></tr>
+    <tr>${fields.slice(0,6).map(f=>`<th>${f.label}<span class="colnum">${PAPER_COLNUM[f.k]||''}</span></th>`).join('')}</tr>`;
+  return `
+  <div class="paper-page">
+    ${paperHeader(rec, station, 1)}
+    <h3>Tour d'horizon</h3>
+    ${paperHourTable(rec, fields, head)}
+    <h3>Grains, orages, grêles</h3>
+    ${renderEventList(rec.grainsOrages, GRAIN_FIELDS, 'grainsOrages', '+ Ajouter un événement')}
+  </div>`;
+}
+function paperPage2(rec, station){
+  const fields = FIELDS_NUAGES;
+  const head = `<tr><th style="width:32px;">Heure<br>TU<span class="colnum">15</span></th>${fields.map(f=>`<th>${f.label}<span class="colnum">${PAPER_COLNUM[f.k]||''}</span></th>`).join('')}</tr>`;
+  return `
+  <div class="paper-page">
+    ${paperHeader(rec, station, 2)}
+    <h3>Nuages — hauteur, genre, espèce, secteur / groupes significatifs</h3>
+    ${paperHourTable(rec, fields, head)}
+    <h3>Observations spéciales</h3>
+    ${renderEventList(rec.observationsSpeciales, OBS_SPECIALE_FIELDS, 'observationsSpeciales', '+ Ajouter une observation')}
+  </div>`;
+}
+function paperPage3(rec, station){
+  const fields = FIELDS_PRECIP_TEMP;
+  return `
+  <div class="paper-page">
+    ${paperHeader(rec, station, 3)}
+    <h3>Précipitations — Température et humidité</h3>
+    ${paperHourTable(rec, fields)}
+    <h3>Hauteur d'eau recueillie (pluviomètre, 1/10mm) — Durée des précipitations</h3>
+    <div class="mini-grid">
+      ${extraField('precip18h6h', "18h(veille)→6h — mm", rec)} ${extraField('duree18h6h', 'Durée (h)', rec)}
+      ${extraField('precip6h18h', '6h→18h — mm', rec)} ${extraField('duree6h18h', 'Durée (h)', rec)}
+      ${extraField('precipitation24h', '0h→24h — mm', rec)} ${extraField('duree24h', 'Durée (h)', rec)}
+    </div>
+    <h3>Évaporation sous abri (Piché)</h3>
+    <div class="mini-grid">
+      ${extraField('evapPicheLecturePrecedente','Lecture précédente', rec)}
+      ${extraField('evapPicheLecture','Lecture', rec)}
+      ${extraField('evapPiche','Différence (évaporation)', rec)}
+    </div>
+    <h3>Température dans le sol (°C)</h3>
+    <div class="mini-grid">
+      ${extraField('sol10_6h','10cm à 6h', rec)} ${extraField('sol10_12h','10cm à 12h', rec)} ${extraField('sol10_18h','10cm à 18h', rec)}
+      ${extraField('sol20','20cm', rec)} ${extraField('sol50','50cm', rec)} ${extraField('sol100','100cm', rec)}
+    </div>
+    <h3>Évaporation Bac classe A</h3>
+    <table>
+      <thead><tr><th>Obs.</th><th>Lecture h1</th><th>Lecture h2</th><th>Différence D</th><th>Nouv. lecture R</th><th>Évap. D+R</th><th>T° eau</th></tr></thead>
+      <tbody>
+        <tr><td class="rh">06h</td><td>${extraFieldBare('bac06_h1',rec)}</td><td>${extraFieldBare('bac06_h2',rec)}</td><td>${extraFieldBare('bac06_diff',rec)}</td><td>${extraFieldBare('bac06_nouvLecture',rec)}</td><td>${extraFieldBare('bac06_evap',rec)}</td><td>${extraFieldBare('bac06_tempEau',rec)}</td></tr>
+        <tr><td class="rh">18h</td><td>${extraFieldBare('bac18_h1',rec)}</td><td>${extraFieldBare('bac18_h2',rec)}</td><td>${extraFieldBare('bac18_diff',rec)}</td><td>${extraFieldBare('bac18_nouvLecture',rec)}</td><td>${extraFieldBare('bac18_evap',rec)}</td><td>${extraFieldBare('bac18_tempEau',rec)}</td></tr>
+      </tbody>
+    </table>
+    <div class="mini-grid">${extraField('evapBac','Évaporation Bac totale du jour (mm)', rec)}</div>
+    <h3>Insolation — Rayonnement global</h3>
+    <div class="mini-grid">
+      ${extraField('insolationMatin','Insolation matin (h)', rec)} ${extraField('insolationSoir','Insolation soir (h)', rec)} ${extraField('insolationTotal','Insolation totale (h)', rec)}
+      ${extraField('rayonnementMatin','Rayonnement matin', rec)} ${extraField('rayonnementSoir','Rayonnement soir', rec)} ${extraField('rayonnementTotal','Rayonnement total', rec)}
+    </div>
+  </div>`;
+}
+function paperPage4(rec, station){
+  const fields = FIELDS_PRESSION;
+  return `
+  <div class="paper-page">
+    ${paperHeader(rec, station, 4)}
+    <h3>Pression</h3>
+    ${paperHourTable(rec, fields)}
+    <div style="display:flex;gap:14px;align-items:flex-start;">
+      <div style="flex:1;">
+        <h3>Températures extrêmes</h3>
+        <table>
+          <thead><tr><th></th><th colspan="2">Au sol</th><th colspan="3">Sous abri</th></tr>
+          <tr><th></th><th>Mini</th><th>Maxi</th><th>Mini</th><th>Maxi</th><th>Heure</th></tr></thead>
+          <tbody><tr><td class="rh">Jour</td><td>${extraFieldBare('tempSolMini',rec)}</td><td>${extraFieldBare('tempSolMaxi',rec)}</td>
+            <td>${extraFieldBare('tempMiniAbri',rec)}</td><td>${extraFieldBare('tempMaxiAbri',rec)}</td><td>${extraFieldBare('tempMaxiAbriHeure',rec)}</td></tr></tbody>
+        </table>
+      </div>
+      <div style="flex:1;">
+        <h3>Pressions extrêmes</h3>
+        <table>
+          <thead><tr><th></th><th>Min. valeur</th><th>Min. heure</th><th>Max. valeur</th><th>Max. heure</th></tr></thead>
+          <tbody>
+            <tr><td class="rh">Matin</td><td>${extraFieldBare('pressMatinMinValeur',rec)}</td><td>${extraFieldBare('pressMatinMinHeure',rec)}</td><td>${extraFieldBare('pressMatinMaxValeur',rec)}</td><td>${extraFieldBare('pressMatinMaxHeure',rec)}</td></tr>
+            <tr><td class="rh">Soir</td><td>${extraFieldBare('pressSoirMinValeur',rec)}</td><td>${extraFieldBare('pressSoirMinHeure',rec)}</td><td>${extraFieldBare('pressSoirMaxValeur',rec)}</td><td>${extraFieldBare('pressSoirMaxHeure',rec)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <h3>Valeurs extrêmes du jour (0 à 24 heures)</h3>
+    <div class="mini-grid">
+      ${extraField('lectureCorrigeeEnreg','Lecture corrigée enregistreur', rec)}
+      ${extraField('ventMaxInstDir','Vent max. instant. — dir.', rec)} ${extraField('ventMaxInstVit','Vent max. instant. — m/s', rec)} ${extraField('ventMaxInstHeure','Vent max. instant. — heure', rec)}
+      ${extraField('ventMoyenDir','Vent moyen (2/10mn) — dir.', rec)} ${extraField('ventMoyenVit','Vent moyen — m/s', rec)} ${extraField('ventMoyenHeure','Vent moyen — heure', rec)}
+      ${extraField('humiditeMinJour','Humidité min. (%)', rec)} ${extraField('humiditeMaxJour','Humidité max. (%)', rec)}
+      ${extraField('visibiliteMin','Visibilité minimale (dam)', rec)} ${extraField('visibiliteMinHeure','Visibilité min. — heure', rec)}
+      ${extraField('hauteurNuagesMin','Hauteur minimale nuages (dam)', rec)} ${extraField('hauteurNuagesMinHeure','Hauteur min. nuages — heure', rec)}
+    </div>
+    <h3>Phénomènes remarquables — notes diverses</h3>
+    <textarea data-extra="phenomenesRemarquables" class="free-text-box" style="width:100%;border:1px solid #333;font-family:var(--font-sans);font-size:10px;">${escapeHtml(rec.extras.phenomenesRemarquables||'')}</textarea>
+  </div>`;
+}
+
+function renderPaperView(rec, station){
+  return `
+  <div class="paper-view">
+    <div class="paper-toolbar"><button class="btn" id="printPaperBtn">🖨️ Imprimer / PDF (4 pages)</button></div>
+    ${paperPage1(rec, station)}
+    ${paperPage2(rec, station)}
+    ${paperPage3(rec, station)}
+    ${paperPage4(rec, station)}
+  </div>`;
+}
+
+/* ================= Vue TCM papier (Tableau Climatologique Mensuel), ENTIÈREMENT ÉDITABLE =================
+   Même principe que la vue carnet papier : les cases se remplissent directement, mais comme
+   ces tables croisent plusieurs jours, chaque modification sauvegarde IMMÉDIATEMENT le jour
+   concerné (pas besoin de revenir sur le Carnet), puis rafraîchit les totaux/moyennes affichés. */
+function tcmPageWrap(station, monthLabel, title, bodyHtml){
+  return `<div class="paper-page">
+    <div style="display:flex;justify-content:space-between;font-family:var(--font-sans);font-size:9.5px;margin-bottom:2px;">
+      <div><b>Station : ${escapeHtml(station.name)}</b></div><div>Mois : ${escapeHtml(monthLabel)}</div>
+    </div>
+    <h2>${escapeHtml(title)}</h2>
+    ${bodyHtml}
+  </div>`;
+}
+function monthlyDayHourCell(m, dateStr, hour, field, width){
+  const rec = m.byDate[dateStr];
+  const val = rec && rec.hours[hour] ? (rec.hours[hour][field]||'') : '';
+  return `<td><input type="text" class="monthly-hour-input" data-m-date="${dateStr}" data-m-hour="${hour}" data-m-field="${field}" value="${escapeAttr(val)}" style="width:${width||36}px;"></td>`;
+}
+function dayHourStats(m, dateStr, field){
+  const rec = m.byDate[dateStr];
+  if(!rec) return {total:null, moy:null, min:null, minH:null, max:null, maxH:null};
+  let total=0,count=0,min=null,minH=null,max=null,maxH=null;
+  STANDARD_HOURS.forEach(h=>{
+    const v = toNum(rec.hours[h] && rec.hours[h][field]);
+    if(v!==null){ total+=v; count++; if(min===null||v<min){min=v;minH=h;} if(max===null||v>max){max=v;maxH=h;} }
+  });
+  return {total: count?total:null, moy: count?total/count:null, min, minH, max, maxH};
+}
+function paperMonthlyHourGrid(m, dates, field){
+  return `<table>
+    <thead><tr><th>Date</th>${STANDARD_HOURS.map(h=>`<th>${h}h</th>`).join('')}<th>Total</th><th>Moy.</th><th>Min</th><th>Heure</th><th>Max</th><th>Heure</th></tr></thead>
+    <tbody>
+      ${dates.map((dateStr,i)=>{
+        const stats = dayHourStats(m, dateStr, field);
+        const cells = STANDARD_HOURS.map(h=> monthlyDayHourCell(m, dateStr, h, field)).join('');
+        return `<tr><td class="rh">${i+1}</td>${cells}<td>${fmt(stats.total)}</td><td>${fmt(stats.moy)}</td><td>${fmt(stats.min)}</td><td>${stats.minH||''}</td><td>${fmt(stats.max)}</td><td>${stats.maxH||''}</td></tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+function tcmVentBody(m, dates, summary){
+  let grandTotalVit=0, grandCountVit=0;
+  const rows = dates.map((dateStr,i)=>{
+    let vitSum=0, vitCount=0;
+    const cells = STANDARD_HOURS.map(h=>{
+      const rec = m.byDate[dateStr];
+      const dir = rec && rec.hours[h] ? (rec.hours[h].ventDirDizaines||'') : '';
+      const vit = rec && rec.hours[h] ? (rec.hours[h].ventVitMs||'') : '';
+      const vitNum = toNum(vit); if(vitNum!==null){ vitSum+=vitNum; vitCount++; grandTotalVit+=vitNum; grandCountVit++; }
+      return `<td><input type="text" class="monthly-hour-input" data-m-date="${dateStr}" data-m-hour="${h}" data-m-field="ventDirDizaines" value="${escapeAttr(dir)}" style="width:24px;"></td><td><input type="text" class="monthly-hour-input" data-m-date="${dateStr}" data-m-hour="${h}" data-m-field="ventVitMs" value="${escapeAttr(vit)}" style="width:24px;"></td>`;
+    }).join('');
+    return `<tr><td class="rh">${i+1}</td>${cells}<td>${vitCount?fmt(vitSum):''}</td><td>${vitCount?fmt(vitSum/vitCount):''}</td></tr>`;
+  }).join('');
+  return `
+  <table>
+    <thead>
+      <tr><th rowspan="2">Date</th>${STANDARD_HOURS.map(h=>`<th colspan="2">${h}h</th>`).join('')}<th rowspan="2">Total<br>vit.</th><th rowspan="2">Moy.<br>vit.</th></tr>
+      <tr>${STANDARD_HOURS.map(()=>'<th>Dir.</th><th>Vit.</th>').join('')}</tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="mini-grid"><div><b>Vitesse maximale instantanée du mois :</b> ${escapeHtml(summary.ventMaxDir||'—')} / ${fmt(summary.ventMax)} m/s — ${escapeHtml(summary.ventMaxDate||'—')}</div></div>`;
+}
+function tcmTempBody(m, dates){
+  return `
+  <h3>Température de l'air sous abri</h3>
+  ${paperMonthlyHourGrid(m, dates, 'Tsec')}
+  <h3>Température du thermomètre mouillé</h3>
+  ${paperMonthlyHourGrid(m, dates, 'Tw')}`;
+}
+function tcmTensionHumiditeBody(m, dates){
+  return `
+  <h3>Tension de vapeur d'eau</h3>
+  ${paperMonthlyHourGrid(m, dates, 'tensionVapeur')}
+  <h3>Humidité relative (%) et pression atmosphérique lue (mb) — 00/06/12/18h</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Hum. min</th><th>Heure</th><th>Hum. max</th><th>Heure</th><th>00h</th><th>06h</th><th>12h</th><th>18h</th></tr></thead>
+    <tbody>
+      ${dates.map((dateStr,i)=>{
+        const hStats = dayHourStats(m, dateStr, 'humidite');
+        const cells = ['00','06','12','18'].map(h=> monthlyDayHourCell(m, dateStr, h, 'pressionLue', 40)).join('');
+        return `<tr><td class="rh">${i+1}</td><td>${fmt(hStats.min,0)}</td><td>${hStats.minH||''}</td><td>${fmt(hStats.max,0)}</td><td>${hStats.maxH||''}</td>${cells}</tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+function tcmNebuloBody(m, dates){
+  return `
+  <h3>Nébulosité totale (octas) par heure synoptique</h3>
+  ${paperMonthlyHourGrid(m, dates, 'N')}
+  <h3>Insolation (h) et température du sol (°C)</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Insol. matin</th><th>Insol. soir</th><th>Insol. totale</th><th>Sol 10cm 6h</th><th>Sol 10cm 12h</th><th>Sol 10cm 18h</th><th>Sol 20cm</th></tr></thead>
+    <tbody>
+      ${dates.map((dateStr,i)=>{
+        const rec = m.byDate[dateStr]; const ex = rec ? rec.extras : {};
+        const f = (k)=> `<td><input type="text" class="monthly-extra-input" data-m-date="${dateStr}" data-m-extra="${k}" value="${escapeAttr(ex[k])}" style="width:42px;"></td>`;
+        return `<tr><td class="rh">${i+1}</td>${f('insolationMatin')}${f('insolationSoir')}${f('insolationTotal')}${f('sol10_6h')}${f('sol10_12h')}${f('sol10_18h')}${f('sol20')}</tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+  <h3>Pression réduite au niveau de la mer (mb) — 00/06/12/18h</h3>
+  <table>
+    <thead><tr><th>Date</th><th>00h</th><th>06h</th><th>12h</th><th>18h</th></tr></thead>
+    <tbody>${dates.map((dateStr,i)=> `<tr><td class="rh">${i+1}</td>${['00','06','12','18'].map(h=>monthlyDayHourCell(m,dateStr,h,'niveauMerPression',44)).join('')}</tr>`).join('')}</tbody>
+  </table>`;
+}
+function tcmMonthEventsList(dates, m){
+  const rows = [];
+  dates.forEach(dateStr=>{
+    const rec = m.byDate[dateStr];
+    if(!rec) return;
+    (rec.grainsOrages||[]).forEach(ev=> rows.push({date:dateStr, type:'Grain/orage/grêle', desc: GRAIN_FIELDS.map(f=>ev[f.k]).filter(Boolean).join(' · ')}));
+    (rec.observationsSpeciales||[]).forEach(ev=> rows.push({date:dateStr, type:'Observation spéciale', desc: OBS_SPECIALE_FIELDS.map(f=>ev[f.k]).filter(Boolean).join(' · ')}));
+  });
+  if(!rows.length) return `<p class="help">Aucun événement enregistré ce mois-ci.</p>`;
+  return `<table><thead><tr><th>Date</th><th>Type</th><th style="text-align:left;">Détail</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td class="rh">${escapeHtml(r.date)}</td><td>${escapeHtml(r.type)}</td><td style="text-align:left;white-space:normal;">${escapeHtml(r.desc)}</td></tr>`).join('')}</tbody></table>
+  <p class="help">Pour modifier ces événements, ouvrez le jour concerné dans le Carnet.</p>`;
+}
+function tcmPrecipEvapBody(m, dates, summary){
+  return `
+  <h3>Précipitations et évaporation (journalier)</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Durée 6-18h</th><th>Durée 0-24h</th><th>Durée 18h(veille)-6h</th><th>Hauteur 24h (mm)</th><th>Piché</th><th>Bac</th></tr></thead>
+    <tbody>
+      ${dates.map((dateStr,i)=>{
+        const rec = m.byDate[dateStr]; const ex = rec ? rec.extras : {};
+        const f=(k,w)=>`<td><input type="text" class="monthly-extra-input" data-m-date="${dateStr}" data-m-extra="${k}" value="${escapeAttr(ex[k])}" style="width:${w||44}px;"></td>`;
+        return `<tr><td class="rh">${i+1}</td>${f('duree6h18h')}${f('duree24h')}${f('duree18h6h')}${f('precipitation24h')}${f('evapPiche')}${f('evapBac')}</tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+  <div class="mini-grid">
+    <div><b>Total précipitations :</b> ${fmt(summary.precipTotal)} mm</div>
+    <div><b>Max 24h :</b> ${fmt(summary.precipMax)} mm — ${escapeHtml(summary.precipMaxDate||'—')}</div>
+    <div><b>Intensité remarquable :</b> ${fmt(m.intensiteRemarquable.value)} mm/h — ${m.intensiteRemarquable.date?`${escapeHtml(m.intensiteRemarquable.date)} à ${escapeHtml(m.intensiteRemarquable.hour)}TU`:'—'}</div>
+  </div>
+  <h3>Orages, grains et observations spéciales du mois</h3>
+  ${tcmMonthEventsList(dates, m)}`;
+}
+function tcmResumeBody(dates, m){
+  return `<table>
+    <thead><tr><th>Date</th><th style="text-align:left;">Résumé du temps (en clair)</th></tr></thead>
+    <tbody>
+      ${dates.map((dateStr,i)=>{
+        const rec = m.byDate[dateStr]; const val = rec ? (rec.extras.resumeTempsClair||'') : '';
+        return `<tr><td class="rh">${i+1}</td><td style="text-align:left;"><input type="text" class="monthly-extra-input" data-m-date="${dateStr}" data-m-extra="resumeTempsClair" value="${escapeAttr(val)}" style="width:100%;text-align:left;"></td></tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+function renderMensuelPaperView(m, station){
+  const year = state.mensuelYear, month = state.mensuelMonth;
+  const dim = daysInMonth(year, month);
+  const dates = Array.from({length:dim}, (_,i)=> `${year}-${pad2(month)}-${pad2(i+1)}`);
+  const summary = summarize(m);
+  const monthLabel = `${MONTH_NAMES[month-1]} ${year}`;
+  return `
+  <div class="paper-view">
+    <div class="paper-toolbar"><button class="btn" id="printPaperBtn">🖨️ Imprimer / PDF</button></div>
+    ${tcmPageWrap(station, monthLabel, 'Direction et vitesse du vent — par heure synoptique', tcmVentBody(m, dates, summary))}
+    ${tcmPageWrap(station, monthLabel, "Température de l'air sous abri et thermomètre mouillé", tcmTempBody(m, dates))}
+    ${tcmPageWrap(station, monthLabel, 'Tension de vapeur, humidité relative et pression atmosphérique', tcmTensionHumiditeBody(m, dates))}
+    ${tcmPageWrap(station, monthLabel, 'Nébulosité, insolation, température du sol et pression au niveau de la mer', tcmNebuloBody(m, dates))}
+    ${tcmPageWrap(station, monthLabel, 'Précipitations, évaporation et événements du mois', tcmPrecipEvapBody(m, dates, summary))}
+    ${tcmPageWrap(station, monthLabel, 'Résumé du temps en clair', tcmResumeBody(dates, m))}
+    <div class="paper-page" style="font-family:var(--font-sans);font-size:11px;">
+      <h3>Pas encore inclus dans cette vue</h3>
+      <p>Le message CLIMAT/CREX chiffré (transmission internationale) et le tableau synoptique horaire détaillé des précipitations sont des formats très spécialisés et sensibles à l'erreur — je préfère les traiter séparément, avec plus de vérifications, plutôt que de les improviser ici. Dites-moi si vous en avez besoin en priorité et on s'y attaque proprement.</p>
+    </div>
+  </div>`;
+}
+function renderScanBox(){
+  return `
+  <div class="card">
+    <h3>Scanner des photos du carnet</h3>
+    <div class="scan-drop" id="scanDrop">
+      <p>Glissez-déposez ou <label style="color:var(--sky);cursor:pointer;text-decoration:underline;">choisissez des photos<input type="file" id="scanInput" accept="image/*" multiple style="display:none;"></label> de toutes les pages du jour (Tour d'horizon, Nuages, Précip/Temp/Humidité, Pression, Agrométéo...).</p>
+      <div class="thumb-row" id="thumbRow"></div>
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <button class="btn brass" id="analyzeBtn" ${state.scanLoading?'disabled':''}>
+        ${state.scanLoading ? '<span class="spinner"></span> Analyse en cours…' : 'Analyser avec l\u2019IA'}
+      </button>
+      <button class="btn" id="clearScanBtn">Effacer les photos</button>
+    </div>
+    <p class="help">L'IA remplit toutes les rubriques ci-dessous à partir des photos. Vérifiez toujours les valeurs avant d'enregistrer.</p>
+  </div>`;
+}
+function renderCalendarStrip(station){
+  const [y,m] = state.carnetDate.split('-');
+  const dim = daysInMonth(parseInt(y), parseInt(m));
+  const saved = new Set(state.carnetSavedDays);
+  let pills = '';
+  for(let d=1; d<=dim; d++){
+    const dateStr = `${y}-${m}-${pad2(d)}`;
+    const isSaved = saved.has(dateStr);
+    const isCurrent = dateStr===state.carnetDate;
+    pills += `<span class="pill ${isSaved?'saved':'missing'}" data-jump="${dateStr}" style="${isCurrent?'box-shadow:0 0 0 2px var(--sky) inset;':''}">${d}</span>`;
+  }
+  return `<div style="margin-top:14px;"><div class="calendar-row">${pills}</div><p class="help">En vert : jours déjà enregistrés ce mois-ci pour ${escapeHtml(station.name)}.</p></div>`;
+}
+
+/* ---- Mensuel view ---- */
+function renderMensuelView(station){
+  const m = state.mensuelData;
+  return `
+  <div class="card">
+    <div class="row" style="justify-content:space-between;">
+      <div class="row">
+        <div class="field"><label>Station</label><input type="text" value="${escapeHtml(station.name)}" disabled style="width:150px;"></div>
+        <div class="field"><label>Mois</label>
+          <select id="mensuelMonth">${MONTH_NAMES.map((n,i)=>`<option value="${i+1}" ${i+1===state.mensuelMonth?'selected':''}>${n}</option>`).join('')}</select>
+        </div>
+        <div class="field"><label>Année</label><input type="number" id="mensuelYear" value="${state.mensuelYear}" style="width:90px;"></div>
+      </div>
+      <div class="row">
+        <button class="btn brass" id="genFromCarnetBtn" ${state.mensuelComputing?'disabled':''}>
+          ${state.mensuelComputing ? '<span class="spinner"></span> Génération…' : 'Générer / régénérer depuis le carnet'}
+        </button>
+        <button class="btn" id="genResumesBtn">Générer les résumés</button>
+        ${state.mensuelData ? `<button class="btn" id="toggleMensuelPaperBtn">${state.mensuelPaperView?'← Retour au tableau':'🖨️ Vue TCM papier'}</button>` : ''}
+        <button class="btn primary" id="saveMensuelBtn">Enregistrer</button>
+        <button class="btn" id="exportMensuelBtn">Exporter JSON</button>
+      </div>
+    </div>
+    <p class="help">« Générer depuis le carnet » relit les jours déjà numérisés — chaque cellule reste ensuite modifiable à la main.</p>
+  </div>
+  ${state.mensuelData && state.mensuelPaperView ? renderMensuelPaperView(state.mensuelData, station) :
+    (m ? renderMensuelBody(m, station) : `<div class="empty-state"><h3>Aucune donnée chargée</h3><p>Cliquez sur « Générer / régénérer depuis le carnet », ou commencez la saisie manuelle directement.</p></div>`)}
+  `;
+}
+function renderMensuelBody(m, station){
+  const summary = summarize(m);
+  const monthLabel = `${MONTH_NAMES[state.mensuelMonth-1]} ${state.mensuelYear}`;
+  const climat = buildClimatDraft(m, summary, station, state.mensuelYear, state.mensuelMonth);
+  return `
+  ${section('mRecap', 'Récapitulatif journalier', `
+    <div class="tbl-wrap">
+      <table class="grid">
+        <thead><tr>
+          <th>Jour</th><th>Tn °C</th><th>Tx °C</th><th>Moy °C</th><th>Hum.moy %</th><th>Ux %</th><th>Un %</th><th>Press.moy</th><th>Néb.moy</th>
+          <th>Précip mm</th><th>Durée h</th><th>Evap.Piche</th><th>Evap.Bac</th><th>Insol. h</th><th>Rayon.</th><th>Sol10</th><th>Sol20</th><th>V.max dir</th><th>V.max m/s</th><th>Résumé</th>
+        </tr></thead>
+        <tbody>
+          ${m.days.map((d,idx)=>{
+            const tn=toNum(d.Tn), tx=toNum(d.Tx);
+            const moy=(tn!==null&&tx!==null)?((tn+tx)/2).toFixed(1):'';
+            return `<tr>
+              <td class="rowhead">${idx+1}${d._hasCarnet?' <span title="jour issu du carnet" style="color:var(--ok);">●</span>':''}</td>
+              <td><input type="text" data-day="${idx}" data-dfield="Tn" value="${escapeAttr(d.Tn)}"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="Tx" value="${escapeAttr(d.Tx)}"></td>
+              <td>${moy}</td>
+              <td>${d._humMoy!==null&&d._humMoy!==undefined?d._humMoy.toFixed(0):''}</td>
+              <td><input type="text" data-day="${idx}" data-dfield="humiditeMaxJour" value="${escapeAttr(d.humiditeMaxJour)}" style="width:44px;"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="humiditeMinJour" value="${escapeAttr(d.humiditeMinJour)}" style="width:44px;"></td>
+              <td>${d._pressMoy!==null&&d._pressMoy!==undefined?d._pressMoy.toFixed(1):''}</td>
+              <td>${d._nebMoy!==null&&d._nebMoy!==undefined?d._nebMoy.toFixed(1):''}</td>
+              <td><input type="text" data-day="${idx}" data-dfield="precipitation24h" value="${escapeAttr(d.precipitation24h)}"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="dureePrecip" value="${escapeAttr(d.dureePrecip)}" style="width:50px;"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="evapPiche" value="${escapeAttr(d.evapPiche)}"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="evapBac" value="${escapeAttr(d.evapBac)}"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="insolationTotal" value="${escapeAttr(d.insolationTotal)}"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="rayonnementTotal" value="${escapeAttr(d.rayonnementTotal)}"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="sol10" value="${escapeAttr(d.sol10)}" style="width:50px;"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="sol20" value="${escapeAttr(d.sol20)}" style="width:50px;"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="ventMaxInstDir" value="${escapeAttr(d.ventMaxInstDir)}" style="width:44px;"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="ventMaxInstVit" value="${escapeAttr(d.ventMaxInstVit)}" style="width:44px;"></td>
+              <td><input type="text" data-day="${idx}" data-dfield="resumeTempsClair" value="${escapeAttr(d.resumeTempsClair)}" style="width:220px;text-align:left;font-family:var(--font-sans);"></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`)}
+
+  ${section('mExtremes', 'Extrêmes et totaux du mois', `
+    <div class="metric-grid">
+      <div class="metric"><div class="label">Moy. Tn / Tx</div><div class="value">${fmt(summary.moyTn)} / ${fmt(summary.moyTx)} °C</div><div class="sub">Amplitude ${fmt(summary.amplitude)} °C</div></div>
+      <div class="metric"><div class="label">Max absolu</div><div class="value">${fmt(summary.maxAbs)} °C</div><div class="sub">${summary.maxAbsDate||'—'}</div></div>
+      <div class="metric"><div class="label">Min absolu</div><div class="value">${fmt(summary.minAbs)} °C</div><div class="sub">${summary.minAbsDate||'—'}</div></div>
+      <div class="metric"><div class="label">Moy. quot. + basse</div><div class="value">${fmt(summary.moyBasse)} °C</div><div class="sub">${summary.moyBasseDate||'—'}</div></div>
+      <div class="metric"><div class="label">Moy. quot. + élevée</div><div class="value">${fmt(summary.moyHaute)} °C</div><div class="sub">${summary.moyHauteDate||'—'}</div></div>
+      <div class="metric"><div class="label">Ux max / Un min (jour)</div><div class="value">${fmt(summary.humMax,0)} / ${fmt(summary.humMin,0)} %</div><div class="sub">${summary.humMaxDate||'—'} / ${summary.humMinDate||'—'}</div></div>
+      <div class="metric"><div class="label">Précipitations totales</div><div class="value">${fmt(summary.precipTotal)} mm</div><div class="sub">≥0.1mm: ${summary.jGE01}j · ≥1mm: ${summary.jGE1}j · ≥10mm: ${summary.jGE10}j</div></div>
+      <div class="metric"><div class="label">Durée totale précip.</div><div class="value">${fmt(summary.dureePrecipTotal)} h</div></div>
+      <div class="metric"><div class="label">Max 24h</div><div class="value">${fmt(summary.precipMax)} mm</div><div class="sub">${summary.precipMaxDate||'—'}</div></div>
+      <div class="metric"><div class="label">Intensité remarquable</div><div class="value">${fmt(m.intensiteRemarquable.value)} mm/h</div><div class="sub">${m.intensiteRemarquable.date?`${m.intensiteRemarquable.date} à ${m.intensiteRemarquable.hour}TU`:'—'}</div></div>
+      <div class="metric"><div class="label">Évaporation Piché / Bac</div><div class="value">${fmt(summary.evapPicheTotal)} / ${fmt(summary.evapBacTotal)} mm</div></div>
+      <div class="metric"><div class="label">Insolation / Rayonnement</div><div class="value">${fmt(summary.insolTotal)} h / ${fmt(summary.rayonTotal)}</div></div>
+      <div class="metric"><div class="label">Vent max instantané</div><div class="value">${fmt(summary.ventMax)} m/s</div><div class="sub">${summary.ventMaxDir||'—'} · ${summary.ventMaxDate||'—'}</div></div>
+      <div class="metric"><div class="label">Pression moy. (station/mer)</div><div class="value">${fmt(m.hourly.pressionMoy)} / ${fmt(m.hourly.pressionMerMoy)} hPa</div></div>
+      <div class="metric"><div class="label">Nébulosité moy. / Tension vap. moy.</div><div class="value">${fmt(m.hourly.nebulositeMoy)} / ${fmt(m.hourly.tensionVapeurMoy)} hPa</div></div>
+      <div class="metric"><div class="label">Sol 10cm / 20cm moy.</div><div class="value">${fmt(summary.sol10Moy)} / ${fmt(summary.sol20Moy)} °C</div></div>
+      <div class="metric"><div class="label">Moy. à 06 / 12 / 18 TU</div><div class="value" style="font-size:14px;">${fmt(m.hourly.perHourTemp['06'])} / ${fmt(m.hourly.perHourTemp['12'])} / ${fmt(m.hourly.perHourTemp['18'])} °C</div></div>
+    </div>`)}
+
+  ${section('mPhenCounts', 'Jours avec phénomènes observés', `
+    <div class="tbl-wrap"><table class="grid"><thead><tr>${PHEN_CHECKS.map(p=>`<th>${p.label}</th>`).join('')}</tr></thead>
+    <tbody><tr>${PHEN_CHECKS.map(p=>`<td>${m.phenCounts[p.k]||0}</td>`).join('')}</tr></tbody></table></div>
+    <p class="help">Comptage à partir des cases cochées dans la section 15 du carnet, jour par jour.</p>`)}
+
+  ${section('mTempBins', 'Répartition des températures du mois', `
+    <div class="row" style="align-items:flex-start;">
+      <div style="flex:1;min-width:260px;"><h3 style="font-size:13px;margin-bottom:8px;">Tn (mini sous abri)</h3>
+        <div class="tbl-wrap"><table class="grid"><thead><tr>${tempBins(m.days,'Tn',[15,20,25,30]).map(b=>`<th>${b.label}</th>`).join('')}</tr></thead>
+        <tbody><tr>${tempBins(m.days,'Tn',[15,20,25,30]).map(b=>`<td>${b.count}</td>`).join('')}</tr></tbody></table></div>
+      </div>
+      <div style="flex:1;min-width:260px;"><h3 style="font-size:13px;margin-bottom:8px;">Tx (maxi sous abri)</h3>
+        <div class="tbl-wrap"><table class="grid"><thead><tr>${tempBins(m.days,'Tx',[30,35,40,45]).map(b=>`<th>${b.label}</th>`).join('')}</tr></thead>
+        <tbody><tr>${tempBins(m.days,'Tx',[30,35,40,45]).map(b=>`<td>${b.count}</td>`).join('')}</tr></tbody></table></div>
+      </div>
+    </div>`)}
+
+  ${section('mWind', 'Fréquence du vent (18 directions × vitesse, ' + m.windFreq.total + ' observations)', `
+    <div class="tbl-wrap"><table class="grid"><thead><tr><th>Vit. m/s</th>${DIRECTIONS_18.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr></thead>
+    <tbody>
+      ${m.windFreq.rows.map(sp=>{
+        const rowTotal = DIRECTIONS_18.reduce((a,d)=> a+(m.windFreq.table[d][sp]||0), 0);
+        return `<tr><td class="rowhead">${sp}</td>${DIRECTIONS_18.map(d=>`<td>${m.windFreq.table[d][sp]||0}</td>`).join('')}<td>${rowTotal}</td></tr>`;
+      }).join('')}
+      <tr class="total-row"><td>Calme</td><td colspan="${DIRECTIONS_18.length}">Nombre de calmes : ${m.windFreq.calme} · Vent &lt;1m/s : ${m.windFreq.under1} · Vent &lt;2m/s : ${m.windFreq.under2}</td><td>${m.windFreq.total}</td></tr>
+    </tbody></table></div>
+    <p class="help">Directions en dizaines de degrés (02 = 20°, 36 = 360°/Nord).</p>`)}
+
+  ${section('mClimat', 'Message CLIMAT — moyennes et brouillon de chiffrement', `
+    <div class="metric-grid" style="margin-bottom:14px;">
+      <div class="metric"><div class="label">Pression station moy.</div><div class="value">${fmt(climat.pressionStation)} hPa</div></div>
+      <div class="metric"><div class="label">Pression mer moy.</div><div class="value">${fmt(climat.pressionMer)} hPa</div></div>
+      <div class="metric"><div class="label">Température sous abri moy.</div><div class="value">${fmt(climat.tempAbri)} °C</div></div>
+      <div class="metric"><div class="label">Tension de vapeur moy.</div><div class="value">${fmt(climat.tension)} hPa</div></div>
+    </div>
+    <code class="mono-block">${escapeHtml(climat.text)}</code>
+    <p class="help">Le chiffrement CLIMAT/CREX complet (groupes numériques OMM) n'est pas généré automatiquement : il exige une vérification experte avant transmission officielle. Les moyennes ci-dessus servent de base de saisie dans votre outil de codage habituel.</p>`)}
+
+  ${section('mDominant', 'Caractères dominants du mois', `
+    <textarea class="wide" id="dominantText" style="min-height:90px;">${escapeHtml(m.dominantText || dominantParagraph(m, summary, station.name, monthLabel))}</textarea>
+    <p class="help">Texte généré automatiquement à partir des données saisies — modifiable librement.</p>`)}
+  `;
+}
+function fmt(v, dec){ if(v===null||v===undefined||isNaN(v)) return '—'; return v.toFixed(dec===undefined?1:dec); }
+function escapeHtml(s){ return (s===undefined||s===null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+/* ---------------- events ---------------- */
+function confirmDiscardIfDirty(){
+  if(!state.carnetDirty) return true;
+  return confirm('Des modifications de ce jour ne sont pas enregistrées. Les abandonner et continuer ?');
+}
+function bindEvents(){
+  const stationSelect = document.getElementById('stationSelect');
+  if(stationSelect) stationSelect.onchange = async (e)=>{
+    if(!confirmDiscardIfDirty()){ render(); return; }
+    state.currentStationId = e.target.value; await refreshForStation(); render();
+  };
+
+  const addBtns = document.querySelectorAll('#addStationBtn, #addStationBtnEmpty, #addStationBtn2');
+  addBtns.forEach(b=> b.onclick = openAddStation);
+
+  document.querySelectorAll('[data-tab]').forEach(t=> t.onclick = async ()=>{
+    state.view = t.dataset.tab;
+    if(state.view==='stations') state.archivedStations = await loadArchivedStations();
+    if(state.view==='utilisateurs') state.usersList = await loadUsers();
+    render();
+  });
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  if(logoutBtn) logoutBtn.onclick = logout;
+  const togglePaperViewBtn = document.getElementById('togglePaperViewBtn');
+  if(togglePaperViewBtn) togglePaperViewBtn.onclick = ()=>{ state.paperView = !state.paperView; render(); };
+  const toggleMensuelPaperBtn = document.getElementById('toggleMensuelPaperBtn');
+  if(toggleMensuelPaperBtn) toggleMensuelPaperBtn.onclick = ()=>{ state.mensuelPaperView = !state.mensuelPaperView; render(); };
+  async function patchMonthlyDay(date, mutateFn){
+    let rec = state.mensuelData.byDate[date];
+    if(!rec){ rec = emptyCarnet(state.currentStationId, date); state.mensuelData.byDate[date] = rec; }
+    mutateFn(rec);
+    const ok = await saveCarnetRecord(rec);
+    if(!ok){ toast('Échec de la sauvegarde — vérifiez la connexion.', true); return; }
+    const prevDominant = state.mensuelData.dominantText;
+    const records = await listCarnetForMonth(state.currentStationId, state.mensuelYear, state.mensuelMonth);
+    const computed = computeMonthly(records, state.mensuelYear, state.mensuelMonth, null);
+    computed.dominantText = prevDominant;
+    state.mensuelData = computed;
+    state.mensuelPaperView = true;
+    render();
+  }
+  document.querySelectorAll('.monthly-hour-input').forEach(inp=> inp.addEventListener('change', (e)=>{
+    const {mDate, mHour, mField} = e.target.dataset;
+    patchMonthlyDay(mDate, rec=>{ rec.hours[mHour][mField] = e.target.value; });
+  }));
+  document.querySelectorAll('.monthly-extra-input').forEach(inp=> inp.addEventListener('change', (e)=>{
+    const {mDate, mExtra} = e.target.dataset;
+    patchMonthlyDay(mDate, rec=>{ rec.extras[mExtra] = e.target.value; });
+  }));
+  const printPaperBtn = document.getElementById('printPaperBtn');
+  if(printPaperBtn) printPaperBtn.onclick = ()=> window.print();
+
+  const addUserBtn = document.getElementById('addUserBtn');
+  if(addUserBtn) addUserBtn.onclick = async ()=>{
+    const fullName = document.getElementById('newUserFullName').value.trim();
+    const username = document.getElementById('newUserUsername').value.trim();
+    const password = document.getElementById('newUserPassword').value;
+    const role = document.getElementById('newUserRole').value;
+    const stationId = document.getElementById('newUserStation').value;
+    if(!username || !password){ toast('Identifiant et mot de passe requis.', true); return; }
+    if(role==='observateur' && !stationId){ toast('Choisissez une station pour ce compte observateur.', true); return; }
+    const {ok, data} = await createUserApi({username, password, role, stationId, fullName});
+    if(ok){ toast('Compte créé.'); state.usersList = await loadUsers(); render(); }
+    else toast(data.error || 'Échec de la création.', true);
+  };
+  document.querySelectorAll('[data-del-user]').forEach(b=> b.onclick = async ()=>{
+    if(!confirm('Supprimer ce compte ?')) return;
+    const ok = await deleteUserApi(b.dataset.delUser);
+    if(ok){ toast('Compte supprimé.'); state.usersList = await loadUsers(); render(); }
+    else toast('Échec de la suppression.', true);
+  });
+
+  document.querySelectorAll('[data-archive-station]').forEach(b=> b.onclick = async ()=>{
+    if(!confirm('Archiver cette station ? Elle disparaît de la liste active mais rien n\u2019est supprimé — vous pourrez la réactiver.')) return;
+    const ok = await archiveStationApi(b.dataset.archiveStation);
+    if(ok){
+      state.stations = state.stations.filter(s=>s.id!==b.dataset.archiveStation);
+      if(state.currentStationId===b.dataset.archiveStation) state.currentStationId = state.stations[0]?.id || null;
+      state.archivedStations = await loadArchivedStations();
+      await refreshForStation();
+    } else toast('Échec de l\u2019archivage.', true);
+    render();
+  });
+  document.querySelectorAll('[data-restore-station]').forEach(b=> b.onclick = async ()=>{
+    const ok = await restoreStationApi(b.dataset.restoreStation);
+    if(ok){
+      state.stations = await loadStations();
+      state.archivedStations = await loadArchivedStations();
+      if(!state.currentStationId) state.currentStationId = state.stations[0]?.id || null;
+      await refreshForStation();
+      toast('Station réactivée.');
+    } else toast('Échec de la réactivation.', true);
+    render();
+  });
+
+  document.querySelectorAll('details.section').forEach(d=>{
+    d.addEventListener('toggle', ()=>{
+      const id = d.dataset.section;
+      if(d.open) state.openSections.add(id); else state.openSections.delete(id);
+    });
+  });
+
+  const carnetDateInput = document.getElementById('carnetDate');
+  if(carnetDateInput) carnetDateInput.onchange = async (e)=>{
+    if(!confirmDiscardIfDirty()){ render(); return; }
+    state.carnetDate = e.target.value; await loadCarnetForCurrent(); render();
+  };
+
+  document.querySelectorAll('[data-mode]').forEach(b=> b.onclick = ()=>{ state.carnetMode = b.dataset.mode; render(); });
+  document.querySelectorAll('[data-jump]').forEach(p=> p.onclick = async ()=>{
+    if(!confirmDiscardIfDirty()){ return; }
+    state.carnetDate = p.dataset.jump; await loadCarnetForCurrent(); render();
+  });
+
+  document.querySelectorAll('[data-hour]').forEach(inp=> inp.onchange = (e)=>{
+    const h = e.target.dataset.hour, f = e.target.dataset.field;
+    if(!f) return; // champs gérés séparément (ex: mini-champs du triplet N5C5h5)
+    state.carnetRecord.hours[h][f] = e.target.value;
+    state.carnetDirty = true; updateSaveIndicator();
+    if(f==='visibiliteDam' && !state.carnetRecord.hours[h].visibiliteCode){
+      const dam = toNum(e.target.value);
+      if(dam!==null){
+        const km = dam*10/1000;
+        const code = nearestVisibiliteCode(km);
+        if(code){
+          state.carnetRecord.hours[h].visibiliteCode = code;
+          patchHourInput(h, 'visibiliteCode', code);
+        }
+      }
+    }
+    if(f==='N' || f==='CL' || f==='CM' || f==='CH'){
+      state.carnetRecord.hours[h].groupeNhClCmCh = computeCloudGroup(state.carnetRecord.hours[h]);
+      patchHourInput(h, 'groupeNhClCmCh', state.carnetRecord.hours[h].groupeNhClCmCh);
+    }
+    if(f==='Tsec' || f==='Tw' || f==='humidite'){
+      const hourObj = state.carnetRecord.hours[h];
+      const changed = autoComputeHygro(hourObj, toNum(hourObj.pressionLue));
+      if(changed){
+        patchHourInput(h, 'tensionVapeur', hourObj.tensionVapeur);
+        patchHourInput(h, 'humidite', hourObj.humidite);
+        patchHourInput(h, 'pointRosee', hourObj.pointRosee);
+      }
+    }
+    if(f==='pressionLue' || f==='Tsec'){
+      const station = state.stations.find(s=>s.id===state.currentStationId);
+      const alt = station ? toNum(station.alt) : null;
+      const hourObj = state.carnetRecord.hours[h];
+      const pression = toNum(hourObj.pressionLue), tsec = toNum(hourObj.Tsec);
+      if(alt!==null && pression!==null && tsec!==null){
+        const mer = reducePressureToSeaLevel(pression, alt, tsec);
+        if(mer!==null){
+          hourObj.niveauMerPression = mer.toFixed(1);
+          patchHourInput(h, 'niveauMerPression', hourObj.niveauMerPression);
+        }
+      }
+    }
+  });
+  attachComboHints();
+  document.querySelectorAll('.triplet-part').forEach(inp=> inp.onchange = (e)=>{
+    const h = e.target.dataset.hour;
+    const field = e.target.dataset.tripletField;
+    const cell = e.target.closest('td.triplet-cell');
+    const n = cell.querySelector('[data-triplet-part="n"]').value;
+    const c = cell.querySelector('[data-triplet-part="c"]').value;
+    const hh = cell.querySelector('[data-triplet-part="h"]').value;
+    state.carnetRecord.hours[h][field] = composeTripletCode(n, c, hh);
+    state.carnetDirty = true; updateSaveIndicator();
+  });
+  function applyParsedCloudCodes(h, showFeedback){
+    const text = state.carnetRecord.hours[h].nuagesDesc || '';
+    const parsed = parseCloudCodesFromText(text);
+    if(!parsed.length){
+      if(showFeedback) toast('Aucune abréviation OMM reconnue dans ce texte — ex. "Cu con 3/8 600m".', true);
+      return;
+    }
+    let filled = 0;
+    parsed.forEach((sug, i)=>{
+      const field = `groupeNuages${i+1}`;
+      if((state.carnetRecord.hours[h][field]||'').trim()) return; // ne jamais écraser une saisie deja faite
+      state.carnetRecord.hours[h][field] = composeTripletCode(sug.n, sug.c, sug.h);
+      filled++;
+    });
+    if(filled){ state.carnetDirty = true; updateSaveIndicator(); render(); }
+    if(showFeedback) toast(filled ? `${filled} colonne(s) rempliee(s) à partir du texte.` : "Rien à faire : les colonnes concernées étaient déjà remplies.");
+  }
+  document.querySelectorAll('[data-suggest-clouds]').forEach(b=> b.onclick = ()=> applyParsedCloudCodes(b.dataset.suggestClouds, true));
+  document.querySelectorAll('.nuages-desc-input').forEach(inp=> inp.addEventListener('blur', ()=> applyParsedCloudCodes(inp.dataset.hour, false)));
+  document.querySelectorAll('[data-extra]').forEach(inp=> inp.onchange = (e)=>{
+    state.carnetRecord.extras[e.target.dataset.extra] = e.target.value;
+    state.carnetDirty = true; updateSaveIndicator();
+  });
+  document.querySelectorAll('[data-phen]').forEach(inp=> inp.onchange = (e)=>{
+    state.carnetRecord.extras[e.target.dataset.phen] = e.target.checked;
+    state.carnetDirty = true; updateSaveIndicator();
+  });
+  const phen = document.getElementById('phenomenesRemarquables');
+  if(phen) phen.onchange = (e)=>{ state.carnetRecord.extras.phenomenesRemarquables = e.target.value; state.carnetDirty = true; updateSaveIndicator(); };
+  const resumeInput = document.getElementById('resumeTempsClair');
+  if(resumeInput) resumeInput.onchange = (e)=>{ state.carnetRecord.extras.resumeTempsClair = e.target.value; state.carnetDirty = true; updateSaveIndicator(); };
+  const genDayResumeBtn = document.getElementById('genDayResumeBtn');
+  if(genDayResumeBtn) genDayResumeBtn.onclick = ()=>{ state.carnetRecord.extras.resumeTempsClair = dailyResume(state.carnetRecord); state.carnetDirty = true; render(); };
+
+  document.querySelectorAll('[data-add-event]').forEach(b=> b.onclick = ()=>{
+    const arr = b.dataset.addEvent;
+    const fields = arr==='grainsOrages' ? GRAIN_FIELDS : OBS_SPECIALE_FIELDS;
+    const obj = {id: uid()}; fields.forEach(f=> obj[f.k]='');
+    state.carnetRecord[arr].push(obj);
+    state.carnetDirty = true;
+    render();
+  });
+  document.querySelectorAll('[data-del-event]').forEach(b=> b.onclick = ()=>{
+    const arr = b.dataset.delArray; const idx = parseInt(b.dataset.delEvent);
+    state.carnetRecord[arr].splice(idx,1);
+    state.carnetDirty = true;
+    render();
+  });
+  document.querySelectorAll('[data-event-field]').forEach(inp=> inp.onchange = (e)=>{
+    const arr = e.target.dataset.eventArray; const idx = parseInt(e.target.dataset.eventIdx); const f = e.target.dataset.eventField;
+    state.carnetRecord[arr][idx][f] = e.target.value;
+    state.carnetDirty = true; updateSaveIndicator();
+  });
+
+  const saveCarnetBtn = document.getElementById('saveCarnetBtn');
+  if(saveCarnetBtn) saveCarnetBtn.onclick = async ()=>{
+    saveCarnetBtn.disabled = true; const prevLabel = saveCarnetBtn.textContent; saveCarnetBtn.innerHTML = '<span class="spinner"></span> Localisation…';
+    await saveCurrentDay('Jour enregistré.', 'day');
+    saveCarnetBtn.disabled = false; saveCarnetBtn.textContent = prevLabel;
+  };
+  const saveRapideBtn = document.getElementById('saveRapideBtn');
+  if(saveRapideBtn) saveRapideBtn.onclick = async ()=>{
+    saveRapideBtn.disabled = true; const prevLabel = saveRapideBtn.textContent; saveRapideBtn.innerHTML = '<span class="spinner"></span> Localisation…';
+    await saveCurrentDay(`${state.rapideHour}h enregistrée.`, 'hour');
+    saveRapideBtn.disabled = false; saveRapideBtn.textContent = prevLabel;
+  };
+
+  document.querySelectorAll('[data-jump-hour]').forEach(p=> p.onclick = ()=>{ state.rapideHour = p.dataset.jumpHour; render(); });
+  const toggleAdvancedBtn = document.getElementById('toggleAdvancedBtn');
+  if(toggleAdvancedBtn) toggleAdvancedBtn.onclick = ()=>{ state.rapideShowAdvanced = !state.rapideShowAdvanced; render(); };
+  const gotoCarnet = document.querySelector('[data-goto-carnet]');
+  if(gotoCarnet) gotoCarnet.onclick = (e)=>{ e.preventDefault(); state.view='carnet'; render(); };
+
+  const scanInput = document.getElementById('scanInput');
+  if(scanInput) scanInput.onchange = (e)=>{ state.scanFiles = state.scanFiles.concat(Array.from(e.target.files)); renderThumbs(); };
+  const scanDrop = document.getElementById('scanDrop');
+  if(scanDrop){
+    scanDrop.ondragover = (e)=>{ e.preventDefault(); scanDrop.classList.add('drag'); };
+    scanDrop.ondragleave = ()=> scanDrop.classList.remove('drag');
+    scanDrop.ondrop = (e)=>{ e.preventDefault(); scanDrop.classList.remove('drag'); state.scanFiles = state.scanFiles.concat(Array.from(e.dataTransfer.files)); renderThumbs(); };
+  }
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  if(analyzeBtn) analyzeBtn.onclick = analyzeScan;
+  const clearScanBtn = document.getElementById('clearScanBtn');
+  if(clearScanBtn) clearScanBtn.onclick = ()=>{ state.scanFiles=[]; renderThumbs(); };
+  renderThumbs();
+
+  const mMonth = document.getElementById('mensuelMonth');
+  if(mMonth) mMonth.onchange = async (e)=>{ state.mensuelMonth = parseInt(e.target.value); await loadMensuelForCurrent(); render(); };
+  const mYear = document.getElementById('mensuelYear');
+  if(mYear) mYear.onchange = async (e)=>{ state.mensuelYear = parseInt(e.target.value); await loadMensuelForCurrent(); render(); };
+
+  const genBtn = document.getElementById('genFromCarnetBtn');
+  if(genBtn) genBtn.onclick = async ()=>{
+    state.mensuelComputing = true; render();
+    const station = state.stations.find(s=>s.id===state.currentStationId);
+    const records = await listCarnetForMonth(station.id, state.mensuelYear, state.mensuelMonth);
+    const existing = {}; if(state.mensuelData) state.mensuelData.days.forEach(d=> existing[d.date]=d);
+    const computed = computeMonthly(records, state.mensuelYear, state.mensuelMonth, records.length? null : existing);
+    computed.dominantText = null;
+    state.mensuelData = computed;
+    state.mensuelComputing = false;
+    toast(`${records.length} jour(s) relu(s) depuis le carnet.`);
+    render();
+  };
+  const genResumesBtn = document.getElementById('genResumesBtn');
+  if(genResumesBtn) genResumesBtn.onclick = async ()=>{
+    if(!state.mensuelData) return;
+    const station = state.stations.find(s=>s.id===state.currentStationId);
+    const records = await listCarnetForMonth(station.id, state.mensuelYear, state.mensuelMonth);
+    const byDate = {}; records.forEach(r=> byDate[r.date]=r);
+    state.mensuelData.days.forEach(d=>{ if(byDate[d.date]) d.resumeTempsClair = dailyResume(byDate[d.date]); });
+    state.mensuelData.dominantText = null;
+    render();
+    toast('Résumés régénérés.');
+  };
+  document.querySelectorAll('[data-day]').forEach(inp=> inp.onchange = (e)=>{
+    state.mensuelData.days[parseInt(e.target.dataset.day)][e.target.dataset.dfield] = e.target.value;
+  });
+  const domText = document.getElementById('dominantText');
+  if(domText) domText.onchange = (e)=>{ state.mensuelData.dominantText = e.target.value; };
+
+  const saveMensuelBtn = document.getElementById('saveMensuelBtn');
+  if(saveMensuelBtn) saveMensuelBtn.onclick = async ()=>{
+    const station = state.stations.find(s=>s.id===state.currentStationId);
+    const payload = { stationId: station.id, year: state.mensuelYear, month: state.mensuelMonth, days: state.mensuelData.days, dominantText: state.mensuelData.dominantText };
+    const ok = await saveMensuel(payload);
+    toast(ok? 'Tableau mensuel enregistré.' : 'Échec de l\u2019enregistrement.', !ok);
+  };
+  const exportBtn = document.getElementById('exportMensuelBtn');
+  if(exportBtn) exportBtn.onclick = ()=>{
+    const station = state.stations.find(s=>s.id===state.currentStationId);
+    const summary = summarize(state.mensuelData);
+    const blob = new Blob([JSON.stringify({station: station.name, year: state.mensuelYear, month: state.mensuelMonth, days: state.mensuelData.days, summary}, null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `tableau-climatologique-${station.id}-${state.mensuelYear}-${pad2(state.mensuelMonth)}.json`;
+    a.click();
+  };
+
+  const draftName = document.getElementById('draftName');
+  if(draftName){ draftName.oninput = (e)=>{ state.stationDraft.name = e.target.value; }; draftName.focus(); }
+  const draftLat = document.getElementById('draftLat'); if(draftLat) draftLat.oninput = (e)=>{ state.stationDraft.lat = e.target.value; };
+  const draftLon = document.getElementById('draftLon'); if(draftLon) draftLon.oninput = (e)=>{ state.stationDraft.lon = e.target.value; };
+  const draftAlt = document.getElementById('draftAlt'); if(draftAlt) draftAlt.oninput = (e)=>{ state.stationDraft.alt = e.target.value; };
+  const cancelStationBtn = document.getElementById('cancelStationBtn'); if(cancelStationBtn) cancelStationBtn.onclick = closeStationModal;
+  const confirmStationBtn = document.getElementById('confirmStationBtn'); if(confirmStationBtn) confirmStationBtn.onclick = confirmAddStation;
+  const overlay = document.getElementById('stationModalOverlay');
+  if(overlay) overlay.onclick = (e)=>{ if(e.target===overlay) closeStationModal(); };
+
+  const exportBackupBtn = document.getElementById('exportBackupBtn');
+  if(exportBackupBtn) exportBackupBtn.onclick = exportFullBackup;
+  const importBackupInput = document.getElementById('importBackupInput');
+  if(importBackupInput) importBackupInput.onchange = (e)=>{ if(e.target.files[0]) importFullBackup(e.target.files[0]); };
+}
+function patchHourInput(hour, field, value){
+  const el = document.querySelector(`input[data-hour="${hour}"][data-field="${field}"]`);
+  if(el) el.value = value;
+}
+function attachComboHints(){
+  document.querySelectorAll('input[data-combo]').forEach(inp=>{
+    inp.addEventListener('focus', onComboFocusOrInput);
+    inp.addEventListener('input', onComboFocusOrInput);
+    inp.addEventListener('blur', onComboBlur);
+  });
+}
+function onComboFocusOrInput(e){
+  const inp = e.target;
+  const table = COMBO_TABLES[inp.dataset.combo];
+  const hint = document.getElementById('codeHint');
+  if(!hint || !table) return;
+  const v = inp.value.trim();
+  if(!v){ hint.style.display='none'; return; }
+  const match = table.find(([c])=> c.toLowerCase()===v.toLowerCase());
+  hint.textContent = match ? `${match[0]} — ${match[1]}` : `« ${v} » — code inconnu dans cette table`;
+  hint.classList.toggle('unknown', !match);
+  const rect = inp.getBoundingClientRect();
+  hint.style.left = Math.max(4, rect.left) + 'px';
+  hint.style.top = (rect.bottom + 6) + 'px';
+  hint.style.display = 'block';
+}
+function onComboBlur(){
+  setTimeout(()=>{ const hint = document.getElementById('codeHint'); if(hint) hint.style.display='none'; }, 120);
+}
+function renderThumbs(){
+  const row = document.getElementById('thumbRow'); if(!row) return;
+  row.innerHTML = state.scanFiles.map((f,i)=>`<div style="position:relative;"><img class="thumb" src="${URL.createObjectURL(f)}"><button class="small-x" data-rmthumb="${i}" style="position:absolute;top:-6px;right:-6px;background:#fff;border-radius:50%;">✕</button></div>`).join('');
+  row.querySelectorAll('[data-rmthumb]').forEach(b=> b.onclick = ()=>{ state.scanFiles.splice(parseInt(b.dataset.rmthumb),1); renderThumbs(); });
+}
+
+/* ---------------- station modal ---------------- */
+function openAddStation(){
+  state.stationDraft = {name:'', lat:'', lon:'', alt:''};
+  state.stationModalOpen = true;
+  render();
+}
+function closeStationModal(){ state.stationModalOpen = false; render(); }
+async function confirmAddStation(){
+  const d = state.stationDraft;
+  if(!d.name.trim()){ toast('Le nom de la station est requis.', true); return; }
+  const id = d.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') + '-' + Date.now().toString(36).slice(-4);
+  const st = {id, name: d.name.trim(), lat: d.lat.trim(), lon: d.lon.trim(), alt: d.alt.trim()};
+  const ok = await addStationApi(st);
+  if(!ok){ toast('Échec de la création — vérifiez que le serveur et la base de données sont bien démarrés.', true); return; }
+  state.stations.push(st);
+  state.currentStationId = id;
+  state.stationModalOpen = false;
+  await refreshForStation();
+  render();
+}
+function renderStationModal(){
+  const d = state.stationDraft;
+  return `
+  <div class="modal-overlay" id="stationModalOverlay">
+    <div class="modal-card">
+      <h3>Nouvelle station</h3>
+      <div class="field"><label>Nom</label><input type="text" id="draftName" value="${escapeAttr(d.name)}" placeholder="Sotuba, Sikasso..." style="font-family:var(--font-sans);"></div>
+      <div class="field"><label>Latitude</label><input type="text" id="draftLat" value="${escapeAttr(d.lat)}" placeholder="12°39'N"></div>
+      <div class="field"><label>Longitude</label><input type="text" id="draftLon" value="${escapeAttr(d.lon)}" placeholder="7°56'W"></div>
+      <div class="field"><label>Altitude (m)</label><input type="text" id="draftAlt" value="${escapeAttr(d.alt)}" placeholder="381"></div>
+      <div class="modal-actions">
+        <button class="btn" id="cancelStationBtn">Annuler</button>
+        <button class="btn primary" id="confirmStationBtn">Ajouter la station</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- load flows ---------------- */
+async function loadCarnetForCurrent(){
+  const station = state.stations.find(s=>s.id===state.currentStationId);
+  if(!station) return;
+  const existing = await loadCarnet(station.id, state.carnetDate);
+  state.carnetRecord = existing ? withDefaults(existing, station.id, state.carnetDate) : emptyCarnet(station.id, state.carnetDate);
+  state.carnetDirty = false;
+  state.carnetLastSaved = null;
+  const [y,m] = state.carnetDate.split('-');
+  const records = await listCarnetForMonth(station.id, parseInt(y), parseInt(m));
+  state.carnetSavedDays = records.map(r=>r.date);
+}
+async function loadMensuelForCurrent(){
+  const station = state.stations.find(s=>s.id===state.currentStationId);
+  if(!station) return;
+  const saved = await loadMensuel(station.id, state.mensuelYear, state.mensuelMonth);
+  if(saved){
+    const records = await listCarnetForMonth(station.id, state.mensuelYear, state.mensuelMonth);
+    const byDate = {}; records.forEach(r=> byDate[r.date]=r);
+    const days = saved.days.map(d=>({...emptyDayAgg(d.date), ...d, _hasCarnet: !!byDate[d.date]}));
+    days.forEach(d=>{ const dm = dayMeans(byDate[d.date]||null); d._humMoy=dm.humMoy; d._pressMoy=dm.pressMoy; d._nebMoy=dm.nebMoy; });
+    state.mensuelData = { days, byDate, hourly: computeHourlyMeans(records), windFreq: computeWindFreq18(records), phenCounts: countPhenDays(records, byDate), intensiteRemarquable: computeIntensiteRemarquable(records), dominantText: saved.dominantText };
+  } else {
+    state.mensuelData = null;
+  }
+}
+async function refreshForStation(){
+  await loadCarnetForCurrent();
+  await loadMensuelForCurrent();
+}
+
+/* ---------------- full backup / restore ---------------- */
+async function exportFullBackup(){
+  state.backupBusy = true; render();
+  try{
+    const backup = {exportedAt: new Date().toISOString(), stations: state.stations, data: {}};
+    for(const st of state.stations){
+      const carnetRecords = await listCarnetAll(st.id);
+      const mensuelRecords = await listMensuelAll(st.id);
+      backup.data[st.id] = {carnet: carnetRecords, mensuel: mensuelRecords};
+    }
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `meteocarnet-sauvegarde-complete-${todayStr()}.json`;
+    a.click();
+    toast('Sauvegarde complète téléchargée.');
+  }catch(e){
+    console.error(e); toast('Échec de la sauvegarde complète.', true);
+  }
+  state.backupBusy = false; render();
+}
+async function importFullBackup(file){
+  try{
+    const text = await file.text();
+    const backup = JSON.parse(text);
+    if(!backup || !backup.data){ toast('Fichier de sauvegarde invalide.', true); return; }
+    if(!confirm('Restaurer cette sauvegarde va réécrire les jours et tableaux mensuels portant les mêmes identifiants (le reste est conservé). Continuer ?')) return;
+    const existingIds = new Set(state.stations.map(s=>s.id));
+    for(const s of (backup.stations||[])){
+      if(!existingIds.has(s.id)){ await addStationApi(s); state.stations.push(s); existingIds.add(s.id); }
+    }
+    for(const stId in backup.data){
+      const d = backup.data[stId];
+      for(const rec of (d.carnet||[])){
+        await apiFetch(`/api/carnet/${encodeURIComponent(stId)}/${rec.date}`, {
+          method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({hours: rec.hours, extras: rec.extras, grainsOrages: rec.grainsOrages, observationsSpeciales: rec.observationsSpeciales})
+        });
+      }
+      for(const rec of (d.mensuel||[])){
+        await apiFetch(`/api/mensuel/${encodeURIComponent(stId)}/${rec.year}/${rec.month}`, {
+          method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({days: rec.days, dominantText: rec.dominantText})
+        });
+      }
+    }
+    toast('Sauvegarde restaurée.');
+    await refreshForStation();
+    render();
+  }catch(e){
+    console.error(e); toast('Fichier de sauvegarde invalide ou illisible.', true);
+  }
+}
+
+/* ---------------- boot ---------------- */
+window.addEventListener('beforeunload', (e)=>{
+  if(state.carnetDirty){ e.preventDefault(); e.returnValue = ''; return ''; }
+});
+async function bootAfterLogin(){
+  document.getElementById('datalists').innerHTML = renderDatalists();
+  state.stations = await loadStations();
+  state.archivedStations = await loadArchivedStations();
+  if(state.stations.length) state.currentStationId = state.stations[0].id;
+  await refreshForStation();
+  render();
+}
+(async function init(){
+  try{
+    const r = await fetch('/api/auth/me');
+    if(r.ok){
+      state.currentUser = await r.json();
+      await bootAfterLogin();
+      return;
+    }
+  }catch(e){}
+  render();
+})();
+</script>
+</body>
+</html>
