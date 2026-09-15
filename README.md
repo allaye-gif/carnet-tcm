@@ -98,6 +98,45 @@ Si PostgreSQL tourne sur ce même serveur, `install-service.bat` affiche une com
 optionnelle pour faire dépendre le service de celui de PostgreSQL, afin qu'il démarre
 toujours après lui au redémarrage.
 
+## 4 bis. Comment saisir — les conventions du carnet papier
+
+L'application se remplit **exactement comme le carnet papier**, sans conversion mentale.
+
+**Les colonnes en 1/10 s'écrivent sans virgule.** Vous lisez `210` sur le thermomètre,
+vous tapez `210` : l'application comprend 21,0 °C. De même `083` pour 8,3 mb et `10132`
+pour 1013,2 mb. Une virgule reste acceptée si vous préférez (`21,0` marche aussi).
+Passez la souris sur une case pour voir la valeur réelle.
+
+Sont concernés : T sec, T mouillé, tension de vapeur, point de rosée, thermomètre et
+hygromètre enregistreurs, toutes les pressions, les températures du sol, les
+températures extrêmes, l'évaporation et l'insolation. En revanche **l'humidité relative
+reste un pourcentage entier** : pour 35 %, tapez `35`.
+
+**Les heures s'écrivent en TU sur 24 heures**, au format `HH:MM`. Tapez au plus court :
+`6` devient `06:00`, `0630` et `6h30` deviennent `06:30`.
+
+**Ce que l'application calcule toute seule** — n'y touchez pas, les cases grisées se
+remplissent d'elles-mêmes :
+
+| Calculé | À partir de |
+|---|---|
+| Différence du Piché (06 et 18 TU) | lecture − lecture précédente |
+| Total Piché du jour | somme des deux relevés |
+| Différence D du bac classe A | h1 − h2 |
+| Évaporation du bac | D + nouvelle lecture (appoint) |
+| Tn et Tx du jour | le plus bas des mini et le plus haut des maxi des 4 relevés |
+| Insolation totale | matin + soir |
+| Précipitations et durée sur 24 h | (18h→6h) + (6h→18h) |
+| Humidité, tension de vapeur, point de rosée | T sec + T mouillé (formule OMM) |
+| Durée d'un phénomène | heure de fin − heure de début |
+
+**Début et fin des phénomènes.** Chaque observation spéciale se note par son heure de
+début et son heure de fin. La durée s'affiche sous la fiche, en heures et dans
+l'écriture du carnet pour la colonne 80. Un phénomène qui commence avant minuit et se
+termine après est géré automatiquement : saisissez simplement l'heure réelle de fin
+(début 23:40, fin 01:15 donne 1 h 35 min). Tant que la fin n'est pas renseignée, le
+phénomène est signalé « en cours ».
+
 ## 5. Connexion et comptes utilisateurs
 
 L'application demande désormais une connexion. Au tout premier démarrage, un compte
