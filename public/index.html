@@ -167,6 +167,11 @@ table.grid tr.sous-titre td{background:var(--sky-pale);color:var(--sky-deep);fon
 table.grid td.ligne-vide{color:var(--ink-soft);font-family:var(--font-sans);font-style:italic;padding:10px;}
 table.grid th.col-vide, table.grid td.col-vide{background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,.05) 4px,rgba(0,0,0,.05) 8px);}
 table.grid th.col-action, table.grid td.col-action{width:34px;background:var(--surface-2);}
+/* Colonnes ajoutées par l'application, absentes du carnet papier : un fond
+   différent pour que l'observateur ne les confonde jamais avec le formulaire. */
+table.grid th.hors-carnet{background:var(--brass-pale,#fdf6e3);color:#7a5c12;}
+table.grid td.hors-carnet{background:rgba(176,141,63,.07);}
+table.grid td.duree-cell{font-family:var(--font-sans);font-size:11px;line-height:1.35;white-space:nowrap;}
 /* Grille libre des observations supplémentaires : des cases, pas de colonnes nommées. */
 table.grid.grille-libre td{height:26px;padding:0;}
 table.grid.grille-libre td input{text-align:left;padding-left:5px;font-family:var(--font-sans);font-size:12px;}
@@ -239,8 +244,18 @@ const EVAP_HOURS = ['06','18'];
 const SOIL_DEPTHS = ['10','20','50','100'];
 // Les trois lignes des blocs insolation et rayonnement (colonnes 91 à 95).
 const INSOL_ROWS = [['matin','Matin'],['soir','Soir'],['total','Total quotidien']];
-// Observations supplémentaires : grille libre du carnet (page 2), sans intitulés.
-const OBS_SUP_LIGNES = 8, OBS_SUP_COLONNES = 8;
+// Le carnet porte DEUX grilles « Observations supplémentaires » : une en bas de la
+// page 1 (sous le tour d'horizon) et une en bas de la page 2 (sous les nuages).
+// Ni intitulé ni numéro de colonne imprimé. Dimensions relevées sur les photos du
+// carnet — une seule valeur à corriger ici si le tirage diffère.
+const OBS_SUP_GRILLES = {
+  p1: { lignes: 10, colonnes: 11 },
+  p2: { lignes: 8,  colonnes: 8  }
+};
+// Observations spéciales (bas de la page 2) : colonnes 38 à 43 du carnet.
+// 38 = heure de l'observation, 39 = large colonne d'observation, 40 à 43 = colonnes
+// étroites dont l'intitulé imprimé n'est pas lisible sur la photo fournie.
+const OBS_SPEC_COLONNES_LIBRES = ['40','41','42','43'];
 
 /* ---- Tables de codes officielles OMM (traductions françaises) ---- */
 const WW_CODES = [
@@ -584,11 +599,15 @@ const GRAIN_FIELDS = [
    alimente la colonne 80 « durée des précipitations ». */
 const INTENSITES = ['Faible','Modérée','Forte'];
 const OBS_SPECIALE_FIELDS = [
+  // Colonnes imprimées sur le carnet (38 à 43)
+  {k:'heureDebut',  label:'Heure de l’observation (38)', type:'time'},
+  {k:'description', label:'Observation (39)'},
+  {k:'col40', label:'Colonne 40'}, {k:'col41', label:'Colonne 41'},
+  {k:'col42', label:'Colonne 42'}, {k:'col43', label:'Colonne 43'},
+  // Aide de l'application, absente du carnet papier
+  {k:'heureFin',    label:'Heure de fin',   type:'time'},
   {k:'phenomene',   label:'Phénomène', combo:'ww'},
-  {k:'intensite',   label:'Intensité', type:'select', options:INTENSITES},
-  {k:'heureDebut',  label:'Début (TU)', type:'time'},
-  {k:'heureFin',    label:'Fin (TU)',   type:'time'},
-  {k:'description', label:'Observation'}
+  {k:'intensite',   label:'Intensité', type:'select', options:INTENSITES}
 ];
 /** Ancien format {heure, description} -> nouveau format début/fin, sans rien perdre. */
 function migrateObsSpeciale(ev){
@@ -602,6 +621,7 @@ function migrateObsSpeciale(ev){
   if(o.phenomene===undefined)   o.phenomene = '';
   if(o.intensite===undefined)   o.intensite = '';
   if(o.description===undefined) o.description = '';
+  OBS_SPEC_COLONNES_LIBRES.forEach(n=>{ if(o['col'+n]===undefined) o['col'+n]=''; });
   return o;
 }
 /** Accepte « 6 », « 06 », « 0630 », « 6h30 », « 06:30 » -> « 06:30 ». */
@@ -959,8 +979,10 @@ function emptyExtras(){
   // Rayonnement : colonnes 94 (global) et 95, laissée sans intitulé sur le carnet.
   INSOL_ROWS.forEach(([k])=>{ e[`rayonGlobal_${k}`]=''; e[`rayonCol95_${k}`]=''; });
   // Observations supplémentaires : grille libre du carnet, sans intitulé de colonne.
-  for(let l=0; l<OBS_SUP_LIGNES; l++)
-    for(let c=0; c<OBS_SUP_COLONNES; c++) e[`obsSup_${l}_${c}`]='';
+  Object.entries(OBS_SUP_GRILLES).forEach(([page, g])=>{
+    for(let l=0; l<g.lignes; l++)
+      for(let c=0; c<g.colonnes; c++) e[`obsSup${page}_${l}_${c}`]='';
+  });
   return e;
 }
 
@@ -1397,7 +1419,7 @@ Structure attendue :
  "date": "AAAA-MM-JJ ou null",
  "hours": { "HH": { ...champs ci-dessous... }, ... },
  "grainsOrages": [ { "heureCrochet":"","dirApparitionCb":"","coupVentDirAvant":"","coupVentDirLettres":"","coupVentVitMax":"","dirVentApres":"","dirDisparitionCb":"","baroVariation":"","baroValeurFinale":"","hygroVariation":"","hygroValeurFinale":"","thermoVariation":"","thermoValeurFinale":"","diametreGrelons":"","signes":"" } ],
- "observationsSpeciales": [ { "phenomene":"", "intensite":"", "heureDebut":"", "heureFin":"", "description":"" } ],
+ "observationsSpeciales": [ { "heureDebut":"", "description":"", "col40":"", "col41":"", "col42":"", "col43":"", "heureFin":"", "phenomene":"", "intensite":"" } ],
  "extras": { ...champs ci-dessous... }
 }
 
@@ -1405,6 +1427,9 @@ IMPORTANT : n'inclus dans "hours" QUE les heures (format "00".."23") où au moin
 
 UNITÉS — le carnet papier écrit les colonnes « 1/10 » SANS virgule (« 210 » = 21,0 °C, « 042 » = 4,2 mb). Dans le JSON, renvoie la VALEUR RÉELLE avec le point décimal : lis « 210 » sur la photo et écris 21.0, lis « 083 » et écris 8.3. Les colonnes concernées sont Tsec, Tw, tensionVapeur, pointRosee, thermoEnregT, mesuresIntermediaires, toutes les pressions, les températures du sol, les extrêmes, l'évaporation et l'insolation. En revanche humidite et hygroEnregU sont déjà des pourcentages entiers : recopie-les tels quels.
 Les heures se renvoient au format "HH:MM" (ex. "06:00").
+
+Bloc « OBSERVATIONS SPECIALES » (bas de la page 2, colonnes 38 à 43) : une entrée par ligne remplie, avec heureDebut = colonne 38 (heure de l'observation), description = colonne 39, puis col40 à col43 pour les quatre colonnes étroites. heureFin, phenomene et intensite ne figurent PAS sur le papier : laisse-les vides.
+Bloc « OBSERVATIONS SUPPLEMENTAIRES » : grilles libres sans intitulé, en bas des pages 1 et 2. Recopie chaque case non vide dans "extras" sous la clé obsSupp1_LIGNE_COLONNE (page 1) ou obsSupp2_LIGNE_COLONNE (page 2), lignes et colonnes numérotées à partir de 0.
 
 Champs de chaque heure (laisser "" si illisible) :
 ventDirLettres (N/NE/E/SE/S/SW/W/NW/Calme), ventVitMs, ventDirDizaines (dizaines de degrés, ex "04"), ventVitNoeuds, visibiliteDam, visibiliteCode, phenomenes (texte), tempsPresent (code W), tempsPasse (code W1/2), CL, CM, CH, N (nébulosité octas 0-8, 9=obscurci), nuagesDesc (hauteur/genre/espèce/secteur, texte libre), groupeNuages1..4 (codes N5C5h5 si présents), intensitePrecip (mm/h), mesuresIntermediaires, Tsec (°C), Tw (°C), humidite (%), tensionVapeur (mb), pointRosee (°C), thermoEnregT, hygroEnregU, pressionEnregLue, reperesMinutes, tempBarometre, pressionLue (mb), pressionReduite0, tempMoyT12, niveauMerPression (mb), evolution24h, initialesObs.
@@ -2126,13 +2151,60 @@ function grainsTable(rec){
   <button class="btn sm" data-add-event="grainsOrages" style="margin-top:8px;">+ Ajouter une ligne</button>`;
 }
 /* Observations supplémentaires — grille libre du carnet, sans intitulé de colonne. */
-function obsSupTable(rec){
+function obsSupTable(rec, page){
+  const g = OBS_SUP_GRILLES[page] || OBS_SUP_GRILLES.p1;
   return `<div class="tbl-wrap"><table class="grid grille-libre">
     <tbody>
-      ${Array.from({length:OBS_SUP_LIGNES}, (_,l)=>`<tr>
-        ${Array.from({length:OBS_SUP_COLONNES}, (_,c)=>`<td>${extraFieldBare(`obsSup_${l}_${c}`, rec)}</td>`).join('')}
+      ${Array.from({length:g.lignes}, (_,l)=>`<tr>
+        ${Array.from({length:g.colonnes}, (_,c)=>`<td>${extraFieldBare(`obsSup${page}_${l}_${c}`, rec)}</td>`).join('')}
       </tr>`).join('')}
     </tbody></table></div>`;
+}
+/* Observations spéciales — bas de la page 2, colonnes 38 à 43 du carnet.
+   Les quatre dernières colonnes du tableau (fin, durée, phénomène, intensité) ne
+   figurent PAS sur le papier : c'est l'aide de l'application, séparée visuellement
+   du carnet, qui permet de chronométrer un phénomène et d'obtenir sa durée. */
+function obsSpecialesTable(rec){
+  const lignes = rec.observationsSpeciales || [];
+  const champ = (f, ev, idx)=> eventFieldInput(f, ev, idx, 'observationsSpeciales');
+  const cellule = (cle, ev, idx, type, opts)=>
+    champ({k:cle, type, options:opts, combo: cle==='phenomene' ? 'ww' : undefined}, ev, idx);
+  return `<div class="tbl-wrap"><table class="grid">
+    <thead>
+      <tr>
+        <th rowspan="2">Heure de<br>l'observation<span class="colnum">38</span></th>
+        <th rowspan="2" style="min-width:220px;">Observation<span class="colnum">39</span></th>
+        ${OBS_SPEC_COLONNES_LIBRES.map(n=>`<th rowspan="2" title="Colonne ${n} du carnet : intitulé non lisible sur la photo fournie">—<span class="colnum">${n}</span></th>`).join('')}
+        <th colspan="4" class="hors-carnet">Aide de l'application <span class="th-sous">(ne figure pas sur le carnet)</span></th>
+        <th rowspan="2" class="col-action"></th>
+      </tr>
+      <tr>
+        <th class="hors-carnet">Heure de fin</th>
+        <th class="hors-carnet">Durée</th>
+        <th class="hors-carnet">Phénomène (code OMM)</th>
+        <th class="hors-carnet">Intensité</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${lignes.length ? lignes.map((ev,idx)=>{
+        const d = phenDuration(ev.heureDebut, ev.heureFin);
+        const duree = d
+          ? `${escapeHtml(d.label)}<br><span class="tenths-hint">${escapeHtml(d.carnet)} en 1/10 h${d.apresMinuit?' · après 00 TU':''}</span>`
+          : (String(ev.heureDebut||'').trim() ? '<span class="tenths-hint">en cours</span>' : '');
+        return `<tr>
+          <td>${cellule('heureDebut', ev, idx, 'time')}</td>
+          <td>${cellule('description', ev, idx)}</td>
+          ${OBS_SPEC_COLONNES_LIBRES.map(n=>`<td>${cellule('col'+n, ev, idx)}</td>`).join('')}
+          <td class="hors-carnet">${cellule('heureFin', ev, idx, 'time')}</td>
+          <td class="hors-carnet calc-cell duree-cell">${duree}</td>
+          <td class="hors-carnet">${cellule('phenomene', ev, idx)}</td>
+          <td class="hors-carnet">${cellule('intensite', ev, idx, 'select', INTENSITES)}</td>
+          <td class="col-action"><button class="small-x" data-del-event="${idx}" data-del-array="observationsSpeciales" title="Supprimer cette ligne">✕</button></td>
+        </tr>`;
+      }).join('')
+      : `<tr><td colspan="${3+OBS_SPEC_COLONNES_LIBRES.length+4}" class="ligne-vide">Aucune observation spéciale ce jour.</td></tr>`}
+    </tbody></table></div>
+  <button class="btn sm" data-add-event="observationsSpeciales" style="margin-top:8px;">+ Ajouter une ligne</button>`;
 }
 /* Case d'heure. Volontairement en saisie texte et non en <input type="time"> :
    ce dernier affiche l'heure au format du NAVIGATEUR (un Chrome en anglais écrit
@@ -2344,12 +2416,15 @@ function renderCarnetBody(rec){
     <p class="help">Une ligne par événement, avec les colonnes du carnet : heure du crochet au baromètre, directions du Cb et du vent, coup de vent, puis les crochets relevés sur le baromètre, l'hygromètre et le thermomètre.</p>
     ${grainsTable(rec)}`, rec.grainsOrages.length||'')}
 
-  ${section('obsSup', '3 bis. Observations supplémentaires (grille libre du carnet)', `
-    <p class="help">La grille libre du carnet, sans intitulé de colonne : notez-y ce qui n'entre dans aucune autre case.</p>
-    ${obsSupTable(rec)}`)}
-  ${section('obsSpeciales', '4. Observations spéciales — début et fin des phénomènes',
-    `<p class="help">Chaque phénomène se note par son <b>heure de début</b> et son <b>heure de fin</b> en TU. La durée se calcule toute seule, y compris quand le phénomène franchit minuit, et se convertit en 1/10 h pour la colonne 80 du carnet.</p>
-     ${renderEventList(rec.observationsSpeciales, OBS_SPECIALE_FIELDS, 'observationsSpeciales', '+ Ajouter un phénomène')}
+  ${section('obsSupP1', '3 bis. Observations supplémentaires — bas de la page 1', `
+    <p class="help">Grille libre du carnet, sans intitulé ni numéro de colonne : notez-y ce qui n'entre dans aucune autre case.</p>
+    ${obsSupTable(rec, 'p1')}`)}
+  ${section('obsSupP2', '3 ter. Observations supplémentaires — bas de la page 2', `
+    <p class="help">La seconde grille libre du carnet, sous le tableau des nuages.</p>
+    ${obsSupTable(rec, 'p2')}`)}
+  ${section('obsSpeciales', '4. Observations spéciales (colonnes 38 à 43)',
+    `<p class="help">Les colonnes 38 à 43 sont celles du carnet. Les quatre dernières, sur fond distinct, <b>ne figurent pas sur le papier</b> : c'est l'aide de l'application. Renseignez une <b>heure de fin</b> et la durée se calcule toute seule, y compris quand le phénomène franchit minuit, et se convertit en 1/10 h pour la colonne 80.</p>
+     ${obsSpecialesTable(rec)}
      <div id="obsDureeRecap">${renderDureeRecap(rec.observationsSpeciales)}</div>`,
     rec.observationsSpeciales.length||'')}
   ${section('precipTemp', '5. Précipitations, température et humidité', hourTable(rec, FIELDS_PRECIP_TEMP, 'Tension de vapeur, humidité et point de rosée se calculent automatiquement dès que T sec + T mouillé sont renseignés (ou T sec + humidité si vous utilisez un hygromètre direct) — formule OMM (Guide CIMO N°8, vérifiée contre l\u2019exemple officiel). Suppose un psychromètre ventilé ; un abri non ventilé peut donner une humidité réelle légèrement supérieure (~2-3%).'))}
@@ -2475,6 +2550,8 @@ function paperPage1(rec, station){
     ${paperHeader(rec, station, 1)}
     <h3>Tour d'horizon</h3>
     ${paperHourTable(rec, fields, head)}
+    <h3>Observations supplémentaires</h3>
+    ${obsSupTable(rec, 'p1')}
     <h3>Grains, orages, grêles</h3>
     ${grainsTable(rec)}
   </div>`;
@@ -2488,9 +2565,9 @@ function paperPage2(rec, station){
     <h3>Nuages — hauteur, genre, espèce, secteur / groupes significatifs</h3>
     ${paperHourTable(rec, fields, head)}
     <h3>Observations supplémentaires</h3>
-    ${obsSupTable(rec)}
-    <h3>Observations spéciales — début et fin des phénomènes</h3>
-    ${renderEventList(rec.observationsSpeciales, OBS_SPECIALE_FIELDS, 'observationsSpeciales', '+ Ajouter un phénomène')}
+    ${obsSupTable(rec, 'p2')}
+    <h3>Observations spéciales</h3>
+    ${obsSpecialesTable(rec)}
   </div>`;
 }
 function paperPage3(rec, station){
@@ -3143,8 +3220,16 @@ function bindEvents(){
       ev[f] = e.target.value;
     }
     state.carnetDirty = true; updateSaveIndicator();
-    // Met à jour la durée affichée sous la fiche, sans reconstruire toute la page.
+    // Met à jour la durée affichée dans la ligne, sans reconstruire toute la page.
     if(arr==='observationsSpeciales' && (f==='heureDebut' || f==='heureFin')){
+      const ligne = e.target.closest('tr');
+      const cellule = ligne && ligne.querySelector('.duree-cell');
+      if(cellule){
+        const d = phenDuration(ev.heureDebut, ev.heureFin);
+        cellule.innerHTML = d
+          ? `${escapeHtml(d.label)}<br><span class="tenths-hint">${escapeHtml(d.carnet)} en 1/10 h${d.apresMinuit?' · après 00 TU':''}</span>`
+          : (String(ev.heureDebut||'').trim() ? '<span class="tenths-hint">en cours</span>' : '');
+      }
       const carte = e.target.closest('.event-card');
       const note = carte && carte.querySelector('.event-note');
       if(note) note.outerHTML = eventDurationNote(ev);

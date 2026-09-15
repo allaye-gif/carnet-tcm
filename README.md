@@ -140,6 +140,7 @@ remplissent d'elles-mêmes :
 | Tour d'horizon | 2 à 14 |
 | Nuages | 15 à 20 |
 | Grains, orages, grêles | 23 à 37 |
+| Observations spéciales | 38 à 43 |
 | Précipitations, température et humidité | 46 à 56 |
 | Pression | 57 à 67 |
 | Hauteur d'eau, évaporation Piché, température du sol | 68 à 78 |
@@ -154,6 +155,15 @@ Le bas de la page 3 est un **seul tableau**, comme sur le papier : les mêmes qu
 lignes horaires (00, 06, 12, 18 TU) servent au pluviomètre, au Piché et aux
 thermomètres de sol. En pratique le Piché se relève à 06 et 18 TU, le sol à 06, 12 et
 18 TU — les lignes inutilisées restent vides, exactement comme sur le carnet.
+
+Les deux grilles **Observations supplémentaires** (bas des pages 1 et 2) sont libres,
+sans intitulé ni numéro de colonne, comme sur le papier.
+
+Dans le bloc **Observations spéciales**, les colonnes 38 à 43 sont celles du carnet.
+Les quatre dernières colonnes, sur fond ocre, portent la mention « ne figure pas sur
+le carnet » : c'est l'aide de l'application (heure de fin, durée calculée, code du
+phénomène, intensité). Vous pouvez les laisser vides si vous recopiez strictement le
+papier.
 
 **Début et fin des phénomènes.** Chaque observation spéciale se note par son heure de
 début et son heure de fin. La durée s'affiche sous la fiche, en heures et dans
