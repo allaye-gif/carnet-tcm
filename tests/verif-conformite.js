@@ -107,26 +107,55 @@ bac.autoComputeHygro(heure, 1000);
 verifie(heure.pointRosee === '10.7', 'point de rosée conforme à l\'exemple officiel (10,7 °C)', heure.pointRosee);
 
 titre('7. Les tableaux du carnet se construisent sans erreur');
-const jeu = bac.withDefaults({ stationId:'S', date:'2025-01-01', hours:{}, grainsOrages:[],
+const jeu = bac.withDefaults({ stationId:'S', date:'2025-01-01', hours:{},
+  grainsOrages:[{id:'g', heureCrochet:'14:00'}],
   observationsSpeciales:[{id:'1', phenomene:'21', heureDebut:'23:40', heureFin:'01:15'}], extras:{} }, 'S','2025-01-01');
-[['températures extrêmes', ()=>bac.tempExtremesTable(jeu)],
- ['valeurs extrêmes du jour', ()=>bac.valeursExtremesTable(jeu)],
- ['évaporation Piché', ()=>bac.picheTable(jeu)],
+[['bas de la page 3 (pluviomètre, Piché, sol)', ()=>bac.basPage3Table(jeu)],
+ ['quantité et durée des précipitations', ()=>bac.quantiteDureeTable(jeu)],
  ['évaporation bac classe A', ()=>bac.bacTable(jeu)],
- ['température du sol', ()=>bac.solTable(jeu)]
+ ['insolation et rayonnement', ()=>bac.insolationTable(jeu)],
+ ['températures extrêmes', ()=>bac.tempExtremesTable(jeu)],
+ ['pressions extrêmes', ()=>bac.pressionsExtremesTable(jeu)],
+ ['valeurs extrêmes du jour', ()=>bac.valeursExtremesTable(jeu)],
+ ['grains, orages, grêles', ()=>bac.grainsTable(jeu)],
+ ['observations supplémentaires', ()=>bac.obsSupTable(jeu)]
 ].forEach(([nom, fn])=>{
   try { verifie(fn().length > 100, `tableau « ${nom} »`); }
   catch(e){ verifie(false, `tableau « ${nom} »`, e.message); }
 });
 const ve = bac.valeursExtremesTable(jeu);
-verifie(['109','110','111','112','113','114','115','116','117'].every(n=> ve.includes('>'+n+'<')),
-  'les colonnes 109 à 117 sont toutes présentes');
 // 7 cases d'heure et non 9 : direction et vitesse d'un même vent partagent une
 // seule heure, comme sur le carnet (la rafale a une heure, pas deux).
 verifie(ve.split('data-heure=').length - 1 === 7, 'la ligne HEURE couvre les 9 colonnes en 7 cases',
   ve.split('data-heure=').length - 1);
 const te = bac.tempExtremesTable(jeu);
 verifie(['00','06','12','18'].every(h=> te.includes('>'+h+'<')), 'les 4 heures de relevé 00/06/12/18 sont présentes');
+
+titre('8. Inventaire des colonnes du carnet papier');
+/* Chaque numéro imprimé sur le carnet (relevé sur les photos du carnet réel) doit
+   apparaître quelque part dans l'application. C'est le contrôle qui empêche
+   d'oublier à nouveau une partie du bas de page. */
+const station = { id:'S', name:'Station test', lat:'12', lon:'-8', alt:'381', active:true };
+const rendu = [1,2,3,4].map(n=> bac['paperPage'+n](jeu, station)).join('\n');
+const presente = n => new RegExp('>' + n + '<').test(rendu);
+const blocs = [
+  ['Tour d\'horizon (page 1)',            [2,3,4,5,6,7,8,9,10,11,12,13,14]],
+  ['Grains, orages, grêles',              [23,24,25,26,27,28,29,30,31,32,33,34,35,36,37]],
+  ['Précipitations, température (page 3)',[47,48,49,50,51,52,53,54,55,56]],
+  ['Pression (page 4)',                   [58,59,60,61,62,63,64,65,66,67]],
+  ['Bas de page 3 : pluvio, Piché, sol',  [68,69,70,71,72,73,74,75,76,77,78]],
+  ['Quantité et durée des précipitations',[79,80]],
+  ['Bac classe A et son anémomètre',      [81,82,83,84,85,86,87,88,89,90]],
+  ['Insolation et rayonnement',           [91,92,93,94,95]],
+  ['Températures extrêmes',               [96,97,98,99,100,101,102]],
+  ['Pressions extrêmes',                  [103,104,105,106,107,108]],
+  ['Valeurs extrêmes du jour',            [109,110,111,112,113,114,115,116,117]]
+];
+blocs.forEach(([nom, nums])=>{
+  const manquants = nums.filter(n=> !presente(n));
+  verifie(manquants.length === 0, `${nom} — colonnes ${nums[0]} à ${nums[nums.length-1]}`,
+    manquants.length ? 'manque ' + manquants.join(', ') : undefined);
+});
 
 console.log(echecs ? `\n${echecs} contrôle(s) en échec.` : '\nTous les contrôles passent.');
 process.exit(echecs ? 1 : 0);

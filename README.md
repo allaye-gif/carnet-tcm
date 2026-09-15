@@ -130,6 +130,31 @@ remplissent d'elles-mêmes :
 | Humidité, tension de vapeur, point de rosée | T sec + T mouillé (formule OMM) |
 | Durée d'un phénomène | heure de fin − heure de début |
 
+**Les numéros de colonnes du carnet sont affichés** en petit sous chaque en-tête (72,
+82, 96, 109…). Vous retrouvez ainsi vos repères entre le papier et l'écran.
+
+**Blocs reproduits, colonne par colonne :**
+
+| Bloc du carnet | Colonnes |
+|---|---|
+| Tour d'horizon | 2 à 14 |
+| Nuages | 15 à 20 |
+| Grains, orages, grêles | 23 à 37 |
+| Précipitations, température et humidité | 46 à 56 |
+| Pression | 57 à 67 |
+| Hauteur d'eau, évaporation Piché, température du sol | 68 à 78 |
+| Quantité et durée des précipitations | 79 et 80 |
+| Évaporation bac classe A et son anémomètre | 81 à 90 |
+| Insolation et rayonnement | 91 à 95 |
+| Températures extrêmes | 96 à 102 |
+| Pressions extrêmes | 103 à 108 |
+| Valeurs extrêmes du jour | 109 à 117 |
+
+Le bas de la page 3 est un **seul tableau**, comme sur le papier : les mêmes quatre
+lignes horaires (00, 06, 12, 18 TU) servent au pluviomètre, au Piché et aux
+thermomètres de sol. En pratique le Piché se relève à 06 et 18 TU, le sol à 06, 12 et
+18 TU — les lignes inutilisées restent vides, exactement comme sur le carnet.
+
 **Début et fin des phénomènes.** Chaque observation spéciale se note par son heure de
 début et son heure de fin. La durée s'affiche sous la fiche, en heures et dans
 l'écriture du carnet pour la colonne 80. Un phénomène qui commence avant minuit et se

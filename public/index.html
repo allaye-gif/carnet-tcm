@@ -159,6 +159,25 @@ table.grid td.calc-cell{background:var(--surface-2);}
 table.grid td.calc-cell input{font-weight:600;}
 /* Numéros de colonnes du carnet papier, repris dans les tableaux de saisie. */
 table.grid .colnum{display:block;font-size:8.5px;color:var(--ink-soft);font-weight:400;letter-spacing:0;}
+table.grid .th-sous{display:block;font-size:9px;font-weight:400;text-transform:none;letter-spacing:0;opacity:.85;}
+h3 .th-sous{font-size:11px;font-weight:400;opacity:.75;}
+/* Lignes de sous-titre à l'intérieur d'un tableau (bloc Matin / bloc Soir). */
+table.grid tr.sous-titre td{background:var(--sky-pale);color:var(--sky-deep);font-family:var(--font-sans);
+  font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;text-align:left;padding:5px 8px;}
+table.grid td.ligne-vide{color:var(--ink-soft);font-family:var(--font-sans);font-style:italic;padding:10px;}
+table.grid th.col-vide, table.grid td.col-vide{background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,.05) 4px,rgba(0,0,0,.05) 8px);}
+table.grid th.col-action, table.grid td.col-action{width:34px;background:var(--surface-2);}
+/* Grille libre des observations supplémentaires : des cases, pas de colonnes nommées. */
+table.grid.grille-libre td{height:26px;padding:0;}
+table.grid.grille-libre td input{text-align:left;padding-left:5px;font-family:var(--font-sans);font-size:12px;}
+/* Blocs 79 et 80, côte à côte comme sur le carnet. */
+.deux-blocs{display:flex;gap:16px;flex-wrap:wrap;}
+.bloc-carnet{flex:1;min-width:280px;border:1px solid var(--border-strong);border-radius:8px;padding:10px 12px;background:var(--surface);}
+.bloc-titre{font-family:var(--font-sans);font-size:12px;font-weight:600;margin-bottom:10px;
+  text-transform:uppercase;letter-spacing:.3px;color:var(--ink);}
+.bloc-titre .unite{font-weight:400;text-transform:none;color:var(--ink-soft);}
+.colnum-inline{display:inline-block;min-width:20px;padding:1px 5px;margin-right:6px;border-radius:4px;
+  background:var(--sky-pale);color:var(--sky-deep);font-size:10.5px;font-weight:600;}
 
 .check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;}
 .check-item{display:flex;align-items:center;gap:8px;font-family:var(--font-sans);font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
@@ -214,10 +233,14 @@ const STANDARD_HOURS = ['00','03','06','09','12','15','18','21'];
 // Lignes horaires des blocs « bas de carnet » (pages 3 et 4 du carnet papier) :
 // températures extrêmes, évaporation, température du sol se relèvent à ces heures.
 const EXTREME_HOURS_ROWS = ['00','06','12','18'];
-// Heures de relevé du Piché et du bac : le carnet ne retient que 06 et 18 TU.
+// Le bac classe A ne se relève qu'à 06 et 18 TU (bloc 81 du carnet).
 const EVAP_HOURS = ['06','18'];
 // Profondeurs des thermomètres de sol, colonnes 75 à 78 du carnet.
 const SOIL_DEPTHS = ['10','20','50','100'];
+// Les trois lignes des blocs insolation et rayonnement (colonnes 91 à 95).
+const INSOL_ROWS = [['matin','Matin'],['soir','Soir'],['total','Total quotidien']];
+// Observations supplémentaires : grille libre du carnet (page 2), sans intitulés.
+const OBS_SUP_LIGNES = 8, OBS_SUP_COLONNES = 8;
 
 /* ---- Tables de codes officielles OMM (traductions françaises) ---- */
 const WW_CODES = [
@@ -521,8 +544,10 @@ const FIELDS_PRECIP_TEMP = [
   {k:'humidite', label:'Humidité %', quick:true},
   {k:'tensionVapeur', label:'Tension vapeur (mb)'},
   {k:'pointRosee', label:'Pt de rosée °C', quick:true},
-  {k:'thermoEnregT', label:'Thermo enreg. T'},
-  {k:'hygroEnregU', label:'Hygro enreg. U'}
+  // Enregistreur d'abri : thermomètre (54), repères en minutes (55), hygromètre (56).
+  {k:'thermoEnregT', label:'Abri — thermo. T'},
+  {k:'reperesMinutesAbri', label:'Abri — repères (min)'},
+  {k:'hygroEnregU', label:'Abri — hygro. U'}
 ];
 const FIELDS_PRESSION = [
   {k:'pressionEnregLue', label:'Press. enreg. lue'},
@@ -532,7 +557,9 @@ const FIELDS_PRESSION = [
   {k:'pressionReduite0', label:'Press. réduite 0°'},
   {k:'tempMoyT12', label:'(t+t-12)/2'},
   {k:'niveauMerPression', label:'Niveau mer (mb)', quick:true},
-  {k:'evolution24h', label:'Évolution 24h'},
+  // Évolution : caractère de la tendance (65) puis variation en 24 h (66).
+  {k:'evolutionCaractere', label:'Évolution — caractère'},
+  {k:'evolution24h', label:'Évolution — var. 24h'},
   {k:'initialesObs', label:'Initiales obs.'}
 ];
 const GRAIN_FIELDS = [
@@ -718,16 +745,21 @@ const TENTHS_EXTRA_FIELDS = new Set([
   'tempSolMini','tempSolMaxi','tempMiniAbri','tempMaxiAbri',
   'pressMatinMinValeur','pressMatinMaxValeur','pressSoirMinValeur','pressSoirMaxValeur'
 ]);
-// Piché et bac classe A : mêmes colonnes répétées à 06 et 18 TU.
+// Bac classe A : colonnes 82 à 87, relevés de 06 et 18 TU.
 EVAP_HOURS.forEach(h=>{
-  ['prec','lect','diff'].forEach(k=> TENTHS_EXTRA_FIELDS.add(`evapPiche${h}_${k}`));
   ['h1','h2','diff','nouvLecture','evap','tempEau'].forEach(k=> TENTHS_EXTRA_FIELDS.add(`bac${h}_${k}`));
 });
-// Températures extrêmes : 4 lignes horaires (00/06/12/18), cf. page 4 du carnet.
+// Le grand tableau du bas de la page 3 : 4 lignes horaires (00/06/12/18) communes
+// au pluviomètre (69-71), au Piché (72-74) et aux thermomètres de sol (75-78).
 EXTREME_HOURS_ROWS.forEach(h=>{
   ['solMini','solMaxi','abriMini','abriMaxi'].forEach(k=> TENTHS_EXTRA_FIELDS.add(`extr${h}_${k}`));
-  // Température dans le sol : grille 4 heures x 4 profondeurs (colonnes 75 à 78).
   SOIL_DEPTHS.forEach(d=> TENTHS_EXTRA_FIELDS.add(`sol${h}_${d}`));
+  ['6h','12h','24h'].forEach(p=> TENTHS_EXTRA_FIELDS.add(`pluvio${h}_${p}`));
+  ['prec','lect','diff'].forEach(k=> TENTHS_EXTRA_FIELDS.add(`evapPiche${h}_${k}`));
+});
+// Insolation (92) et rayonnement (94 et 95) : matin, soir, total quotidien.
+INSOL_ROWS.forEach(([k])=>{
+  TENTHS_EXTRA_FIELDS.add(`insolation${k==='total'?'Total':k==='matin'?'Matin':'Soir'}`);
 });
 function isTenthsExtra(k){ return TENTHS_EXTRA_FIELDS.has(k); }
 /* Toute case qui porte une heure se saisit avec un vrai sélecteur d'heure : plus de
@@ -905,21 +937,30 @@ function emptyExtras(){
     phenRosee:false, phenGeleeBlanche:false, phenVentContinu:false, phenVentFort16:false,
     phenomenesRemarquables:'', resumeTempsClair:''
   };
-  // Évaporation sous abri (Piché) et bac classe A : le carnet prévoit un relevé à
-  // 06 et à 18 TU, chacun avec lecture précédente, lecture du jour et différence.
+  // Bac classe A (bloc 81) : deux observations, 06 et 18 TU. Colonnes 82 à 87 pour
+  // le bac lui-même, 88 à 90 pour le compteur de l'anémomètre placé près du bac.
   EVAP_HOURS.forEach(h=>{
-    e[`evapPiche${h}_prec`]=''; e[`evapPiche${h}_lect`]=''; e[`evapPiche${h}_diff`]='';
+    e[`bac${h}_heureObs`]='';
     e[`bac${h}_h1`]=''; e[`bac${h}_h2`]=''; e[`bac${h}_diff`]='';
     e[`bac${h}_nouvLecture`]=''; e[`bac${h}_evap`]=''; e[`bac${h}_tempEau`]='';
+    e[`bac${h}_anemoPrec`]=''; e[`bac${h}_anemoLect`]=''; e[`bac${h}_anemoDiff`]='';
   });
-  // Températures extrêmes : une ligne par heure de relevé (00/06/12/18), exactement
-  // comme le tableau de la page 4 du carnet papier.
+  // Grand tableau du bas de la page 3 (colonnes 68 à 78) : les mêmes 4 lignes
+  // horaires servent au pluviomètre, au Piché et aux thermomètres de sol.
+  // Mêmes 4 lignes pour les températures extrêmes de la page 4 (colonnes 96 à 102).
   EXTREME_HOURS_ROWS.forEach(h=>{
     e[`extr${h}_solMini`]=''; e[`extr${h}_solMaxi`]='';
     e[`extr${h}_abriMini`]=''; e[`extr${h}_abriMiniHeure`]='';
     e[`extr${h}_abriMaxi`]=''; e[`extr${h}_abriMaxiHeure`]='';
     SOIL_DEPTHS.forEach(d=> e[`sol${h}_${d}`]='');
+    e[`pluvio${h}_6h`]=''; e[`pluvio${h}_12h`]=''; e[`pluvio${h}_24h`]='';
+    e[`evapPiche${h}_prec`]=''; e[`evapPiche${h}_lect`]=''; e[`evapPiche${h}_diff`]='';
   });
+  // Rayonnement : colonnes 94 (global) et 95, laissée sans intitulé sur le carnet.
+  INSOL_ROWS.forEach(([k])=>{ e[`rayonGlobal_${k}`]=''; e[`rayonCol95_${k}`]=''; });
+  // Observations supplémentaires : grille libre du carnet, sans intitulé de colonne.
+  for(let l=0; l<OBS_SUP_LIGNES; l++)
+    for(let c=0; c<OBS_SUP_COLONNES; c++) e[`obsSup_${l}_${c}`]='';
   return e;
 }
 
@@ -949,6 +990,12 @@ function migrateExtras(x){
     report('sol10_6h','sol06_10'); report('sol10_12h','sol12_10'); report('sol10_18h','sol18_10');
     report('sol20','sol06_20'); report('sol50','sol06_50'); report('sol100','sol06_100');
   }
+  // Rayonnement : les trois anciennes cases deviennent la colonne 94 (global).
+  if(vide('rayonGlobal_matin') && vide('rayonGlobal_soir') && vide('rayonGlobal_total')){
+    if(String(x.rayonnementMatin||'').trim()) x.rayonGlobal_matin = x.rayonnementMatin;
+    if(String(x.rayonnementSoir||'').trim())  x.rayonGlobal_soir  = x.rayonnementSoir;
+    if(String(x.rayonnementTotal||'').trim()) x.rayonGlobal_total = x.rayonnementTotal;
+  }
   return x;
 }
 
@@ -959,9 +1006,10 @@ function recomputeExtrasDerived(rec){
   const put = (k,v)=>{ x[k] = (v===null||v===undefined) ? '' : String(v); };
   const arrondi = v => Math.round(v*10)/10;
 
-  // Piché : différence = lecture du jour - lecture précédente, pour 06h et 18h.
+  // Piché : différence = lecture du jour - lecture précédente, sur les 4 lignes
+  // horaires du carnet (en pratique remplies à 06 et 18 TU).
   let picheTotal = null;
-  EVAP_HOURS.forEach(h=>{
+  EXTREME_HOURS_ROWS.forEach(h=>{
     const p = toNum(x[`evapPiche${h}_prec`]), l = toNum(x[`evapPiche${h}_lect`]);
     if(p!==null && l!==null){
       const d = arrondi(l - p);
@@ -983,12 +1031,19 @@ function recomputeExtrasDerived(rec){
       put(`bac${h}_evap`, evap);
       bacTotal = (bacTotal===null?0:bacTotal) + evap;
     }
+    // Anémomètre du bac (colonnes 88 à 90) : vent parcouru entre deux relevés.
+    const ap = toNum(x[`bac${h}_anemoPrec`]), al = toNum(x[`bac${h}_anemoLect`]);
+    if(ap!==null && al!==null) put(`bac${h}_anemoDiff`, arrondi(al - ap));
   });
   if(bacTotal!==null) put('evapBac', arrondi(bacTotal));
 
-  // Insolation : total = matin + soir.
+  // Insolation et rayonnement : total quotidien = matin + soir.
   const im = toNum(x.insolationMatin), is = toNum(x.insolationSoir);
   if(im!==null || is!==null) put('insolationTotal', arrondi((im||0)+(is||0)));
+  [['rayonGlobal_','rayonGlobal_total'],['rayonCol95_','rayonCol95_total']].forEach(([prefixe, cleTotal])=>{
+    const m = toNum(x[prefixe+'matin']), s = toNum(x[prefixe+'soir']);
+    if(m!==null || s!==null) put(cleTotal, arrondi((m||0)+(s||0)));
+  });
 
   // Précipitations : total 24h = (18h veille -> 6h) + (6h -> 18h), idem pour la durée.
   const p1 = toNum(x.precip18h6h), p2 = toNum(x.precip6h18h);
@@ -1024,6 +1079,11 @@ function recomputeExtrasDerived(rec){
     for(const h of EXTREME_HOURS_ROWS){ const v = x[`sol${h}_${d}`]; if(String(v||'').trim()) return v; }
     return null;
   };
+  // Le tableau mensuel lit encore les anciennes cases de rayonnement.
+  if(String(x.rayonGlobal_matin||'').trim()) put('rayonnementMatin', x.rayonGlobal_matin);
+  if(String(x.rayonGlobal_soir||'').trim())  put('rayonnementSoir',  x.rayonGlobal_soir);
+  if(String(x.rayonGlobal_total||'').trim()) put('rayonnementTotal', x.rayonGlobal_total);
+
   if(String(x.sol06_10||'').trim()) put('sol10_6h',  x.sol06_10);
   if(String(x.sol12_10||'').trim()) put('sol10_12h', x.sol12_10);
   if(String(x.sol18_10||'').trim()) put('sol10_18h', x.sol18_10);
@@ -1869,9 +1929,9 @@ function virgule(v){ return String(v==null?'':v).replace('.', ','); }
 function tempExtremesTable(rec){
   return `<div class="tbl-wrap"><table class="grid">
     <thead>
-      <tr><th rowspan="2">Heure<br>TU</th><th colspan="2">Au sol</th><th colspan="4">Sous abri</th></tr>
-      <tr><th>Mini<span class="colnum">96</span></th><th>Maxi<span class="colnum">97</span></th>
-          <th>Mini<span class="colnum">98</span></th><th>Heure<span class="colnum">99</span></th>
+      <tr><th rowspan="2">Heure<br>TU<span class="colnum">96</span></th><th colspan="2">Au sol</th><th colspan="4">Sous abri</th></tr>
+      <tr><th>Mini<span class="colnum">97</span></th><th>Maxi<span class="colnum">98</span></th>
+          <th>Mini<span class="colnum">99</span></th><th>Heure<span class="colnum">100</span></th>
           <th>Maxi<span class="colnum">101</span></th><th>Heure<span class="colnum">102</span></th></tr>
     </thead>
     <tbody>
@@ -1886,51 +1946,191 @@ function tempExtremesTable(rec){
       </tr>`).join('')}
     </tbody></table></div>`;
 }
-/* Température dans le sol — grille 4 heures x 4 profondeurs, colonnes 75 à 78,
-   exactement comme le bas de la page 3 du carnet. */
-function solTable(rec){
+/* Bas de la page 3 du carnet, colonnes 68 à 78, reproduit tel quel : un seul
+   tableau dont les 4 lignes horaires (00/06/12/18) servent à la fois à la hauteur
+   d'eau recueillie, à l'évaporation sous abri et aux thermomètres de sol. */
+function basPage3Table(rec){
   return `<div class="tbl-wrap"><table class="grid">
-    <thead><tr><th rowspan="2">Heure<br>TU</th><th colspan="${SOIL_DEPTHS.length}">Profondeurs</th></tr>
-      <tr>${SOIL_DEPTHS.map((d,i)=>`<th>${d} cm<span class="colnum">${75+i}</span></th>`).join('')}</tr></thead>
+    <thead>
+      <tr>
+        <th rowspan="3" style="width:52px;">Heure<br>TU<span class="colnum">68</span></th>
+        <th colspan="3">Hauteur d'eau recueillie<br><span class="th-sous">1/10 mm (pluviomètre)</span></th>
+        <th colspan="3">Évaporation<br><span class="th-sous">sous abri (Piché)</span></th>
+        <th colspan="${SOIL_DEPTHS.length}">Température dans le sol</th>
+      </tr>
+      <tr>
+        <th rowspan="2">en 6 h<span class="colnum">69</span></th>
+        <th rowspan="2">en 12 h<span class="colnum">70</span></th>
+        <th rowspan="2">en 24 h<span class="colnum">71</span></th>
+        <th rowspan="2">Lecture<br>précédente<span class="colnum">72</span></th>
+        <th rowspan="2">Lecture<span class="colnum">73</span></th>
+        <th rowspan="2">Différence<span class="colnum">74</span></th>
+        <th colspan="${SOIL_DEPTHS.length}">Profondeurs</th>
+      </tr>
+      <tr>${SOIL_DEPTHS.map((d,i)=>`<th>${d} cm<span class="colnum">${75+i}</span></th>`).join('')}</tr>
+    </thead>
     <tbody>
       ${EXTREME_HOURS_ROWS.map(h=>`<tr class="${(h==='06'||h==='18')?'std-hour':''}">
         <td class="rowhead">${h}</td>
+        <td>${extraFieldBare(`pluvio${h}_6h`, rec)}</td>
+        <td>${extraFieldBare(`pluvio${h}_12h`, rec)}</td>
+        <td>${extraFieldBare(`pluvio${h}_24h`, rec)}</td>
+        <td>${extraFieldBare(`evapPiche${h}_prec`, rec)}</td>
+        <td>${extraFieldBare(`evapPiche${h}_lect`, rec)}</td>
+        <td class="calc-cell">${extraFieldBare(`evapPiche${h}_diff`, rec)}</td>
         ${SOIL_DEPTHS.map(d=>`<td>${extraFieldBare(`sol${h}_${d}`, rec)}</td>`).join('')}
       </tr>`).join('')}
     </tbody></table></div>`;
 }
-/* Évaporation sous abri (Piché) — colonnes 72 à 74, relevés de 06 et 18 TU. */
-function picheTable(rec){
-  return `<div class="tbl-wrap"><table class="grid">
-    <thead><tr><th>Relevé</th>
-      <th>Lecture précédente<span class="colnum">72</span></th>
-      <th>Lecture<span class="colnum">73</span></th>
-      <th>Différence<span class="colnum">74</span></th></tr></thead>
-    <tbody>
-      ${EVAP_HOURS.map(h=>`<tr><td class="rowhead">${h}</td>
-        <td>${extraFieldBare(`evapPiche${h}_prec`, rec)}</td>
-        <td>${extraFieldBare(`evapPiche${h}_lect`, rec)}</td>
-        <td class="calc-cell">${extraFieldBare(`evapPiche${h}_diff`, rec)}</td></tr>`).join('')}
-    </tbody></table></div>`;
+/* Blocs 79 et 80 du carnet, avec leurs intitulés exacts. */
+function quantiteDureeTable(rec){
+  return `<div class="deux-blocs">
+    <div class="bloc-carnet">
+      <div class="bloc-titre"><span class="colnum-inline">79</span> Quantité de précipitations <span class="unite">(1/10 mm)</span></div>
+      <div class="row">
+        ${extraField('precip18h6h','De 18 h (la veille) à 6 h', rec)}
+        ${extraField('precip6h18h','De 6 h à 18 h', rec)}
+      </div>
+    </div>
+    <div class="bloc-carnet">
+      <div class="bloc-titre"><span class="colnum-inline">80</span> Durée des précipitations <span class="unite">(1/10 h)</span></div>
+      <div class="row">
+        ${extraField('duree6h18h','De 6 h à 18 h', rec)}
+        ${extraField('duree24h','De 0 h à 24 h', rec)}
+      </div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:8px;">
+    ${extraField('precipitation24h','Total 0 h → 24 h (calculé)', rec)}
+    ${extraField('duree18h6h','Durée 18 h (veille) → 6 h', rec)}
+  </div>`;
 }
-/* Évaporation Bac classe A — colonnes 82 à 87, relevés de 06 et 18 TU. */
+/* Évaporation Bac classe A — bloc 81, colonnes 82 à 90. Les colonnes 88 à 90 sont
+   le compteur de l'anémomètre installé près du bac (vent parcouru entre 2 relevés). */
 function bacTable(rec){
   return `<div class="tbl-wrap"><table class="grid">
-    <thead><tr><th>Relevé</th>
-      <th>Lecture précédente h1<span class="colnum">82</span></th>
-      <th>Lecture h2<span class="colnum">83</span></th>
-      <th>Différence D<span class="colnum">84</span></th>
-      <th>Nouvelle lecture R<span class="colnum">85</span></th>
-      <th>Évaporation D+R<span class="colnum">86</span></th>
-      <th>T° de l'eau<span class="colnum">87</span></th></tr></thead>
+    <thead>
+      <tr>
+        <th rowspan="2">Heure de<br>l'observation<span class="colnum">81</span></th>
+        <th colspan="6">Bac classe A</th>
+        <th colspan="3">Anémomètre du bac</th>
+      </tr>
+      <tr>
+        <th>Lecture<br>précédente h1<span class="colnum">82</span></th>
+        <th>Lecture h2<span class="colnum">83</span></th>
+        <th>Différence<br>D = h1 − h2<span class="colnum">84</span></th>
+        <th>Nouvelle lecture<br><span class="th-sous">(s'il y a lieu)</span><span class="colnum">85</span></th>
+        <th>Évaporation<br>D + R<span class="colnum">86</span></th>
+        <th>Température<br>de l'eau<span class="colnum">87</span></th>
+        <th>Lecture<br>précédente<span class="colnum">88</span></th>
+        <th>Lecture<span class="colnum">89</span></th>
+        <th>Différence<span class="colnum">90</span></th>
+      </tr>
+    </thead>
     <tbody>
-      ${EVAP_HOURS.map(h=>`<tr><td class="rowhead">${h}</td>
+      ${EVAP_HOURS.map(h=>`<tr>
+        <td class="rowhead">${h}</td>
         <td>${extraFieldBare(`bac${h}_h1`, rec)}</td>
         <td>${extraFieldBare(`bac${h}_h2`, rec)}</td>
         <td class="calc-cell">${extraFieldBare(`bac${h}_diff`, rec)}</td>
         <td>${extraFieldBare(`bac${h}_nouvLecture`, rec)}</td>
         <td class="calc-cell">${extraFieldBare(`bac${h}_evap`, rec)}</td>
         <td>${extraFieldBare(`bac${h}_tempEau`, rec)}</td>
+        <td>${extraFieldBare(`bac${h}_anemoPrec`, rec)}</td>
+        <td>${extraFieldBare(`bac${h}_anemoLect`, rec)}</td>
+        <td class="calc-cell">${extraFieldBare(`bac${h}_anemoDiff`, rec)}</td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+/* Insolation et rayonnement — colonnes 91 à 95, lignes matin / soir / total.
+   La colonne 95 n'a pas d'intitulé imprimé sur le carnet : on la laisse telle quelle. */
+function insolationTable(rec){
+  const cle = k => k==='total' ? 'Total' : (k==='matin' ? 'Matin' : 'Soir');
+  return `<div class="tbl-wrap"><table class="grid">
+    <thead>
+      <tr><th rowspan="2"><span class="colnum">91</span></th>
+        <th rowspan="2">Insolation<br><span class="th-sous">(1/10 h)</span><span class="colnum">92</span></th>
+        <th colspan="2">Rayonnement<span class="colnum">93</span></th></tr>
+      <tr><th>Global<span class="colnum">94</span></th>
+          <th title="Colonne 95 du carnet : sans intitulé imprimé sur le formulaire">—<span class="colnum">95</span></th></tr>
+    </thead>
+    <tbody>
+      ${INSOL_ROWS.map(([k,libelle])=>`<tr class="${k==='total'?'total-row':''}">
+        <td class="rowhead">${libelle}</td>
+        <td class="${k==='total'?'calc-cell':''}">${extraFieldBare('insolation'+cle(k), rec)}</td>
+        <td class="${k==='total'?'calc-cell':''}">${extraFieldBare(`rayonGlobal_${k}`, rec)}</td>
+        <td class="${k==='total'?'calc-cell':''}">${extraFieldBare(`rayonCol95_${k}`, rec)}</td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+/* Pressions extrêmes — colonnes 103 à 108, disposées comme le carnet :
+   un bloc MATIN puis un bloc SOIR, chacun avec sa ligne minimum et sa ligne maximum. */
+function pressionsExtremesTable(rec){
+  // Le carnet empile deux blocs identiques, Matin puis Soir, et chacun porte ses
+  // propres numéros de colonnes : 103/104/105 pour le matin, 106/107/108 pour le soir.
+  const bloc = (prefixe, titre, nTitre, nVal, nHeure)=>`
+    <tr class="sous-titre">
+      <td>${titre}<span class="colnum">${nTitre}</span></td>
+      <td>Valeur<span class="colnum">${nVal}</span></td>
+      <td>Heure<span class="colnum">${nHeure}</span></td>
+    </tr>
+    <tr><td class="rowhead">Minimum</td>
+      <td>${extraFieldBare(prefixe+'MinValeur', rec)}</td>
+      <td>${extraFieldBare(prefixe+'MinHeure', rec)}</td></tr>
+    <tr><td class="rowhead">Maximum</td>
+      <td>${extraFieldBare(prefixe+'MaxValeur', rec)}</td>
+      <td>${extraFieldBare(prefixe+'MaxHeure', rec)}</td></tr>`;
+  return `<div class="tbl-wrap"><table class="grid">
+    <tbody>
+      ${bloc('pressMatin','Matin', 103, 104, 105)}
+      ${bloc('pressSoir','Soir', 106, 107, 108)}
+    </tbody></table></div>`;
+}
+/* Grains, orages, grêles — colonnes 23 à 37, en tableau comme sur le carnet
+   (une ligne par événement) et non plus en fiches empilées. */
+function grainsTable(rec){
+  const lignes = rec.grainsOrages || [];
+  const cell = (ev, idx, f)=>`<td>${eventFieldInput(f, ev, idx, 'grainsOrages')}</td>`;
+  return `<div class="tbl-wrap"><table class="grid">
+    <thead>
+      <tr>
+        <th rowspan="2">Heure du crochet<br>au baromètre<span class="colnum">23</span></th>
+        <th rowspan="2">Direction<br>d'apparition du Cb<span class="colnum">24</span></th>
+        <th rowspan="2">Direction du<br>vent avant<span class="colnum">25</span></th>
+        <th colspan="2">Coup de vent</th>
+        <th rowspan="2">Direction du<br>vent après<span class="colnum">28</span></th>
+        <th rowspan="2">Direction de<br>disparition du Cb<span class="colnum">29</span></th>
+        <th colspan="6">Crochets</th>
+        <th rowspan="2">Diamètre des<br>grêlons (mm)<span class="colnum">36</span></th>
+        <th rowspan="2">Signes<span class="colnum">37</span></th>
+        <th rowspan="2" class="col-action"></th>
+      </tr>
+      <tr>
+        <th>Direction<br><span class="th-sous">lettres de la rose</span><span class="colnum">26</span></th>
+        <th>Vitesse<br>maximale m/s<span class="colnum">27</span></th>
+        <th>Baro ±<br><span class="th-sous">1/10 mb</span><span class="colnum">30</span></th>
+        <th>Baro<br>valeur finale<span class="colnum">31</span></th>
+        <th>Hygro ±<br><span class="th-sous">centièmes</span><span class="colnum">32</span></th>
+        <th>Hygro<br>valeur finale<span class="colnum">33</span></th>
+        <th>Thermo ±<br><span class="th-sous">1/10 degré</span><span class="colnum">34</span></th>
+        <th>Thermo<br>valeur finale<span class="colnum">35</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      ${lignes.length ? lignes.map((ev,idx)=>`<tr>
+        ${GRAIN_FIELDS.map(f=> cell(ev, idx, f)).join('')}
+        <td class="col-action"><button class="small-x" data-del-event="${idx}" data-del-array="grainsOrages" title="Supprimer cette ligne">✕</button></td>
+      </tr>`).join('')
+      : `<tr><td colspan="${GRAIN_FIELDS.length+1}" class="ligne-vide">Aucun grain, orage ou grêle ce jour.</td></tr>`}
+    </tbody></table></div>
+  <button class="btn sm" data-add-event="grainsOrages" style="margin-top:8px;">+ Ajouter une ligne</button>`;
+}
+/* Observations supplémentaires — grille libre du carnet, sans intitulé de colonne. */
+function obsSupTable(rec){
+  return `<div class="tbl-wrap"><table class="grid grille-libre">
+    <tbody>
+      ${Array.from({length:OBS_SUP_LIGNES}, (_,l)=>`<tr>
+        ${Array.from({length:OBS_SUP_COLONNES}, (_,c)=>`<td>${extraFieldBare(`obsSup_${l}_${c}`, rec)}</td>`).join('')}
       </tr>`).join('')}
     </tbody></table></div>`;
 }
@@ -2140,7 +2340,13 @@ function renderCarnetBody(rec){
 
   ${section('tourHorizon', '1. Tour d\u2019horizon — vent, visibilité, nébulosité, temps', hourTable(rec, FIELDS_TOUR))}
   ${section('nuages', '2. Nuages — hauteur, genre, groupes significatifs', hourTable(rec, FIELDS_NUAGES, "Pour chaque couche significative (N5C5h5 #1 à #4) : les 3 petites cases se remplissent séparément (quantité, genre, hauteur) et se combinent toutes seules. Astuce : si vous décrivez le nuage dans la 1ère colonne avec les abréviations officielles OMM (ex. \"Cu con 3/8 600m\" = Cumulus congestus, 3 octas, 600m), l'app remplit les codes toute seule dès que vous quittez la case — vérifiez juste le résultat."))}
-  ${section('grains', '3. Grains, orages, grêles (événements)', renderEventList(rec.grainsOrages, GRAIN_FIELDS, 'grainsOrages', '+ Ajouter un événement'), rec.grainsOrages.length||'')}
+  ${section('grains', '3. Grains, orages, grêles (colonnes 23 à 37)', `
+    <p class="help">Une ligne par événement, avec les colonnes du carnet : heure du crochet au baromètre, directions du Cb et du vent, coup de vent, puis les crochets relevés sur le baromètre, l'hygromètre et le thermomètre.</p>
+    ${grainsTable(rec)}`, rec.grainsOrages.length||'')}
+
+  ${section('obsSup', '3 bis. Observations supplémentaires (grille libre du carnet)', `
+    <p class="help">La grille libre du carnet, sans intitulé de colonne : notez-y ce qui n'entre dans aucune autre case.</p>
+    ${obsSupTable(rec)}`)}
   ${section('obsSpeciales', '4. Observations spéciales — début et fin des phénomènes',
     `<p class="help">Chaque phénomène se note par son <b>heure de début</b> et son <b>heure de fin</b> en TU. La durée se calcule toute seule, y compris quand le phénomène franchit minuit, et se convertit en 1/10 h pour la colonne 80 du carnet.</p>
      ${renderEventList(rec.observationsSpeciales, OBS_SPECIALE_FIELDS, 'observationsSpeciales', '+ Ajouter un phénomène')}
@@ -2149,39 +2355,21 @@ function renderCarnetBody(rec){
   ${section('precipTemp', '5. Précipitations, température et humidité', hourTable(rec, FIELDS_PRECIP_TEMP, 'Tension de vapeur, humidité et point de rosée se calculent automatiquement dès que T sec + T mouillé sont renseignés (ou T sec + humidité si vous utilisez un hygromètre direct) — formule OMM (Guide CIMO N°8, vérifiée contre l\u2019exemple officiel). Suppose un psychromètre ventilé ; un abri non ventilé peut donner une humidité réelle légèrement supérieure (~2-3%).'))}
   ${section('pression', '6. Pression atmosphérique', hourTable(rec, FIELDS_PRESSION, 'Le niveau mer se calcule automatiquement depuis la pression lue, l\u2019altitude de la station et la température — formule hypsométrique standard (gradient 6,5°C/km). Précision typique : à 1-2 hPa près (la méthode officielle complète ajoute une correction d\u2019humidité et une moyenne sur 12h que cette version simplifiée n\u2019inclut pas) — vérifiez contre votre table de réduction habituelle pour un usage officiel. La pression réduite à 0° (correction du baromètre à mercure) reste à saisir à la main.'))}
 
-  ${section('hauteurEau', '7. Hauteur d\u2019eau recueillie (pluviométrie)', `
-    <div class="row">
-      ${extraField('precip18h6h','Précip. 18h (veille) → 6h (mm)', rec)}
-      ${extraField('precip6h18h','Précip. 6h → 18h (mm)', rec)}
-      ${extraField('precipitation24h','Précip. totale 0h → 24h (mm)', rec)}
-      ${extraField('duree18h6h','Durée 18h→6h (h, 1/10)', rec)}
-      ${extraField('duree6h18h','Durée 6h→18h (h, 1/10)', rec)}
-      ${extraField('duree24h','Durée totale 24h (h, 1/10)', rec)}
-    </div>`)}
+  ${section('basPage3', '7. Bas de la page 3 — hauteur d\u2019eau, Piché, température du sol (colonnes 68 à 78)', `
+    <p class="help">Un seul tableau, comme sur le carnet : les mêmes 4 lignes horaires servent au pluviomètre (69-71), au Piché (72-74) et aux thermomètres de sol (75-78). Le Piché se relève à <b>06</b> et <b>18 TU</b> et sa différence se calcule seule. Tout est en 1/10 — tapez <b>158</b> pour 15,8 et <b>233</b> pour 23,3.</p>
+    ${basPage3Table(rec)}
+    <div class="row" style="margin-top:12px;">${extraField('evapPiche','Évaporation Piché du jour — total (mm)', rec)}</div>`)}
 
-  ${section('evapPiche', '8. Évaporation sous abri (Piché) — 06 et 18 TU', `
-    <p class="help">Un relevé à <b>06 TU</b> et un à <b>18 TU</b>, comme sur le carnet. Saisissez la <b>lecture précédente</b> puis la <b>lecture du jour</b> : la <b>différence</b> et le total quotidien se calculent tout seuls. Valeurs en 1/10 mm — tapez <b>158</b> pour 15,8 mm.</p>
-    ${picheTable(rec)}
-    <div class="row" style="margin-top:10px;">${extraField('evapPiche','Évaporation Piché du jour — total (mm)', rec)}</div>`)}
+  ${section('quantiteDuree', '8. Quantité et durée des précipitations (colonnes 79 et 80)', quantiteDureeTable(rec))}
 
-  ${section('sol', '9. Température dans le sol — 00/06/12/18 TU', `
-    <p class="help">Grille heures × profondeurs, comme le carnet. Températures en 1/10 — tapez <b>233</b> pour 23,3 °C.</p>
-    ${solTable(rec)}`)}
-
-  ${section('bac', '10. Évaporation Bac classe A', `
-    <p class="help">D = h1 − h2 se calcule tout seul, et l'évaporation = D + nouvelle lecture (l'appoint d'eau, s'il y en a eu). Valeurs en 1/10 — tapez <b>070</b> pour 7,0.</p>
+  ${section('bac', '9. Évaporation bac classe A et anémomètre du bac (colonnes 81 à 90)', `
+    <p class="help">D = h1 − h2, puis évaporation = D + nouvelle lecture (l'appoint d'eau, s'il y en a eu) : les deux se calculent seuls, ainsi que la différence du compteur d'anémomètre.</p>
     ${bacTable(rec)}
-    <div class="row" style="margin-top:10px;">${extraField('evapBac','Évaporation Bac totale du jour (mm)', rec)}</div>`)}
+    <div class="row" style="margin-top:10px;">${extraField('evapBac','Évaporation bac totale du jour (mm)', rec)}</div>`)}
 
-  ${section('insolation', '11. Insolation et rayonnement global', `
-    <div class="row">
-      ${extraField('insolationMatin','Insolation matin (h)', rec)}
-      ${extraField('insolationSoir','Insolation soir (h)', rec)}
-      ${extraField('insolationTotal','Insolation totale (h)', rec)}
-      ${extraField('rayonnementMatin','Rayonnement matin', rec)}
-      ${extraField('rayonnementSoir','Rayonnement soir', rec)}
-      ${extraField('rayonnementTotal','Rayonnement total', rec)}
-    </div>`)}
+  ${section('insolation', '10. Insolation et rayonnement (colonnes 91 à 95)', `
+    <p class="help">Matin, soir et total quotidien, comme sur le carnet. Le total se calcule seul. L'insolation est en 1/10 h — tapez <b>48</b> pour 4,8 h.</p>
+    ${insolationTable(rec)}`)}
 
   ${section('tempExtremes', '12. Températures extrêmes (sol et sous abri) — 00/06/12/18 TU', `
     <p class="help">Une ligne par heure de relevé, comme sur la page 4 du carnet. Les <b>Tn et Tx de la journée</b> affichés dessous s'en déduisent tout seuls (plus bas des mini, plus haut des maxi) et alimentent le tableau climatologique mensuel. Températures en 1/10 — tapez <b>334</b> pour 33,4 °C.</p>
@@ -2202,17 +2390,8 @@ function renderCarnetBody(rec){
     </div>`)}
 
   ${section('pressExtremes', '13. Pressions extrêmes (matin / soir)', `
-    <p class="help">Max de jour ≈ 10h locales · Min de jour ≈ 16h locales · Max de nuit ≈ 22h locales · Min de nuit ≈ 4h locales.</p>
-    <div class="row">
-      ${extraField('pressMatinMinValeur','Matin — min valeur', rec)}
-      ${extraField('pressMatinMinHeure','Matin — min heure', rec)}
-      ${extraField('pressMatinMaxValeur','Matin — max valeur', rec)}
-      ${extraField('pressMatinMaxHeure','Matin — max heure', rec)}
-      ${extraField('pressSoirMinValeur','Soir — min valeur', rec)}
-      ${extraField('pressSoirMinHeure','Soir — min heure', rec)}
-      ${extraField('pressSoirMaxValeur','Soir — max valeur', rec)}
-      ${extraField('pressSoirMaxHeure','Soir — max heure', rec)}
-    </div>`)}
+    <p class="help">Au niveau de la cuvette du baromètre, comme l'indique le carnet. Max de jour ≈ 10h locales · Min de jour ≈ 16h locales · Max de nuit ≈ 22h locales · Min de nuit ≈ 4h locales.</p>
+    ${pressionsExtremesTable(rec)}`)}
 
   ${section('valeursExtremes', '14. Valeurs extrêmes du jour (vent, visibilité, nuages)', `
     <p class="help">Bloc du bas de la page 4 du carnet : chaque valeur extrême de la journée va avec <b>l'heure à laquelle elle a été atteinte</b>. Les humidités min/max sont reprises de la section 12.</p>
@@ -2256,10 +2435,11 @@ const PAPER_COLNUM = {
   visibiliteDam:'6', visibiliteCode:'7', phenomenes:'8', tempsPresent:'9', tempsPasse:'10',
   CL:'11', CM:'12', CH:'13', N:'14',
   nuagesDesc:'16', groupeNuages1:'17', groupeNuages2:'18', groupeNuages3:'19', groupeNuages4:'20',
-  intensitePrecip:'46', mesuresIntermediaires:'47/48', Tsec:'49', Tw:'50', humidite:'51',
-  tensionVapeur:'52', pointRosee:'53', thermoEnregT:'54', reperesMinutes:'55', hygroEnregU:'56',
-  pressionEnregLue:'57', tempBarometre:'59', pressionLue:'60/61', pressionReduite0:'62',
-  tempMoyT12:'63', niveauMerPression:'64', evolution24h:'65', initialesObs:'66/67'
+  // Numéros relevés directement sur le carnet imprimé (réf. MALI METEO 850 05).
+  intensitePrecip:'47', mesuresIntermediaires:'48', Tsec:'49', Tw:'50', humidite:'51',
+  tensionVapeur:'52', pointRosee:'53', thermoEnregT:'54', reperesMinutesAbri:'55', hygroEnregU:'56',
+  pressionEnregLue:'58', reperesMinutes:'59', tempBarometre:'60', pressionLue:'61', pressionReduite0:'62',
+  tempMoyT12:'63', niveauMerPression:'64', evolutionCaractere:'65', evolution24h:'66', initialesObs:'67'
 };
 function paperFieldsHeadRow(fields){
   return `<tr><th style="width:32px;">Heure<br>TU</th>${fields.map(f=>`<th>${f.label}<span class="colnum">${PAPER_COLNUM[f.k]||''}</span></th>`).join('')}</tr>`;
@@ -2296,7 +2476,7 @@ function paperPage1(rec, station){
     <h3>Tour d'horizon</h3>
     ${paperHourTable(rec, fields, head)}
     <h3>Grains, orages, grêles</h3>
-    ${renderEventList(rec.grainsOrages, GRAIN_FIELDS, 'grainsOrages', '+ Ajouter un événement')}
+    ${grainsTable(rec)}
   </div>`;
 }
 function paperPage2(rec, station){
@@ -2307,8 +2487,10 @@ function paperPage2(rec, station){
     ${paperHeader(rec, station, 2)}
     <h3>Nuages — hauteur, genre, espèce, secteur / groupes significatifs</h3>
     ${paperHourTable(rec, fields, head)}
-    <h3>Observations spéciales</h3>
-    ${renderEventList(rec.observationsSpeciales, OBS_SPECIALE_FIELDS, 'observationsSpeciales', '+ Ajouter une observation')}
+    <h3>Observations supplémentaires</h3>
+    ${obsSupTable(rec)}
+    <h3>Observations spéciales — début et fin des phénomènes</h3>
+    ${renderEventList(rec.observationsSpeciales, OBS_SPECIALE_FIELDS, 'observationsSpeciales', '+ Ajouter un phénomène')}
   </div>`;
 }
 function paperPage3(rec, station){
@@ -2318,24 +2500,14 @@ function paperPage3(rec, station){
     ${paperHeader(rec, station, 3)}
     <h3>Précipitations — Température et humidité</h3>
     ${paperHourTable(rec, fields)}
-    <h3>Hauteur d'eau recueillie (pluviomètre, 1/10mm) — Durée des précipitations</h3>
-    <div class="mini-grid">
-      ${extraField('precip18h6h', "18h(veille)→6h — mm", rec)} ${extraField('duree18h6h', 'Durée (h)', rec)}
-      ${extraField('precip6h18h', '6h→18h — mm', rec)} ${extraField('duree6h18h', 'Durée (h)', rec)}
-      ${extraField('precipitation24h', '0h→24h — mm', rec)} ${extraField('duree24h', 'Durée (h)', rec)}
-    </div>
-    <h3>Évaporation sous abri (Piché) — 1/10 mm</h3>
-    ${picheTable(rec)}
-    <h3>Température dans le sol (1/10 °C)</h3>
-    ${solTable(rec)}
-    <h3>Évaporation Bac classe A</h3>
+    <h3>Hauteur d'eau recueillie — Évaporation sous abri — Température dans le sol</h3>
+    ${basPage3Table(rec)}
+    ${quantiteDureeTable(rec)}
+    <h3>Évaporation — Bac classe A</h3>
     ${bacTable(rec)}
-    <div class="mini-grid">${extraField('evapBac','Évaporation Bac totale du jour (mm)', rec)}</div>
-    <h3>Insolation — Rayonnement global</h3>
-    <div class="mini-grid">
-      ${extraField('insolationMatin','Insolation matin (h)', rec)} ${extraField('insolationSoir','Insolation soir (h)', rec)} ${extraField('insolationTotal','Insolation totale (h)', rec)}
-      ${extraField('rayonnementMatin','Rayonnement matin', rec)} ${extraField('rayonnementSoir','Rayonnement soir', rec)} ${extraField('rayonnementTotal','Rayonnement total', rec)}
-    </div>
+    <div class="mini-grid">${extraField('evapBac','Évaporation bac totale du jour (mm)', rec)}</div>
+    <h3>Insolation — Rayonnement</h3>
+    ${insolationTable(rec)}
   </div>`;
 }
 function paperPage4(rec, station){
@@ -2351,14 +2523,8 @@ function paperPage4(rec, station){
         ${tempExtremesTable(rec)}
       </div>
       <div style="flex:1;">
-        <h3>Pressions extrêmes</h3>
-        <table>
-          <thead><tr><th></th><th>Min. valeur</th><th>Min. heure</th><th>Max. valeur</th><th>Max. heure</th></tr></thead>
-          <tbody>
-            <tr><td class="rh">Matin</td><td>${extraFieldBare('pressMatinMinValeur',rec)}</td><td>${extraFieldBare('pressMatinMinHeure',rec)}</td><td>${extraFieldBare('pressMatinMaxValeur',rec)}</td><td>${extraFieldBare('pressMatinMaxHeure',rec)}</td></tr>
-            <tr><td class="rh">Soir</td><td>${extraFieldBare('pressSoirMinValeur',rec)}</td><td>${extraFieldBare('pressSoirMinHeure',rec)}</td><td>${extraFieldBare('pressSoirMaxValeur',rec)}</td><td>${extraFieldBare('pressSoirMaxHeure',rec)}</td></tr>
-          </tbody>
-        </table>
+        <h3>Pressions extrêmes <span class="th-sous">(niveau de la cuvette du baromètre)</span></h3>
+        ${pressionsExtremesTable(rec)}
       </div>
     </div>
     <h3>Valeurs extrêmes du jour (0 à 24 heures)</h3>
