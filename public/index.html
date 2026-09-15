@@ -132,7 +132,33 @@ details.section .section-body{padding:14px 16px;}
 .event-card{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--surface-2);position:relative;}
 .event-card .row{margin-bottom:0;}
 .event-card .field input{width:100px;}
+.event-card .field select{border:1px solid var(--border-strong);border-radius:7px;padding:7px 9px;background:#fff;color:var(--ink);}
 .event-del{position:absolute;top:6px;right:8px;}
+
+/* Durée d'un phénomène : rappel visuel sous chaque fiche début/fin. */
+.event-note{margin-top:9px;padding:6px 10px;border-radius:7px;font-family:var(--font-sans);font-size:12px;
+  background:var(--surface);border:1px dashed var(--border-strong);color:var(--ink-soft);}
+.event-note.ok{border-style:solid;border-color:var(--sky);background:var(--sky-pale);color:var(--sky-deep);}
+.event-note.pending{border-color:var(--brass,#b08d3f);color:#7a5c12;background:var(--brass-pale,#fdf6e3);}
+.recap-box{margin-top:10px;padding:8px 12px;border-radius:8px;background:var(--sky-pale);color:var(--sky-deep);
+  font-family:var(--font-sans);font-size:12.5px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.phen-libelle{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;
+  background:rgba(0,0,0,.05);font-size:11.5px;font-style:italic;}
+
+/* Heures : toujours HH:MM sur 24 h, jamais le format du navigateur. */
+.heure-input{font-family:var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:.5px;}
+.heure-input.invalide{outline:2px solid #c0392b;outline-offset:1px;background:#fdecea;}
+.heure-input::placeholder{color:#aaa;letter-spacing:.5px;}
+
+/* Saisie en dixièmes : rappel de la valeur réelle sous la case. */
+.tenths-hint{font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);letter-spacing:.2px;}
+.tenths-input{font-variant-numeric:tabular-nums;}
+/* Cases calculées par l'application (différences, évaporations) : on les distingue
+   de la saisie pour que l'observateur sache qu'il n'a rien à y écrire. */
+table.grid td.calc-cell{background:var(--surface-2);}
+table.grid td.calc-cell input{font-weight:600;}
+/* Numéros de colonnes du carnet papier, repris dans les tableaux de saisie. */
+table.grid .colnum{display:block;font-size:8.5px;color:var(--ink-soft);font-weight:400;letter-spacing:0;}
 
 .check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;}
 .check-item{display:flex;align-items:center;gap:8px;font-family:var(--font-sans);font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
@@ -185,6 +211,13 @@ input[list]{background-image:none;}
 function padHour(n){ return String(n).padStart(2,'0'); }
 const ALL_HOURS = Array.from({length:24}, (_,i)=>padHour(i));
 const STANDARD_HOURS = ['00','03','06','09','12','15','18','21'];
+// Lignes horaires des blocs « bas de carnet » (pages 3 et 4 du carnet papier) :
+// températures extrêmes, évaporation, température du sol se relèvent à ces heures.
+const EXTREME_HOURS_ROWS = ['00','06','12','18'];
+// Heures de relevé du Piché et du bac : le carnet ne retient que 06 et 18 TU.
+const EVAP_HOURS = ['06','18'];
+// Profondeurs des thermomètres de sol, colonnes 75 à 78 du carnet.
+const SOIL_DEPTHS = ['10','20','50','100'];
 
 /* ---- Tables de codes officielles OMM (traductions françaises) ---- */
 const WW_CODES = [
@@ -519,10 +552,68 @@ const GRAIN_FIELDS = [
   {k:'diametreGrelons', label:'Diamètre grêlons (mm)'},
   {k:'signes', label:'Signes'}
 ];
+/* Observations spéciales — un phénomène se relève par sa DURÉE (début et fin),
+   pas par un instant unique : c'est ce que demande le carnet et c'est ce qui
+   alimente la colonne 80 « durée des précipitations ». */
+const INTENSITES = ['Faible','Modérée','Forte'];
 const OBS_SPECIALE_FIELDS = [
-  {k:'heure', label:'Heure'},
+  {k:'phenomene',   label:'Phénomène', combo:'ww'},
+  {k:'intensite',   label:'Intensité', type:'select', options:INTENSITES},
+  {k:'heureDebut',  label:'Début (TU)', type:'time'},
+  {k:'heureFin',    label:'Fin (TU)',   type:'time'},
   {k:'description', label:'Observation'}
 ];
+/** Ancien format {heure, description} -> nouveau format début/fin, sans rien perdre. */
+function migrateObsSpeciale(ev){
+  const o = {...ev};
+  if(o.heureDebut===undefined && o.heureFin===undefined){
+    o.heureDebut = normalizeHeure(o.heure || '');
+    o.heureFin = '';
+  }
+  o.heureDebut = normalizeHeure(o.heureDebut || '');
+  o.heureFin   = normalizeHeure(o.heureFin || '');
+  if(o.phenomene===undefined)   o.phenomene = '';
+  if(o.intensite===undefined)   o.intensite = '';
+  if(o.description===undefined) o.description = '';
+  return o;
+}
+/** Accepte « 6 », « 06 », « 0630 », « 6h30 », « 06:30 » -> « 06:30 ». */
+function normalizeHeure(v){
+  const s = String(v==null?'':v).trim();
+  if(s==='') return '';
+  const m = s.match(/^(\d{1,2})\s*[:hH.]?\s*(\d{2})?$/);
+  if(!m) return s;
+  let hh = parseInt(m[1],10);
+  let mm = m[2]===undefined ? 0 : parseInt(m[2],10);
+  if(s.replace(/\D/g,'').length===4 && m[2]===undefined) return s;
+  if(hh>23 || mm>59) return s;
+  return `${pad2(hh)}:${pad2(mm)}`;
+}
+function heureToMinutes(v){
+  const s = normalizeHeure(v);
+  const m = s.match(/^(\d{2}):(\d{2})$/);
+  return m ? parseInt(m[1],10)*60 + parseInt(m[2],10) : null;
+}
+/** Durée d'un phénomène, en gérant le passage de minuit (fin < début). */
+function phenDuration(debut, fin){
+  const a = heureToMinutes(debut), b = heureToMinutes(fin);
+  if(a===null || b===null) return null;
+  let min = b - a;
+  const apresMinuit = min < 0;
+  if(apresMinuit) min += 24*60;             // le phénomène s'est prolongé après 00 TU
+  if(min===0) return {minutes:0, label:'moins d’une minute', heures:'0', carnet:'0', apresMinuit:false};
+  const h = Math.floor(min/60), m = min%60;
+  // `heures` est la durée en heures décimales (1,6 h) : c'est la valeur enregistrée.
+  // `carnet` est son écriture sur le papier, en 1/10 h et sans virgule (« 16 »).
+  const heures = String(Math.round(min/6)/10);
+  return {
+    minutes: min,
+    label: (h? `${h} h ` : '') + (m? `${m} min` : (h?'':'0 min')),
+    heures,
+    carnet: tenthsToInput(heures),
+    apresMinuit
+  };
+}
 const DIRECTIONS_18 = ['02','04','06','08','10','12','14','16','18','20','22','24','26','28','30','32','34','36'];
 const MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const PHEN_CHECKS = [
@@ -600,6 +691,83 @@ function nearestStandardHour(){
   return best;
 }
 function toNum(v){ if(v===null||v===undefined||v==='') return null; const n=parseFloat(String(v).replace(',','.')); return isNaN(n)?null:n; }
+
+/* ---------------- Saisie en dixièmes, comme sur le carnet papier ----------------
+   Sur le carnet ASECNA, les colonnes marquées « 1/10 » s'écrivent SANS virgule :
+   21,0 °C se note « 210 » et 4,2 mb se note « 042 ». L'observateur recopie donc
+   exactement ce qu'il a sous les yeux, sans conversion mentale.
+
+   L'application accepte les deux écritures :
+     • un entier             -> lu en dixièmes    (« 192 » = 19,2)
+     • une valeur à virgule  -> prise telle quelle (« 19,2 » = 19,2)
+
+   La valeur ENREGISTRÉE en base reste toujours en unité réelle (19.2). Tous les
+   calculs existants (humidité, point de rosée, pression réduite au niveau de la
+   mer, moyennes mensuelles) sont donc inchangés, et les anciennes saisies restent
+   valables : un « 19.2 » déjà en base se réaffiche simplement « 192 ». */
+const TENTHS_HOUR_FIELDS = new Set([
+  'Tsec','Tw','tensionVapeur','pointRosee','thermoEnregT','mesuresIntermediaires',
+  'pressionEnregLue','tempBarometre','pressionLue','pressionReduite0','tempMoyT12',
+  'niveauMerPression','evolution24h'
+]);
+const TENTHS_EXTRA_FIELDS = new Set([
+  'precip18h6h','precip6h18h','precipitation24h','duree18h6h','duree6h18h','duree24h',
+  'evapPicheLecturePrecedente','evapPicheLecture','evapPiche',
+  'sol10_6h','sol10_12h','sol10_18h','sol20','sol50','sol100',
+  'evapBac','insolationMatin','insolationSoir','insolationTotal',
+  'tempSolMini','tempSolMaxi','tempMiniAbri','tempMaxiAbri',
+  'pressMatinMinValeur','pressMatinMaxValeur','pressSoirMinValeur','pressSoirMaxValeur'
+]);
+// Piché et bac classe A : mêmes colonnes répétées à 06 et 18 TU.
+EVAP_HOURS.forEach(h=>{
+  ['prec','lect','diff'].forEach(k=> TENTHS_EXTRA_FIELDS.add(`evapPiche${h}_${k}`));
+  ['h1','h2','diff','nouvLecture','evap','tempEau'].forEach(k=> TENTHS_EXTRA_FIELDS.add(`bac${h}_${k}`));
+});
+// Températures extrêmes : 4 lignes horaires (00/06/12/18), cf. page 4 du carnet.
+EXTREME_HOURS_ROWS.forEach(h=>{
+  ['solMini','solMaxi','abriMini','abriMaxi'].forEach(k=> TENTHS_EXTRA_FIELDS.add(`extr${h}_${k}`));
+  // Température dans le sol : grille 4 heures x 4 profondeurs (colonnes 75 à 78).
+  SOIL_DEPTHS.forEach(d=> TENTHS_EXTRA_FIELDS.add(`sol${h}_${d}`));
+});
+function isTenthsExtra(k){ return TENTHS_EXTRA_FIELDS.has(k); }
+/* Toute case qui porte une heure se saisit avec un vrai sélecteur d'heure : plus de
+   « 6h », « 06 h 00 » ou « 0600 » mélangés dans la même colonne. */
+function isHeureExtra(k){ return /Heure$/.test(k); }
+
+/** Valeur stockée (19.2) -> ce qui s'affiche dans la case (« 192 »). */
+function tenthsToInput(stored){
+  if(stored===null||stored===undefined) return '';
+  const s = String(stored).trim();
+  if(s==='') return '';
+  const n = toNum(s);
+  if(n===null) return s;                       // texte libre (« X », « // ») : inchangé
+  return (n<0?'-':'') + String(Math.round(Math.abs(n)*10));
+}
+/** Ce que l'observateur tape (« 192 ») -> valeur stockée (19.2). */
+function inputToTenths(raw){
+  if(raw===null||raw===undefined) return '';
+  const s = String(raw).trim();
+  if(s==='') return '';
+  if(/[.,]/.test(s)){                          // virgule explicite : on respecte la saisie
+    const n = toNum(s);
+    return n===null ? s : String(n);
+  }
+  if(!/^[+-]?\d+$/.test(s)) return s;          // pas un entier : texte libre conservé
+  const n = parseInt(s.replace(/^[+-]/,''), 10) / 10;
+  return String(s.startsWith('-') ? -n : n);
+}
+/** Info-bulle « 192 = 19,2 » posée sur chaque case concernée. */
+function tenthsTitle(stored){
+  const base = 'Saisie en dixièmes, comme sur le carnet papier : tapez 192 pour 19,2. La virgule reste acceptée.';
+  const n = toNum(stored);
+  return n===null ? base : `${tenthsToInput(stored)} = ${virgule(n)}\n${base}`;
+}
+/** Petit rappel « = 19,2 » affiché sous les champs qui ont la place. */
+function tenthsHint(stored){
+  const n = toNum(stored);
+  if(n===null) return '';
+  return `<span class="tenths-hint">= ${escapeHtml(virgule(n))}</span>`;
+}
 function daysInMonth(year,month){ return new Date(year,month,0).getDate(); }
 function initials(name){ return (name||'??').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -712,21 +880,23 @@ function emptyHour(){
   return h;
 }
 function emptyExtras(){
-  return {
+  const e = {
     precip18h6h:'', precip6h18h:'', precipitation24h:'', duree18h6h:'', duree6h18h:'', duree24h:'',
+    // Piché : conservés pour les carnets déjà saisis, repris automatiquement dans la
+    // ligne 06h par migrateExtras(). Ne plus saisir directement.
     evapPicheLecturePrecedente:'', evapPicheLecture:'', evapPiche:'',
     sol10_6h:'', sol10_12h:'', sol10_18h:'', sol20:'', sol50:'', sol100:'',
-    bac06_h1:'', bac06_h2:'', bac06_diff:'', bac06_nouvLecture:'', bac06_evap:'', bac06_tempEau:'',
-    bac18_h1:'', bac18_h2:'', bac18_diff:'', bac18_nouvLecture:'', bac18_evap:'', bac18_tempEau:'',
     evapBac:'',
     insolationMatin:'', insolationSoir:'', insolationTotal:'',
     rayonnementMatin:'', rayonnementSoir:'', rayonnementTotal:'',
+    // Tn/Tx de la journée : calculés à partir des 4 lignes horaires ci-dessous,
+    // et conservés car le tableau climatologique mensuel les lit directement.
     tempSolMini:'', tempSolMaxi:'',
     tempMiniAbri:'', tempMiniAbriHeure:'', tempMaxiAbri:'', tempMaxiAbriHeure:'',
     humiditeMaxJour:'', humiditeMaxJourHeure:'', humiditeMinJour:'', humiditeMinJourHeure:'',
     pressMatinMinValeur:'', pressMatinMinHeure:'', pressMatinMaxValeur:'', pressMatinMaxHeure:'',
     pressSoirMinValeur:'', pressSoirMinHeure:'', pressSoirMaxValeur:'', pressSoirMaxHeure:'',
-    lectureCorrigeeEnreg:'',
+    lectureCorrigeeEnreg:'', lectureCorrigeeEnregHeure:'',
     ventMaxInstDir:'', ventMaxInstVit:'', ventMaxInstHeure:'',
     ventMoyenDir:'', ventMoyenVit:'', ventMoyenHeure:'',
     visibiliteMin:'', visibiliteMinHeure:'', hauteurNuagesMin:'', hauteurNuagesMinHeure:'',
@@ -735,6 +905,148 @@ function emptyExtras(){
     phenRosee:false, phenGeleeBlanche:false, phenVentContinu:false, phenVentFort16:false,
     phenomenesRemarquables:'', resumeTempsClair:''
   };
+  // Évaporation sous abri (Piché) et bac classe A : le carnet prévoit un relevé à
+  // 06 et à 18 TU, chacun avec lecture précédente, lecture du jour et différence.
+  EVAP_HOURS.forEach(h=>{
+    e[`evapPiche${h}_prec`]=''; e[`evapPiche${h}_lect`]=''; e[`evapPiche${h}_diff`]='';
+    e[`bac${h}_h1`]=''; e[`bac${h}_h2`]=''; e[`bac${h}_diff`]='';
+    e[`bac${h}_nouvLecture`]=''; e[`bac${h}_evap`]=''; e[`bac${h}_tempEau`]='';
+  });
+  // Températures extrêmes : une ligne par heure de relevé (00/06/12/18), exactement
+  // comme le tableau de la page 4 du carnet papier.
+  EXTREME_HOURS_ROWS.forEach(h=>{
+    e[`extr${h}_solMini`]=''; e[`extr${h}_solMaxi`]='';
+    e[`extr${h}_abriMini`]=''; e[`extr${h}_abriMiniHeure`]='';
+    e[`extr${h}_abriMaxi`]=''; e[`extr${h}_abriMaxiHeure`]='';
+    SOIL_DEPTHS.forEach(d=> e[`sol${h}_${d}`]='');
+  });
+  return e;
+}
+
+/* Reprise des carnets saisis avant la mise en conformité : les anciennes cases
+   uniques du Piché deviennent la ligne 06h, et l'ancien couple Tn/Tx du jour
+   devient la ligne 06h des températures extrêmes. Aucune donnée n'est perdue et
+   la migration ne s'applique que si la nouvelle ligne est encore vide. */
+function migrateExtras(x){
+  const vide = k => !String(x[k]||'').trim();
+  if(vide('evapPiche06_prec') && vide('evapPiche06_lect') && vide('evapPiche06_diff')){
+    if(String(x.evapPicheLecturePrecedente||'').trim()) x.evapPiche06_prec = x.evapPicheLecturePrecedente;
+    if(String(x.evapPicheLecture||'').trim())           x.evapPiche06_lect = x.evapPicheLecture;
+    if(String(x.evapPiche||'').trim())                  x.evapPiche06_diff = x.evapPiche;
+  }
+  if(vide('extr06_abriMini') && vide('extr06_abriMaxi')){
+    if(String(x.tempMiniAbri||'').trim()){ x.extr06_abriMini = x.tempMiniAbri; x.extr06_abriMiniHeure = x.tempMiniAbriHeure||''; }
+    if(String(x.tempMaxiAbri||'').trim()){ x.extr06_abriMaxi = x.tempMaxiAbri; x.extr06_abriMaxiHeure = x.tempMaxiAbriHeure||''; }
+    if(String(x.tempSolMini||'').trim()) x.extr06_solMini = x.tempSolMini;
+    if(String(x.tempSolMaxi||'').trim()) x.extr06_solMaxi = x.tempSolMaxi;
+  }
+  // Température du sol : les anciennes cases (10cm à 6/12/18h, puis 20/50/100cm sans
+  // heure) rejoignent la grille heures x profondeurs. Les profondeurs qui n'avaient
+  // pas d'heure sont rattachées au relevé de 06 TU, le relevé principal du matin.
+  const grilleSolVide = EXTREME_HOURS_ROWS.every(h=> SOIL_DEPTHS.every(d=> !String(x[`sol${h}_${d}`]||'').trim()));
+  if(grilleSolVide){
+    const report = (src, dst)=>{ if(String(x[src]||'').trim()) x[dst] = x[src]; };
+    report('sol10_6h','sol06_10'); report('sol10_12h','sol12_10'); report('sol10_18h','sol18_10');
+    report('sol20','sol06_20'); report('sol50','sol06_50'); report('sol100','sol06_100');
+  }
+  return x;
+}
+
+/* Différences, totaux et extrêmes du jour : tout ce que l'observateur ne doit plus
+   calculer à la main. Renvoie true si au moins une valeur a changé. */
+function recomputeExtrasDerived(rec){
+  const x = rec.extras, avant = JSON.stringify(x);
+  const put = (k,v)=>{ x[k] = (v===null||v===undefined) ? '' : String(v); };
+  const arrondi = v => Math.round(v*10)/10;
+
+  // Piché : différence = lecture du jour - lecture précédente, pour 06h et 18h.
+  let picheTotal = null;
+  EVAP_HOURS.forEach(h=>{
+    const p = toNum(x[`evapPiche${h}_prec`]), l = toNum(x[`evapPiche${h}_lect`]);
+    if(p!==null && l!==null){
+      const d = arrondi(l - p);
+      put(`evapPiche${h}_diff`, d);
+      picheTotal = (picheTotal===null?0:picheTotal) + d;
+    }
+  });
+  if(picheTotal!==null) put('evapPiche', arrondi(picheTotal));
+
+  // Bac classe A : D = h1 - h2, évaporation = D + nouvelle lecture (appoint éventuel).
+  let bacTotal = null;
+  EVAP_HOURS.forEach(h=>{
+    const h1 = toNum(x[`bac${h}_h1`]), h2 = toNum(x[`bac${h}_h2`]);
+    if(h1!==null && h2!==null){
+      const d = arrondi(h1 - h2);
+      put(`bac${h}_diff`, d);
+      const r = toNum(x[`bac${h}_nouvLecture`]);
+      const evap = arrondi(d + (r===null ? 0 : r));
+      put(`bac${h}_evap`, evap);
+      bacTotal = (bacTotal===null?0:bacTotal) + evap;
+    }
+  });
+  if(bacTotal!==null) put('evapBac', arrondi(bacTotal));
+
+  // Insolation : total = matin + soir.
+  const im = toNum(x.insolationMatin), is = toNum(x.insolationSoir);
+  if(im!==null || is!==null) put('insolationTotal', arrondi((im||0)+(is||0)));
+
+  // Précipitations : total 24h = (18h veille -> 6h) + (6h -> 18h), idem pour la durée.
+  const p1 = toNum(x.precip18h6h), p2 = toNum(x.precip6h18h);
+  if(p1!==null || p2!==null) put('precipitation24h', arrondi((p1||0)+(p2||0)));
+  const d1 = toNum(x.duree18h6h), d2 = toNum(x.duree6h18h);
+  if(d1!==null || d2!==null) put('duree24h', arrondi((d1||0)+(d2||0)));
+
+  // Tn / Tx du jour = le plus bas des mini et le plus haut des maxi des 4 relevés.
+  const collecte = (suffixe)=>{
+    const out = [];
+    EXTREME_HOURS_ROWS.forEach(h=>{
+      const v = toNum(x[`extr${h}_${suffixe}`]);
+      if(v!==null) out.push({v, heure: x[`extr${h}_${suffixe}Heure`] || ''});
+    });
+    return out;
+  };
+  const mini = collecte('abriMini'), maxi = collecte('abriMaxi');
+  if(mini.length){
+    const m = mini.reduce((a,b)=> b.v<a.v?b:a);
+    put('tempMiniAbri', m.v); if(m.heure) put('tempMiniAbriHeure', m.heure);
+  }
+  if(maxi.length){
+    const m = maxi.reduce((a,b)=> b.v>a.v?b:a);
+    put('tempMaxiAbri', m.v); if(m.heure) put('tempMaxiAbriHeure', m.heure);
+  }
+  const solMini = collecte('solMini'), solMaxi = collecte('solMaxi');
+  if(solMini.length) put('tempSolMini', Math.min(...solMini.map(o=>o.v)));
+  if(solMaxi.length) put('tempSolMaxi', Math.max(...solMaxi.map(o=>o.v)));
+
+  // Le tableau climatologique mensuel lit encore les anciennes cases de sol : on les
+  // tient à jour depuis la grille, pour que rien ne se perde côté TCM.
+  const premierRenseigne = (d)=>{
+    for(const h of EXTREME_HOURS_ROWS){ const v = x[`sol${h}_${d}`]; if(String(v||'').trim()) return v; }
+    return null;
+  };
+  if(String(x.sol06_10||'').trim()) put('sol10_6h',  x.sol06_10);
+  if(String(x.sol12_10||'').trim()) put('sol10_12h', x.sol12_10);
+  if(String(x.sol18_10||'').trim()) put('sol10_18h', x.sol18_10);
+  ['20','50','100'].forEach(d=>{ const v = premierRenseigne(d); if(v!==null) put(`sol${d}`, v); });
+
+  return JSON.stringify(x) !== avant;
+}
+
+/* Rafraîchit à l'écran les seules cases recalculées, sans reconstruire toute la
+   page : l'observateur ne perd ni son focus ni sa position de défilement. */
+function refreshDerivedExtraInputs(){
+  if(!state.carnetRecord) return;
+  const x = state.carnetRecord.extras;
+  document.querySelectorAll('[data-extra]').forEach(el=>{
+    if(el === document.activeElement) return;   // ne jamais écraser la case en cours de frappe
+    const k = el.dataset.extra;
+    if(!(k in x)) return;
+    const attendu = el.dataset.tenths ? tenthsToInput(x[k]) : String(x[k]==null?'':x[k]);
+    if(el.value !== attendu){
+      el.value = attendu;
+      if(el.dataset.tenths) el.title = tenthsTitle(x[k]);
+    }
+  });
 }
 function emptyCarnet(stationId, date){
   const hours={}; ALL_HOURS.forEach(h=>hours[h]=emptyHour());
@@ -745,9 +1057,10 @@ function withDefaults(rec, stationId, date){
   const out = {...base, ...rec};
   out.hours = {...base.hours};
   ALL_HOURS.forEach(h=>{ out.hours[h] = {...base.hours[h], ...(rec.hours && rec.hours[h] ? rec.hours[h] : {})}; });
-  out.extras = {...base.extras, ...(rec.extras||{})};
+  out.extras = migrateExtras({...base.extras, ...(rec.extras||{})});
   out.grainsOrages = rec.grainsOrages || [];
-  out.observationsSpeciales = rec.observationsSpeciales || [];
+  out.observationsSpeciales = (rec.observationsSpeciales || []).map(migrateObsSpeciale);
+  recomputeExtrasDerived(out);
   return out;
 }
 function emptyDayAgg(date){
@@ -1024,27 +1337,38 @@ Structure attendue :
  "date": "AAAA-MM-JJ ou null",
  "hours": { "HH": { ...champs ci-dessous... }, ... },
  "grainsOrages": [ { "heureCrochet":"","dirApparitionCb":"","coupVentDirAvant":"","coupVentDirLettres":"","coupVentVitMax":"","dirVentApres":"","dirDisparitionCb":"","baroVariation":"","baroValeurFinale":"","hygroVariation":"","hygroValeurFinale":"","thermoVariation":"","thermoValeurFinale":"","diametreGrelons":"","signes":"" } ],
- "observationsSpeciales": [ { "heure":"", "description":"" } ],
+ "observationsSpeciales": [ { "phenomene":"", "intensite":"", "heureDebut":"", "heureFin":"", "description":"" } ],
  "extras": { ...champs ci-dessous... }
 }
 
 IMPORTANT : n'inclus dans "hours" QUE les heures (format "00".."23") où au moins une valeur est réellement lisible sur la photo — omets complètement les heures sans donnée visible. De même, "grainsOrages" et "observationsSpeciales" restent des tableaux vides [] s'il n'y a aucun événement visible.
+
+UNITÉS — le carnet papier écrit les colonnes « 1/10 » SANS virgule (« 210 » = 21,0 °C, « 042 » = 4,2 mb). Dans le JSON, renvoie la VALEUR RÉELLE avec le point décimal : lis « 210 » sur la photo et écris 21.0, lis « 083 » et écris 8.3. Les colonnes concernées sont Tsec, Tw, tensionVapeur, pointRosee, thermoEnregT, mesuresIntermediaires, toutes les pressions, les températures du sol, les extrêmes, l'évaporation et l'insolation. En revanche humidite et hygroEnregU sont déjà des pourcentages entiers : recopie-les tels quels.
+Les heures se renvoient au format "HH:MM" (ex. "06:00").
 
 Champs de chaque heure (laisser "" si illisible) :
 ventDirLettres (N/NE/E/SE/S/SW/W/NW/Calme), ventVitMs, ventDirDizaines (dizaines de degrés, ex "04"), ventVitNoeuds, visibiliteDam, visibiliteCode, phenomenes (texte), tempsPresent (code W), tempsPasse (code W1/2), CL, CM, CH, N (nébulosité octas 0-8, 9=obscurci), nuagesDesc (hauteur/genre/espèce/secteur, texte libre), groupeNuages1..4 (codes N5C5h5 si présents), intensitePrecip (mm/h), mesuresIntermediaires, Tsec (°C), Tw (°C), humidite (%), tensionVapeur (mb), pointRosee (°C), thermoEnregT, hygroEnregU, pressionEnregLue, reperesMinutes, tempBarometre, pressionLue (mb), pressionReduite0, tempMoyT12, niveauMerPression (mb), evolution24h, initialesObs.
 
 Champs "extras" (données uniques du jour, laisser "" si illisible ; les champs phenXxx sont des booléens true/false selon si le phénomène a été observé/coché ce jour) :
 precip18h6h, precip6h18h, precipitation24h, duree18h6h, duree6h18h, duree24h,
-evapPicheLecturePrecedente, evapPicheLecture, evapPiche,
-sol10_6h, sol10_12h, sol10_18h, sol20, sol50, sol100,
+évaporation Piché (colonnes 72/73/74), un relevé à 06 et un à 18 TU :
+evapPiche06_prec, evapPiche06_lect, evapPiche06_diff, evapPiche18_prec, evapPiche18_lect, evapPiche18_diff, evapPiche (total du jour),
+température du sol (colonnes 75 à 78), grille heures x profondeurs :
+sol00_10, sol00_20, sol00_50, sol00_100, sol06_10, sol06_20, sol06_50, sol06_100,
+sol12_10, sol12_20, sol12_50, sol12_100, sol18_10, sol18_20, sol18_50, sol18_100,
 bac06_h1, bac06_h2, bac06_diff, bac06_nouvLecture, bac06_evap, bac06_tempEau,
 bac18_h1, bac18_h2, bac18_diff, bac18_nouvLecture, bac18_evap, bac18_tempEau, evapBac,
 insolationMatin, insolationSoir, insolationTotal, rayonnementMatin, rayonnementSoir, rayonnementTotal,
-tempSolMini, tempSolMaxi, tempMiniAbri, tempMiniAbriHeure, tempMaxiAbri, tempMaxiAbriHeure,
+températures extrêmes (colonnes 96 à 102), une ligne par heure de relevé 00/06/12/18 :
+extr00_solMini, extr00_solMaxi, extr00_abriMini, extr00_abriMiniHeure, extr00_abriMaxi, extr00_abriMaxiHeure,
+extr06_solMini, extr06_solMaxi, extr06_abriMini, extr06_abriMiniHeure, extr06_abriMaxi, extr06_abriMaxiHeure,
+extr12_solMini, extr12_solMaxi, extr12_abriMini, extr12_abriMiniHeure, extr12_abriMaxi, extr12_abriMaxiHeure,
+extr18_solMini, extr18_solMaxi, extr18_abriMini, extr18_abriMiniHeure, extr18_abriMaxi, extr18_abriMaxiHeure,
 humiditeMaxJour, humiditeMaxJourHeure, humiditeMinJour, humiditeMinJourHeure,
 pressMatinMinValeur, pressMatinMinHeure, pressMatinMaxValeur, pressMatinMaxHeure,
 pressSoirMinValeur, pressSoirMinHeure, pressSoirMaxValeur, pressSoirMaxHeure,
-lectureCorrigeeEnreg, ventMaxInstDir, ventMaxInstVit, ventMaxInstHeure, ventMoyenDir, ventMoyenVit, ventMoyenHeure,
+valeurs extrêmes du jour (colonnes 109 à 117), chaque valeur avec SON heure :
+lectureCorrigeeEnreg, lectureCorrigeeEnregHeure, ventMaxInstDir, ventMaxInstVit, ventMaxInstHeure, ventMoyenDir, ventMoyenVit, ventMoyenHeure,
 visibiliteMin, visibiliteMinHeure, hauteurNuagesMin, hauteurNuagesMinHeure,
 phenGrele, phenOrageSansTonnerre, phenOrageAvecTonnerre, phenEclairsSansTonnerre, phenBrouillard, phenBrumeHumide, phenBrumeSeche, phenChasseSable, phenRosee, phenGeleeBlanche, phenVentContinu, phenVentFort16,
 phenomenesRemarquables.
@@ -1471,6 +1795,9 @@ function hourCell(rec, h, f){
   if(f.type==='combo'){
     return `<td><input type="text" data-hour="${h}" data-field="${f.k}" data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off" value="${escapeAttr(val)}"></td>`;
   }
+  if(TENTHS_HOUR_FIELDS.has(f.k)){
+    return `<td><input type="text" inputmode="numeric" class="tenths-input" data-hour="${h}" data-field="${f.k}" data-tenths="1" value="${escapeAttr(tenthsToInput(val))}" title="${escapeAttr(tenthsTitle(val))}"></td>`;
+  }
   return `<td><input type="text" data-hour="${h}" data-field="${f.k}" value="${escapeAttr(val)}"></td>`;
 }
 function renderDatalists(){
@@ -1492,19 +1819,242 @@ function extraField(key, label, rec, width, combo){
   if(combo){
     return `<div class="field"><label>${label}</label><input type="text" data-extra="${key}" data-combo="${combo}" list="dl-${combo}" autocomplete="off" value="${escapeAttr(val)}" ${width?`style="width:${width}px;"`:''}></div>`;
   }
+  if(isTenthsExtra(key)){
+    return `<div class="field"><label>${label}</label>
+      <input type="text" inputmode="numeric" class="tenths-input" data-extra="${key}" data-tenths="1" value="${escapeAttr(tenthsToInput(val))}" title="${escapeAttr(tenthsTitle(val))}" ${width?`style="width:${width}px;"`:''}>
+      ${tenthsHint(val)}</div>`;
+  }
+  if(isHeureExtra(key)){
+    return `<div class="field"><label>${label}</label>${heureInput(`data-extra="${key}" data-heure="1"`, val, 'width:110px;')}</div>`;
+  }
   return `<div class="field"><label>${label}</label><input type="text" data-extra="${key}" value="${escapeAttr(val)}" ${width?`style="width:${width}px;"`:''}></div>`;
 }
+function eventFieldInput(f, ev, idx, arrayKey){
+  const common = `data-event-field="${f.k}" data-event-idx="${idx}" data-event-array="${arrayKey}"`;
+  if(f.type==='select'){
+    const opts = ['<option value="">—</option>']
+      .concat(f.options.map(o=>`<option value="${escapeAttr(o)}" ${ev[f.k]===o?'selected':''}>${escapeHtml(o)}</option>`));
+    return `<select ${common}>${opts.join('')}</select>`;
+  }
+  if(f.type==='time'){
+    return heureInput(common, ev[f.k], 'width:100px;');
+  }
+  const comboAttrs = f.combo ? `data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off"` : '';
+  const large = f.k==='description' ? 'style="min-width:260px;flex:1;"' : '';
+  return `<input type="text" ${common} ${comboAttrs} value="${escapeAttr(ev[f.k])}" ${large}>`;
+}
+/* Bandeau de durée affiché sous chaque observation spéciale : l'observateur voit
+   immédiatement combien de temps le phénomène a duré, et si la saisie est cohérente. */
+function eventDurationNote(ev){
+  // Le code OMM saisi est retraduit en clair : l'observateur vérifie d'un coup d'œil
+  // qu'il a bien noté le phénomène qu'il voulait.
+  const code = String(ev.phenomene||'').trim();
+  const lib = code ? (WW_CODES.find(c=>c[0]===code)||[])[1] : null;
+  const libelle = lib ? `<span class="phen-libelle">${escapeHtml(code)} — ${escapeHtml(lib)}</span>` : '';
+  const d = phenDuration(ev.heureDebut, ev.heureFin);
+  if(!d){
+    if(String(ev.heureDebut||'').trim() && !String(ev.heureFin||'').trim())
+      return `<div class="event-note pending">⏳ Phénomène en cours — renseignez l'heure de fin pour obtenir la durée. ${libelle}</div>`;
+    return `<div class="event-note">Renseignez le début et la fin pour calculer la durée automatiquement. ${libelle}</div>`;
+  }
+  const minuit = d.apresMinuit ? ' <b>(s’est prolongé après 00 TU)</b>' : '';
+  return `<div class="event-note ok">⏱ Durée : <b>${escapeHtml(d.label)}</b> = <b>${escapeHtml(virgule(d.heures))} h</b>, qui s'écrit <b>${escapeHtml(d.carnet)}</b> dans la colonne 80 du carnet${minuit} ${libelle}</div>`;
+}
+/** Affichage à la française : 1.6 -> 1,6 (l'enregistrement, lui, garde le point). */
+function virgule(v){ return String(v==null?'':v).replace('.', ','); }
+/* Tableau des températures extrêmes, fidèle à la page 4 du carnet : 4 lignes
+   horaires, mini/maxi au sol et sous abri, chaque extrême sous abri accompagné de
+   son heure. Une seule définition, réutilisée par la saisie ET la vue papier, pour
+   qu'elles ne puissent pas diverger. */
+function tempExtremesTable(rec){
+  return `<div class="tbl-wrap"><table class="grid">
+    <thead>
+      <tr><th rowspan="2">Heure<br>TU</th><th colspan="2">Au sol</th><th colspan="4">Sous abri</th></tr>
+      <tr><th>Mini<span class="colnum">96</span></th><th>Maxi<span class="colnum">97</span></th>
+          <th>Mini<span class="colnum">98</span></th><th>Heure<span class="colnum">99</span></th>
+          <th>Maxi<span class="colnum">101</span></th><th>Heure<span class="colnum">102</span></th></tr>
+    </thead>
+    <tbody>
+      ${EXTREME_HOURS_ROWS.map(h=>`<tr class="${(h==='06'||h==='18')?'std-hour':''}">
+        <td class="rowhead">${h}</td>
+        <td>${extraFieldBare(`extr${h}_solMini`, rec)}</td>
+        <td>${extraFieldBare(`extr${h}_solMaxi`, rec)}</td>
+        <td>${extraFieldBare(`extr${h}_abriMini`, rec)}</td>
+        <td>${heureFieldBare(`extr${h}_abriMiniHeure`, rec)}</td>
+        <td>${extraFieldBare(`extr${h}_abriMaxi`, rec)}</td>
+        <td>${heureFieldBare(`extr${h}_abriMaxiHeure`, rec)}</td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+/* Température dans le sol — grille 4 heures x 4 profondeurs, colonnes 75 à 78,
+   exactement comme le bas de la page 3 du carnet. */
+function solTable(rec){
+  return `<div class="tbl-wrap"><table class="grid">
+    <thead><tr><th rowspan="2">Heure<br>TU</th><th colspan="${SOIL_DEPTHS.length}">Profondeurs</th></tr>
+      <tr>${SOIL_DEPTHS.map((d,i)=>`<th>${d} cm<span class="colnum">${75+i}</span></th>`).join('')}</tr></thead>
+    <tbody>
+      ${EXTREME_HOURS_ROWS.map(h=>`<tr class="${(h==='06'||h==='18')?'std-hour':''}">
+        <td class="rowhead">${h}</td>
+        ${SOIL_DEPTHS.map(d=>`<td>${extraFieldBare(`sol${h}_${d}`, rec)}</td>`).join('')}
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+/* Évaporation sous abri (Piché) — colonnes 72 à 74, relevés de 06 et 18 TU. */
+function picheTable(rec){
+  return `<div class="tbl-wrap"><table class="grid">
+    <thead><tr><th>Relevé</th>
+      <th>Lecture précédente<span class="colnum">72</span></th>
+      <th>Lecture<span class="colnum">73</span></th>
+      <th>Différence<span class="colnum">74</span></th></tr></thead>
+    <tbody>
+      ${EVAP_HOURS.map(h=>`<tr><td class="rowhead">${h}</td>
+        <td>${extraFieldBare(`evapPiche${h}_prec`, rec)}</td>
+        <td>${extraFieldBare(`evapPiche${h}_lect`, rec)}</td>
+        <td class="calc-cell">${extraFieldBare(`evapPiche${h}_diff`, rec)}</td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+/* Évaporation Bac classe A — colonnes 82 à 87, relevés de 06 et 18 TU. */
+function bacTable(rec){
+  return `<div class="tbl-wrap"><table class="grid">
+    <thead><tr><th>Relevé</th>
+      <th>Lecture précédente h1<span class="colnum">82</span></th>
+      <th>Lecture h2<span class="colnum">83</span></th>
+      <th>Différence D<span class="colnum">84</span></th>
+      <th>Nouvelle lecture R<span class="colnum">85</span></th>
+      <th>Évaporation D+R<span class="colnum">86</span></th>
+      <th>T° de l'eau<span class="colnum">87</span></th></tr></thead>
+    <tbody>
+      ${EVAP_HOURS.map(h=>`<tr><td class="rowhead">${h}</td>
+        <td>${extraFieldBare(`bac${h}_h1`, rec)}</td>
+        <td>${extraFieldBare(`bac${h}_h2`, rec)}</td>
+        <td class="calc-cell">${extraFieldBare(`bac${h}_diff`, rec)}</td>
+        <td>${extraFieldBare(`bac${h}_nouvLecture`, rec)}</td>
+        <td class="calc-cell">${extraFieldBare(`bac${h}_evap`, rec)}</td>
+        <td>${extraFieldBare(`bac${h}_tempEau`, rec)}</td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+/* Case d'heure. Volontairement en saisie texte et non en <input type="time"> :
+   ce dernier affiche l'heure au format du NAVIGATEUR (un Chrome en anglais écrit
+   « 06:00 AM »), ce qui n'a aucun sens dans un carnet tenu en temps universel.
+   Ici c'est toujours HH:MM sur 24 h, quel que soit le poste. La frappe reste
+   rapide : « 6 », « 0630 » ou « 6h30 » sont acceptés et remis en forme. */
+function heureInput(attrs, value, style){
+  const v = normalizeHeure(value);
+  const invalide = v!=='' && !/^([01]\d|2[0-3]):[0-5]\d$/.test(v);
+  return `<input type="text" inputmode="numeric" class="heure-input${invalide?' invalide':''}" ${attrs}
+    value="${escapeAttr(v)}" placeholder="HH:MM" maxlength="5" autocomplete="off"
+    title="Heure en TU, sur 24 h. Tapez 6, 0630 ou 6h30 : l'application écrit 06:00 ou 06:30."
+    style="${style||''}">`;
+}
+function heureFieldBare(key, rec){
+  return heureInput(`data-extra="${key}" data-heure="1"`, rec.extras[key], 'width:100%;min-width:74px;text-align:center;');
+}
+/** Souligne en rouge une heure que l'application n'a pas su interpréter. */
+function marquerHeureInvalide(el, v){
+  const mauvais = v!=='' && !/^([01]\d|2[0-3]):[0-5]\d$/.test(v);
+  el.classList.toggle('invalide', mauvais);
+  if(mauvais) toast(`Heure non comprise : « ${v} ». Écrivez par exemple 6, 0630 ou 06:30.`, true);
+}
+/* Valeurs extrêmes du jour (0 à 24 h) — bloc du bas de la page 4 du carnet.
+   Deux lignes, VALEUR puis HEURE, et les 9 colonnes 109 à 117 dans l'ordre du
+   formulaire. C'est la ligne HEURE qui manquait entièrement à l'application. */
+function valeursExtremesTable(rec){
+  const v = k => extraFieldBare(k, rec);
+  const hh = k => heureFieldBare(k, rec);
+  return `<div class="tbl-wrap"><table class="grid">
+    <thead>
+      <tr>
+        <th rowspan="3" style="width:64px;"></th>
+        <th rowspan="3">Lecture corrigée<br>de l'enregistreur<span class="colnum">109</span></th>
+        <th colspan="4">Vent maximal</th>
+        <th colspan="2">Humidité relative</th>
+        <th rowspan="3">Visibilité<br>minimale (dam)<span class="colnum">116</span></th>
+        <th rowspan="3">Hauteur minimale<br>des nuages (dam)<span class="colnum">117</span></th>
+      </tr>
+      <tr><th colspan="2">Instantané</th><th colspan="2">Moyen (2 ou 10 mn)</th><th rowspan="2">Min.<span class="colnum">114</span></th><th rowspan="2">Max.<span class="colnum">115</span></th></tr>
+      <tr><th>Direct.<span class="colnum">110</span></th><th>Vitesse<span class="colnum">111</span></th>
+          <th>Direct.<span class="colnum">112</span></th><th>Vitesse<span class="colnum">113</span></th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="rowhead">Valeur</td>
+        <td>${v('lectureCorrigeeEnreg')}</td>
+        <td>${v('ventMaxInstDir')}</td><td>${v('ventMaxInstVit')}</td>
+        <td>${v('ventMoyenDir')}</td><td>${v('ventMoyenVit')}</td>
+        <td>${v('humiditeMinJour')}</td><td>${v('humiditeMaxJour')}</td>
+        <td>${v('visibiliteMin')}</td><td>${v('hauteurNuagesMin')}</td>
+      </tr>
+      <tr>
+        <td class="rowhead">Heure</td>
+        <td>${hh('lectureCorrigeeEnregHeure')}</td>
+        <td colspan="2">${hh('ventMaxInstHeure')}</td>
+        <td colspan="2">${hh('ventMoyenHeure')}</td>
+        <td>${hh('humiditeMinJourHeure')}</td><td>${hh('humiditeMaxJourHeure')}</td>
+        <td>${hh('visibiliteMinHeure')}</td><td>${hh('hauteurNuagesMinHeure')}</td>
+      </tr>
+    </tbody></table></div>`;
+}
 function renderEventList(list, fields, arrayKey, addLabel){
+  const avecDuree = arrayKey==='observationsSpeciales';
   return `
   ${list.map((ev,idx)=>`
     <div class="event-card" data-event-idx="${idx}" data-event-array="${arrayKey}">
       <button class="small-x event-del" data-del-event="${idx}" data-del-array="${arrayKey}" title="Supprimer">✕</button>
       <div class="row">
-        ${fields.map(f=>`<div class="field"><label>${f.label}</label><input type="text" data-event-field="${f.k}" data-event-idx="${idx}" data-event-array="${arrayKey}" ${f.combo?`data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off"`:''} value="${escapeAttr(ev[f.k])}"></div>`).join('')}
+        ${fields.map(f=>`<div class="field"><label>${f.label}</label>${eventFieldInput(f, ev, idx, arrayKey)}</div>`).join('')}
       </div>
+      ${avecDuree ? eventDurationNote(ev) : ''}
     </div>`).join('')}
   <button class="btn sm" data-add-event="${arrayKey}">${addLabel}</button>
+  ${avecDuree && list.length ? `<p class="help">Un phénomène qui commence avant minuit et se termine après est géré automatiquement : saisissez simplement l'heure réelle de fin (ex. début 23:40, fin 01:15 = 1 h 35 min).</p>` : ''}
   `;
+}
+/* Somme des durées des phénomènes du jour, en 1/10 h — sert de contrôle face à la
+   colonne 80 « durée des précipitations » que l'observateur saisit par ailleurs. */
+function totalDureePhenomenes(list){
+  let total = 0, compte = 0;
+  (list||[]).forEach(ev=>{
+    const d = phenDuration(ev.heureDebut, ev.heureFin);
+    if(d){ total += d.minutes; compte++; }
+  });
+  if(!compte) return null;
+  const heures = String(Math.round(total/6)/10);
+  return {compte, heures, carnet: tenthsToInput(heures), minutes: total};
+}
+/* Résumé lisible d'un phénomène : « 14:20 → 15:05 (45 min) — Averse de pluie, Forte ». */
+function describeObsSpeciale(ev){
+  const o = migrateObsSpeciale(ev||{});
+  const parts = [];
+  const d = phenDuration(o.heureDebut, o.heureFin);
+  if(o.heureDebut && o.heureFin)      parts.push(`${o.heureDebut} → ${o.heureFin}${d?` (${d.label})`:''}`);
+  else if(o.heureDebut)               parts.push(`à partir de ${o.heureDebut}`);
+  else if(o.heureFin)                 parts.push(`jusqu'à ${o.heureFin}`);
+  if(o.phenomene){
+    const lib = (WW_CODES.find(c=>c[0]===String(o.phenomene).trim())||[])[1];
+    parts.push(lib ? `${o.phenomene} — ${lib}` : o.phenomene);
+  }
+  if(o.intensite)   parts.push(o.intensite);
+  if(o.description) parts.push(o.description);
+  return parts.join(' · ');
+}
+function attachReportDureeBtn(){
+  const b = document.getElementById('reportDureeBtn');
+  if(!b) return;
+  b.onclick = ()=>{
+    const t = totalDureePhenomenes(state.carnetRecord.observationsSpeciales);
+    if(!t) return;
+    state.carnetRecord.extras.duree24h = t.heures;   // enregistré en heures décimales
+    state.carnetDirty = true;
+    refreshDerivedExtraInputs();
+    toast(`Durée totale 24h renseignée : ${virgule(t.heures)} h, écrite ${t.carnet} sur le carnet.`);
+  };
+}
+function renderDureeRecap(list){
+  const t = totalDureePhenomenes(list);
+  if(!t) return '';
+  return `<div class="recap-box">Total des phénomènes chronométrés : <b>${t.compte}</b> — durée cumulée <b>${escapeHtml(virgule(t.heures))} h</b> (soit <b>${escapeHtml(t.carnet)}</b> sur le carnet).
+    <button type="button" class="btn ghost sm" id="reportDureeBtn" title="Recopier ce total dans « Durée totale 24h » de la section 7">↧ Reporter dans la durée 24h</button></div>`;
 }
 function hourHasData(hourObj){
   return Object.values(hourObj).some(v=> v!==undefined && v!==null && String(v).trim()!=='');
@@ -1516,6 +2066,11 @@ function rapideField(rec, f){
   }
   const val = rec.hours[state.rapideHour][f.k];
   const comboAttrs = f.type==='combo' ? `data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off"` : '';
+  if(TENTHS_HOUR_FIELDS.has(f.k)){
+    return `<div class="field"><label>${f.label}</label>
+      <input type="text" inputmode="numeric" class="tenths-input" data-hour="${state.rapideHour}" data-field="${f.k}" data-tenths="1" value="${escapeAttr(tenthsToInput(val))}" title="${escapeAttr(tenthsTitle(val))}">
+      ${tenthsHint(val)}</div>`;
+  }
   return `<div class="field"><label>${f.label}</label><input type="text" data-hour="${state.rapideHour}" data-field="${f.k}" ${comboAttrs} value="${escapeAttr(val)}"></div>`;
 }
 function renderRapideView(station){
@@ -1586,7 +2141,11 @@ function renderCarnetBody(rec){
   ${section('tourHorizon', '1. Tour d\u2019horizon — vent, visibilité, nébulosité, temps', hourTable(rec, FIELDS_TOUR))}
   ${section('nuages', '2. Nuages — hauteur, genre, groupes significatifs', hourTable(rec, FIELDS_NUAGES, "Pour chaque couche significative (N5C5h5 #1 à #4) : les 3 petites cases se remplissent séparément (quantité, genre, hauteur) et se combinent toutes seules. Astuce : si vous décrivez le nuage dans la 1ère colonne avec les abréviations officielles OMM (ex. \"Cu con 3/8 600m\" = Cumulus congestus, 3 octas, 600m), l'app remplit les codes toute seule dès que vous quittez la case — vérifiez juste le résultat."))}
   ${section('grains', '3. Grains, orages, grêles (événements)', renderEventList(rec.grainsOrages, GRAIN_FIELDS, 'grainsOrages', '+ Ajouter un événement'), rec.grainsOrages.length||'')}
-  ${section('obsSpeciales', '4. Observations spéciales (événements)', renderEventList(rec.observationsSpeciales, OBS_SPECIALE_FIELDS, 'observationsSpeciales', '+ Ajouter une observation'), rec.observationsSpeciales.length||'')}
+  ${section('obsSpeciales', '4. Observations spéciales — début et fin des phénomènes',
+    `<p class="help">Chaque phénomène se note par son <b>heure de début</b> et son <b>heure de fin</b> en TU. La durée se calcule toute seule, y compris quand le phénomène franchit minuit, et se convertit en 1/10 h pour la colonne 80 du carnet.</p>
+     ${renderEventList(rec.observationsSpeciales, OBS_SPECIALE_FIELDS, 'observationsSpeciales', '+ Ajouter un phénomène')}
+     <div id="obsDureeRecap">${renderDureeRecap(rec.observationsSpeciales)}</div>`,
+    rec.observationsSpeciales.length||'')}
   ${section('precipTemp', '5. Précipitations, température et humidité', hourTable(rec, FIELDS_PRECIP_TEMP, 'Tension de vapeur, humidité et point de rosée se calculent automatiquement dès que T sec + T mouillé sont renseignés (ou T sec + humidité si vous utilisez un hygromètre direct) — formule OMM (Guide CIMO N°8, vérifiée contre l\u2019exemple officiel). Suppose un psychromètre ventilé ; un abri non ventilé peut donner une humidité réelle légèrement supérieure (~2-3%).'))}
   ${section('pression', '6. Pression atmosphérique', hourTable(rec, FIELDS_PRESSION, 'Le niveau mer se calcule automatiquement depuis la pression lue, l\u2019altitude de la station et la température — formule hypsométrique standard (gradient 6,5°C/km). Précision typique : à 1-2 hPa près (la méthode officielle complète ajoute une correction d\u2019humidité et une moyenne sur 12h que cette version simplifiée n\u2019inclut pas) — vérifiez contre votre table de réduction habituelle pour un usage officiel. La pression réduite à 0° (correction du baromètre à mercure) reste à saisir à la main.'))}
 
@@ -1600,43 +2159,18 @@ function renderCarnetBody(rec){
       ${extraField('duree24h','Durée totale 24h (h, 1/10)', rec)}
     </div>`)}
 
-  ${section('evapPiche', '8. Évaporation sous abri (Piché)', `
-    <div class="row">
-      ${extraField('evapPicheLecturePrecedente','Lecture précédente (1/10mm)', rec)}
-      ${extraField('evapPicheLecture','Lecture (1/10mm)', rec)}
-      ${extraField('evapPiche','Évaporation Piché du jour (mm)', rec)}
-    </div>`)}
+  ${section('evapPiche', '8. Évaporation sous abri (Piché) — 06 et 18 TU', `
+    <p class="help">Un relevé à <b>06 TU</b> et un à <b>18 TU</b>, comme sur le carnet. Saisissez la <b>lecture précédente</b> puis la <b>lecture du jour</b> : la <b>différence</b> et le total quotidien se calculent tout seuls. Valeurs en 1/10 mm — tapez <b>158</b> pour 15,8 mm.</p>
+    ${picheTable(rec)}
+    <div class="row" style="margin-top:10px;">${extraField('evapPiche','Évaporation Piché du jour — total (mm)', rec)}</div>`)}
 
-  ${section('sol', '9. Température dans le sol', `
-    <div class="row">
-      ${extraField('sol10_6h','10cm à 6h TU (°C)', rec)}
-      ${extraField('sol10_12h','10cm à 12h TU (°C)', rec)}
-      ${extraField('sol10_18h','10cm à 18h TU (°C)', rec)}
-      ${extraField('sol20','20cm (°C)', rec)}
-      ${extraField('sol50','50cm (°C)', rec)}
-      ${extraField('sol100','100cm (°C)', rec)}
-    </div>`)}
+  ${section('sol', '9. Température dans le sol — 00/06/12/18 TU', `
+    <p class="help">Grille heures × profondeurs, comme le carnet. Températures en 1/10 — tapez <b>233</b> pour 23,3 °C.</p>
+    ${solTable(rec)}`)}
 
   ${section('bac', '10. Évaporation Bac classe A', `
-    <div class="tbl-wrap"><table class="grid"><thead><tr><th>Obs.</th><th>Lecture h1</th><th>Lecture h2</th><th>Différence D</th><th>Nouv. lecture R</th><th>Évaporation D+R</th><th>T° eau</th></tr></thead>
-    <tbody>
-      <tr><td class="rowhead">06h</td>
-        <td><input type="text" data-extra="bac06_h1" value="${escapeAttr(rec.extras.bac06_h1)}"></td>
-        <td><input type="text" data-extra="bac06_h2" value="${escapeAttr(rec.extras.bac06_h2)}"></td>
-        <td><input type="text" data-extra="bac06_diff" value="${escapeAttr(rec.extras.bac06_diff)}"></td>
-        <td><input type="text" data-extra="bac06_nouvLecture" value="${escapeAttr(rec.extras.bac06_nouvLecture)}"></td>
-        <td><input type="text" data-extra="bac06_evap" value="${escapeAttr(rec.extras.bac06_evap)}"></td>
-        <td><input type="text" data-extra="bac06_tempEau" value="${escapeAttr(rec.extras.bac06_tempEau)}"></td>
-      </tr>
-      <tr><td class="rowhead">18h</td>
-        <td><input type="text" data-extra="bac18_h1" value="${escapeAttr(rec.extras.bac18_h1)}"></td>
-        <td><input type="text" data-extra="bac18_h2" value="${escapeAttr(rec.extras.bac18_h2)}"></td>
-        <td><input type="text" data-extra="bac18_diff" value="${escapeAttr(rec.extras.bac18_diff)}"></td>
-        <td><input type="text" data-extra="bac18_nouvLecture" value="${escapeAttr(rec.extras.bac18_nouvLecture)}"></td>
-        <td><input type="text" data-extra="bac18_evap" value="${escapeAttr(rec.extras.bac18_evap)}"></td>
-        <td><input type="text" data-extra="bac18_tempEau" value="${escapeAttr(rec.extras.bac18_tempEau)}"></td>
-      </tr>
-    </tbody></table></div>
+    <p class="help">D = h1 − h2 se calcule tout seul, et l'évaporation = D + nouvelle lecture (l'appoint d'eau, s'il y en a eu). Valeurs en 1/10 — tapez <b>070</b> pour 7,0.</p>
+    ${bacTable(rec)}
     <div class="row" style="margin-top:10px;">${extraField('evapBac','Évaporation Bac totale du jour (mm)', rec)}</div>`)}
 
   ${section('insolation', '11. Insolation et rayonnement global', `
@@ -1649,14 +2183,18 @@ function renderCarnetBody(rec){
       ${extraField('rayonnementTotal','Rayonnement total', rec)}
     </div>`)}
 
-  ${section('tempExtremes', '12. Températures extrêmes (sol et sous abri)', `
-    <div class="row">
-      ${extraField('tempSolMini','Tn au sol (°C)', rec)}
-      ${extraField('tempSolMaxi','Tx au sol (°C)', rec)}
-      ${extraField('tempMiniAbri','Tn sous abri (°C)', rec)}
+  ${section('tempExtremes', '12. Températures extrêmes (sol et sous abri) — 00/06/12/18 TU', `
+    <p class="help">Une ligne par heure de relevé, comme sur la page 4 du carnet. Les <b>Tn et Tx de la journée</b> affichés dessous s'en déduisent tout seuls (plus bas des mini, plus haut des maxi) et alimentent le tableau climatologique mensuel. Températures en 1/10 — tapez <b>334</b> pour 33,4 °C.</p>
+    ${tempExtremesTable(rec)}
+    <div class="row" style="margin-top:12px;">
+      ${extraField('tempMiniAbri','Tn du jour sous abri (auto)', rec)}
       ${extraField('tempMiniAbriHeure','Heure Tn', rec)}
-      ${extraField('tempMaxiAbri','Tx sous abri (°C)', rec)}
+      ${extraField('tempMaxiAbri','Tx du jour sous abri (auto)', rec)}
       ${extraField('tempMaxiAbriHeure','Heure Tx', rec)}
+      ${extraField('tempSolMini','Tn au sol du jour (auto)', rec)}
+      ${extraField('tempSolMaxi','Tx au sol du jour (auto)', rec)}
+    </div>
+    <div class="row" style="margin-top:12px;">
       ${extraField('humiditeMaxJour','Ux — humidité max (%)', rec)}
       ${extraField('humiditeMaxJourHeure','Heure Ux', rec)}
       ${extraField('humiditeMinJour','Un — humidité min (%)', rec)}
@@ -1677,19 +2215,8 @@ function renderCarnetBody(rec){
     </div>`)}
 
   ${section('valeursExtremes', '14. Valeurs extrêmes du jour (vent, visibilité, nuages)', `
-    <div class="row">
-      ${extraField('lectureCorrigeeEnreg','Lecture corrigée enregistreur', rec)}
-      ${extraField('ventMaxInstDir','Vent max instantané — dir.', rec, null, 'dir')}
-      ${extraField('ventMaxInstVit','Vent max instantané — vit. (m/s)', rec)}
-      ${extraField('ventMaxInstHeure','Vent max instantané — heure', rec)}
-      ${extraField('ventMoyenDir','Vent moyen (2/10mn) — dir.', rec, null, 'dir')}
-      ${extraField('ventMoyenVit','Vent moyen (2/10mn) — vit.', rec)}
-      ${extraField('ventMoyenHeure','Vent moyen — heure', rec)}
-      ${extraField('visibiliteMin','Visibilité minimale (dam)', rec)}
-      ${extraField('visibiliteMinHeure','Heure visib. min.', rec)}
-      ${extraField('hauteurNuagesMin','Hauteur min. des nuages (dam)', rec)}
-      ${extraField('hauteurNuagesMinHeure','Heure hauteur min.', rec)}
-    </div>`)}
+    <p class="help">Bloc du bas de la page 4 du carnet : chaque valeur extrême de la journée va avec <b>l'heure à laquelle elle a été atteinte</b>. Les humidités min/max sont reprises de la section 12.</p>
+    ${valeursExtremesTable(rec)}`)}
 
   ${section('phenomenesJour', '15. Phénomènes observés ce jour (pour comptage mensuel)', `
     <div class="check-grid">
@@ -1746,7 +2273,12 @@ function paperHourTable(rec, fields, extraHeadRow){
   </table>`;
 }
 function extraFieldBare(key, rec){
-  return `<input type="text" data-extra="${key}" value="${escapeAttr(rec.extras[key])}" style="width:100%;">`;
+  const val = rec.extras[key];
+  if(isTenthsExtra(key)){
+    return `<input type="text" inputmode="numeric" class="tenths-input" data-extra="${key}" data-tenths="1" value="${escapeAttr(tenthsToInput(val))}" title="${escapeAttr(tenthsTitle(val))}" style="width:100%;">`;
+  }
+  if(isHeureExtra(key)) return heureFieldBare(key, rec);
+  return `<input type="text" data-extra="${key}" value="${escapeAttr(val)}" style="width:100%;">`;
 }
 function paperPage1(rec, station){
   const fields = FIELDS_TOUR.filter(f=> f.k!=='groupeNhClCmCh' && f.k!=='notes');
@@ -1792,25 +2324,12 @@ function paperPage3(rec, station){
       ${extraField('precip6h18h', '6h→18h — mm', rec)} ${extraField('duree6h18h', 'Durée (h)', rec)}
       ${extraField('precipitation24h', '0h→24h — mm', rec)} ${extraField('duree24h', 'Durée (h)', rec)}
     </div>
-    <h3>Évaporation sous abri (Piché)</h3>
-    <div class="mini-grid">
-      ${extraField('evapPicheLecturePrecedente','Lecture précédente', rec)}
-      ${extraField('evapPicheLecture','Lecture', rec)}
-      ${extraField('evapPiche','Différence (évaporation)', rec)}
-    </div>
-    <h3>Température dans le sol (°C)</h3>
-    <div class="mini-grid">
-      ${extraField('sol10_6h','10cm à 6h', rec)} ${extraField('sol10_12h','10cm à 12h', rec)} ${extraField('sol10_18h','10cm à 18h', rec)}
-      ${extraField('sol20','20cm', rec)} ${extraField('sol50','50cm', rec)} ${extraField('sol100','100cm', rec)}
-    </div>
+    <h3>Évaporation sous abri (Piché) — 1/10 mm</h3>
+    ${picheTable(rec)}
+    <h3>Température dans le sol (1/10 °C)</h3>
+    ${solTable(rec)}
     <h3>Évaporation Bac classe A</h3>
-    <table>
-      <thead><tr><th>Obs.</th><th>Lecture h1</th><th>Lecture h2</th><th>Différence D</th><th>Nouv. lecture R</th><th>Évap. D+R</th><th>T° eau</th></tr></thead>
-      <tbody>
-        <tr><td class="rh">06h</td><td>${extraFieldBare('bac06_h1',rec)}</td><td>${extraFieldBare('bac06_h2',rec)}</td><td>${extraFieldBare('bac06_diff',rec)}</td><td>${extraFieldBare('bac06_nouvLecture',rec)}</td><td>${extraFieldBare('bac06_evap',rec)}</td><td>${extraFieldBare('bac06_tempEau',rec)}</td></tr>
-        <tr><td class="rh">18h</td><td>${extraFieldBare('bac18_h1',rec)}</td><td>${extraFieldBare('bac18_h2',rec)}</td><td>${extraFieldBare('bac18_diff',rec)}</td><td>${extraFieldBare('bac18_nouvLecture',rec)}</td><td>${extraFieldBare('bac18_evap',rec)}</td><td>${extraFieldBare('bac18_tempEau',rec)}</td></tr>
-      </tbody>
-    </table>
+    ${bacTable(rec)}
     <div class="mini-grid">${extraField('evapBac','Évaporation Bac totale du jour (mm)', rec)}</div>
     <h3>Insolation — Rayonnement global</h3>
     <div class="mini-grid">
@@ -1829,12 +2348,7 @@ function paperPage4(rec, station){
     <div style="display:flex;gap:14px;align-items:flex-start;">
       <div style="flex:1;">
         <h3>Températures extrêmes</h3>
-        <table>
-          <thead><tr><th></th><th colspan="2">Au sol</th><th colspan="3">Sous abri</th></tr>
-          <tr><th></th><th>Mini</th><th>Maxi</th><th>Mini</th><th>Maxi</th><th>Heure</th></tr></thead>
-          <tbody><tr><td class="rh">Jour</td><td>${extraFieldBare('tempSolMini',rec)}</td><td>${extraFieldBare('tempSolMaxi',rec)}</td>
-            <td>${extraFieldBare('tempMiniAbri',rec)}</td><td>${extraFieldBare('tempMaxiAbri',rec)}</td><td>${extraFieldBare('tempMaxiAbriHeure',rec)}</td></tr></tbody>
-        </table>
+        ${tempExtremesTable(rec)}
       </div>
       <div style="flex:1;">
         <h3>Pressions extrêmes</h3>
@@ -1848,14 +2362,7 @@ function paperPage4(rec, station){
       </div>
     </div>
     <h3>Valeurs extrêmes du jour (0 à 24 heures)</h3>
-    <div class="mini-grid">
-      ${extraField('lectureCorrigeeEnreg','Lecture corrigée enregistreur', rec)}
-      ${extraField('ventMaxInstDir','Vent max. instant. — dir.', rec)} ${extraField('ventMaxInstVit','Vent max. instant. — m/s', rec)} ${extraField('ventMaxInstHeure','Vent max. instant. — heure', rec)}
-      ${extraField('ventMoyenDir','Vent moyen (2/10mn) — dir.', rec)} ${extraField('ventMoyenVit','Vent moyen — m/s', rec)} ${extraField('ventMoyenHeure','Vent moyen — heure', rec)}
-      ${extraField('humiditeMinJour','Humidité min. (%)', rec)} ${extraField('humiditeMaxJour','Humidité max. (%)', rec)}
-      ${extraField('visibiliteMin','Visibilité minimale (dam)', rec)} ${extraField('visibiliteMinHeure','Visibilité min. — heure', rec)}
-      ${extraField('hauteurNuagesMin','Hauteur minimale nuages (dam)', rec)} ${extraField('hauteurNuagesMinHeure','Hauteur min. nuages — heure', rec)}
-    </div>
+    ${valeursExtremesTable(rec)}
     <h3>Phénomènes remarquables — notes diverses</h3>
     <textarea data-extra="phenomenesRemarquables" class="free-text-box" style="width:100%;border:1px solid #333;font-family:var(--font-sans);font-size:10px;">${escapeHtml(rec.extras.phenomenesRemarquables||'')}</textarea>
   </div>`;
@@ -1985,7 +2492,7 @@ function tcmMonthEventsList(dates, m){
     const rec = m.byDate[dateStr];
     if(!rec) return;
     (rec.grainsOrages||[]).forEach(ev=> rows.push({date:dateStr, type:'Grain/orage/grêle', desc: GRAIN_FIELDS.map(f=>ev[f.k]).filter(Boolean).join(' · ')}));
-    (rec.observationsSpeciales||[]).forEach(ev=> rows.push({date:dateStr, type:'Observation spéciale', desc: OBS_SPECIALE_FIELDS.map(f=>ev[f.k]).filter(Boolean).join(' · ')}));
+    (rec.observationsSpeciales||[]).forEach(ev=> rows.push({date:dateStr, type:'Observation spéciale', desc: describeObsSpeciale(ev)}));
   });
   if(!rows.length) return `<p class="help">Aucun événement enregistré ce mois-ci.</p>`;
   return `<table><thead><tr><th>Date</th><th>Type</th><th style="text-align:left;">Détail</th></tr></thead>
@@ -2334,7 +2841,14 @@ function bindEvents(){
   document.querySelectorAll('[data-hour]').forEach(inp=> inp.onchange = (e)=>{
     const h = e.target.dataset.hour, f = e.target.dataset.field;
     if(!f) return; // champs gérés séparément (ex: mini-champs du triplet N5C5h5)
-    state.carnetRecord.hours[h][f] = e.target.value;
+    if(e.target.dataset.tenths){
+      // « 192 » saisi -> 19.2 enregistré, puis on réaffiche la forme carnet normalisée
+      state.carnetRecord.hours[h][f] = inputToTenths(e.target.value);
+      e.target.value = tenthsToInput(state.carnetRecord.hours[h][f]);
+      e.target.title = tenthsTitle(state.carnetRecord.hours[h][f]);
+    } else {
+      state.carnetRecord.hours[h][f] = e.target.value;
+    }
     state.carnetDirty = true; updateSaveIndicator();
     if(f==='visibiliteDam' && !state.carnetRecord.hours[h].visibiliteCode){
       const dam = toNum(e.target.value);
@@ -2405,8 +2919,27 @@ function bindEvents(){
   document.querySelectorAll('[data-suggest-clouds]').forEach(b=> b.onclick = ()=> applyParsedCloudCodes(b.dataset.suggestClouds, true));
   document.querySelectorAll('.nuages-desc-input').forEach(inp=> inp.addEventListener('blur', ()=> applyParsedCloudCodes(inp.dataset.hour, false)));
   document.querySelectorAll('[data-extra]').forEach(inp=> inp.onchange = (e)=>{
-    state.carnetRecord.extras[e.target.dataset.extra] = e.target.value;
+    if(!state.carnetRecord) return;
+    const key = e.target.dataset.extra;
+    if(e.target.dataset.heure){
+      const v = normalizeHeure(e.target.value);
+      state.carnetRecord.extras[key] = v;
+      e.target.value = v;                       // « 630 » saisi devient « 06:30 » affiché
+      marquerHeureInvalide(e.target, v);
+      state.carnetDirty = true; updateSaveIndicator();
+      if(recomputeExtrasDerived(state.carnetRecord)) refreshDerivedExtraInputs();
+      return;
+    }
+    if(e.target.dataset.tenths){
+      state.carnetRecord.extras[key] = inputToTenths(e.target.value);
+      e.target.value = tenthsToInput(state.carnetRecord.extras[key]);
+      e.target.title = tenthsTitle(state.carnetRecord.extras[key]);
+    } else {
+      state.carnetRecord.extras[key] = e.target.value;
+    }
     state.carnetDirty = true; updateSaveIndicator();
+    // Différences, totaux et Tn/Tx du jour se recalculent à chaque frappe utile.
+    if(recomputeExtrasDerived(state.carnetRecord)) refreshDerivedExtraInputs();
   });
   document.querySelectorAll('[data-phen]').forEach(inp=> inp.onchange = (e)=>{
     state.carnetRecord.extras[e.target.dataset.phen] = e.target.checked;
@@ -2435,9 +2968,28 @@ function bindEvents(){
   });
   document.querySelectorAll('[data-event-field]').forEach(inp=> inp.onchange = (e)=>{
     const arr = e.target.dataset.eventArray; const idx = parseInt(e.target.dataset.eventIdx); const f = e.target.dataset.eventField;
-    state.carnetRecord[arr][idx][f] = e.target.value;
+    const ev = state.carnetRecord[arr][idx];
+    if(f==='heureDebut' || f==='heureFin'){
+      ev[f] = normalizeHeure(e.target.value);
+      e.target.value = ev[f];
+      marquerHeureInvalide(e.target, ev[f]);
+    } else {
+      ev[f] = e.target.value;
+    }
     state.carnetDirty = true; updateSaveIndicator();
+    // Met à jour la durée affichée sous la fiche, sans reconstruire toute la page.
+    if(arr==='observationsSpeciales' && (f==='heureDebut' || f==='heureFin')){
+      const carte = e.target.closest('.event-card');
+      const note = carte && carte.querySelector('.event-note');
+      if(note) note.outerHTML = eventDurationNote(ev);
+      const recap = document.getElementById('obsDureeRecap');
+      if(recap){
+        recap.innerHTML = renderDureeRecap(state.carnetRecord.observationsSpeciales);
+        attachReportDureeBtn();
+      }
+    }
   });
+  attachReportDureeBtn();
 
   const saveCarnetBtn = document.getElementById('saveCarnetBtn');
   if(saveCarnetBtn) saveCarnetBtn.onclick = async ()=>{
@@ -2540,8 +3092,17 @@ function bindEvents(){
   if(importBackupInput) importBackupInput.onchange = (e)=>{ if(e.target.files[0]) importFullBackup(e.target.files[0]); };
 }
 function patchHourInput(hour, field, value){
-  const el = document.querySelector(`input[data-hour="${hour}"][data-field="${field}"]`);
-  if(el) el.value = value;
+  // Les valeurs calculées (tension de vapeur, point de rosée, pression au niveau de
+  // la mer) sont stockées en unité réelle : on les réaffiche en dixièmes comme le
+  // reste de la colonne, sinon la case calculée jurerait avec les cases saisies.
+  document.querySelectorAll(`input[data-hour="${hour}"][data-field="${field}"]`).forEach(el=>{
+    if(el.dataset.tenths){
+      el.value = tenthsToInput(value);
+      el.title = tenthsTitle(value);
+    } else {
+      el.value = value;
+    }
+  });
 }
 function attachComboHints(){
   document.querySelectorAll('input[data-combo]').forEach(inp=>{
