@@ -2441,12 +2441,12 @@ const PAPER_COLNUM = {
   pressionEnregLue:'58', reperesMinutes:'59', tempBarometre:'60', pressionLue:'61', pressionReduite0:'62',
   tempMoyT12:'63', niveauMerPression:'64', evolutionCaractere:'65', evolution24h:'66', initialesObs:'67'
 };
-function paperFieldsHeadRow(fields){
-  return `<tr><th style="width:32px;">Heure<br>TU</th>${fields.map(f=>`<th>${f.label}<span class="colnum">${PAPER_COLNUM[f.k]||''}</span></th>`).join('')}</tr>`;
+function paperFieldsHeadRow(fields, numHeure){
+  return `<tr><th style="width:32px;">Heure<br>TU${numHeure?`<span class="colnum">${numHeure}</span>`:''}</th>${fields.map(f=>`<th>${f.label}<span class="colnum">${PAPER_COLNUM[f.k]||''}</span></th>`).join('')}</tr>`;
 }
-function paperHourTable(rec, fields, extraHeadRow){
+function paperHourTable(rec, fields, extraHeadRow, numHeure){
   return `<table>
-    <thead>${extraHeadRow || paperFieldsHeadRow(fields)}</thead>
+    <thead>${extraHeadRow || paperFieldsHeadRow(fields, numHeure)}</thead>
     <tbody>
       ${ALL_HOURS.map(h=> `<tr><td class="rh">${h}</td>${fields.map(f=> hourCell(rec, h, f)).join('')}</tr>`).join('')}
     </tbody>
@@ -2499,7 +2499,7 @@ function paperPage3(rec, station){
   <div class="paper-page">
     ${paperHeader(rec, station, 3)}
     <h3>Précipitations — Température et humidité</h3>
-    ${paperHourTable(rec, fields)}
+    ${paperHourTable(rec, fields, null, '46')}
     <h3>Hauteur d'eau recueillie — Évaporation sous abri — Température dans le sol</h3>
     ${basPage3Table(rec)}
     ${quantiteDureeTable(rec)}
@@ -2516,7 +2516,7 @@ function paperPage4(rec, station){
   <div class="paper-page">
     ${paperHeader(rec, station, 4)}
     <h3>Pression</h3>
-    ${paperHourTable(rec, fields)}
+    ${paperHourTable(rec, fields, null, '57')}
     <div style="display:flex;gap:14px;align-items:flex-start;">
       <div style="flex:1;">
         <h3>Températures extrêmes</h3>
