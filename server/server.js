@@ -103,16 +103,26 @@ app.patch('/api/users/:id/password', requireAdmin, async (req, res) => {
 });
 
 /* ---------------- stations ---------------- */
+// Champs d'en-tête de la page 1 du TCM officiel (identité du poste et de son équipement) —
+// au-delà de id/name/lat/lon/alt/active qui existaient déjà.
+const STATION_META_FIELDS = [
+  'chef_station', 'etat', 'heures_ouverture_debut', 'heures_ouverture_fin',
+  'altitude_capteur_baro', 'cor_inst', 'cor_gravite', 'hauteur_capteur_vent', 'type_capteur_vent',
+  'nature_girouette', 'nature_pluvio', 'cylindre', 'nature_helio', 'nature_evapo', 'nature_actino',
+  'renseignements_equipement', 'fuseau_horaire', 'heure_midi_tu', 'heure_midi_legale'
+];
+const STATION_COLUMNS = ['id', 'name', 'lat', 'lon', 'alt', ...STATION_META_FIELDS].join(', ');
+
 app.get('/api/stations', async (req, res) => {
   try {
-    const r = await pool.query('SELECT id, name, lat, lon, alt FROM stations WHERE active = true ORDER BY name');
+    const r = await pool.query(`SELECT ${STATION_COLUMNS} FROM stations WHERE active = true ORDER BY name`);
     res.json(r.rows);
   } catch (e) { console.error(e); res.status(500).json({ error: e.message }); }
 });
 
 app.get('/api/stations/archived', async (req, res) => {
   try {
-    const r = await pool.query('SELECT id, name, lat, lon, alt FROM stations WHERE active = false ORDER BY name');
+    const r = await pool.query(`SELECT ${STATION_COLUMNS} FROM stations WHERE active = false ORDER BY name`);
     res.json(r.rows);
   } catch (e) { console.error(e); res.status(500).json({ error: e.message }); }
 });
@@ -120,13 +130,17 @@ app.get('/api/stations/archived', async (req, res) => {
 app.post('/api/stations', requireAdmin, async (req, res) => {
   const { id, name, lat, lon, alt } = req.body || {};
   if (!id || !name) return res.status(400).json({ error: 'id et name requis' });
+  const meta = STATION_META_FIELDS.map(f => (req.body || {})[f] || '');
   try {
     await pool.query(
-      `INSERT INTO stations (id, name, lat, lon, alt, active) VALUES ($1,$2,$3,$4,$5,true)
-       ON CONFLICT (id) DO UPDATE SET name = $2, lat = $3, lon = $4, alt = $5`,
-      [id, name, lat || '', lon || '', alt || '']
+      `INSERT INTO stations (id, name, lat, lon, alt, active, ${STATION_META_FIELDS.join(', ')})
+       VALUES ($1,$2,$3,$4,$5,true, ${STATION_META_FIELDS.map((_, i) => `$${i + 6}`).join(', ')})
+       ON CONFLICT (id) DO UPDATE SET name = $2, lat = $3, lon = $4, alt = $5,
+         ${STATION_META_FIELDS.map((f, i) => `${f} = $${i + 6}`).join(', ')}`,
+      [id, name, lat || '', lon || '', alt || '', ...meta]
     );
-    res.json({ id, name, lat: lat || '', lon: lon || '', alt: alt || '' });
+    const r = await pool.query(`SELECT ${STATION_COLUMNS} FROM stations WHERE id = $1`, [id]);
+    res.json(r.rows[0]);
   } catch (e) { console.error(e); res.status(500).json({ error: e.message }); }
 });
 
@@ -155,10 +169,11 @@ app.delete('/api/stations/:id', requireAdmin, async (req, res) => {
 
 /* ---------------- carnet (jours) ---------------- */
 // Retire les informations de localisation/horodatage de saisie pour les comptes non-admin :
-// seuls les administrateurs voient qui/où/quand une heure a été saisie.
+// seuls les administrateurs voient qui/où/quand une heure a été saisie. Le statut "verrouillé"
+// (meta.locked) reste visible de tous — un observateur doit savoir qu'il ne peut plus modifier.
 function stripMetaIfNotAdmin(record, req) {
   if (req.session.user.role === 'admin') return record;
-  if (record.meta) delete record.meta;
+  if (record.meta) record.meta = { locked: !!record.meta.locked };
   if (record.hours) {
     Object.keys(record.hours).forEach(h => { if (record.hours[h] && record.hours[h].meta) delete record.hours[h].meta; });
   }
@@ -173,6 +188,8 @@ function rowToCarnet(row) {
     extras: row.extras,
     grainsOrages: row.grains_orages,
     observationsSpeciales: row.observations_speciales,
+    troublesVisibilite: row.troubles_visibilite || [],
+    precipEvenements: row.precip_evenements || [],
     meta: row.meta || undefined
   };
 }
@@ -184,7 +201,7 @@ app.get('/api/carnet/:stationId', async (req, res) => {
     if (year && month) {
       const first = `${year}-${pad2(parseInt(month, 10))}-01`;
       r = await pool.query(
-        `SELECT station_id, date, hours, extras, grains_orages, observations_speciales, meta
+        `SELECT station_id, date, hours, extras, grains_orages, observations_speciales, troubles_visibilite, precip_evenements, meta
          FROM carnet_days
          WHERE station_id = $1 AND date >= $2::date AND date < ($2::date + interval '1 month')
          ORDER BY date`,
@@ -192,7 +209,7 @@ app.get('/api/carnet/:stationId', async (req, res) => {
       );
     } else {
       r = await pool.query(
-        `SELECT station_id, date, hours, extras, grains_orages, observations_speciales, meta
+        `SELECT station_id, date, hours, extras, grains_orages, observations_speciales, troubles_visibilite, precip_evenements, meta
          FROM carnet_days WHERE station_id = $1 ORDER BY date`,
         [req.params.stationId]
       );
@@ -204,7 +221,7 @@ app.get('/api/carnet/:stationId', async (req, res) => {
 app.get('/api/carnet/:stationId/:date', async (req, res) => {
   try {
     const r = await pool.query(
-      `SELECT station_id, date, hours, extras, grains_orages, observations_speciales, meta
+      `SELECT station_id, date, hours, extras, grains_orages, observations_speciales, troubles_visibilite, precip_evenements, meta
        FROM carnet_days WHERE station_id = $1 AND date = $2`,
       [req.params.stationId, req.params.date]
     );
@@ -214,23 +231,64 @@ app.get('/api/carnet/:stationId/:date', async (req, res) => {
 });
 
 app.put('/api/carnet/:stationId/:date', async (req, res) => {
-  const { hours, extras, grainsOrages, observationsSpeciales, meta } = req.body || {};
+  const { hours, extras, grainsOrages, observationsSpeciales, troublesVisibilite, precipEvenements, meta } = req.body || {};
+  const isAdmin = req.session.user.role === 'admin';
   try {
-    // Un compte non-admin ne doit jamais pouvoir écraser les métadonnées déjà enregistrées
-    // (ni en poser de nouvelles côté "vue" — elles sont capturées et acceptées ici, mais
-    // simplement jamais renvoyées à la lecture pour ce rôle). On les accepte donc toujours
-    // en écriture : c'est la lecture qui est filtrée par rôle, pas l'écriture.
+    const existingR = await pool.query(
+      'SELECT meta FROM carnet_days WHERE station_id = $1 AND date = $2',
+      [req.params.stationId, req.params.date]
+    );
+    const existingMeta = existingR.rows.length ? existingR.rows[0].meta : null;
+
+    // Une fois qu'un observateur a enregistré ce jour, il est verrouillé : seul un admin peut
+    // encore le modifier (jusqu'à ce qu'il le déverrouille explicitement — voir la route PATCH
+    // .../unlock ci-dessous).
+    if (existingMeta && existingMeta.locked && !isAdmin) {
+      return res.status(423).json({ error: 'Ce relevé a déjà été soumis et est verrouillé — seul un administrateur peut le modifier.' });
+    }
+
+    // meta transporte l'horodatage/position de saisie (capturés côté client). Un enregistrement
+    // "rapide" par heure ne renvoie pas toujours ce meta de jour : dans ce cas on garde celui déjà
+    // en base plutôt que de l'écraser par du vide. Le flag "locked" n'est jamais retiré par une
+    // simple sauvegarde — seul un admin peut le lever (route unlock).
+    let finalMeta = meta !== undefined && meta !== null ? meta : (existingMeta || null);
+    if (finalMeta && typeof finalMeta === 'object') {
+      finalMeta = { ...finalMeta, locked: isAdmin ? !!(existingMeta && existingMeta.locked) : true };
+    } else if (!isAdmin) {
+      finalMeta = { locked: true };
+    }
+
     await pool.query(
-      `INSERT INTO carnet_days (station_id, date, hours, extras, grains_orages, observations_speciales, meta, updated_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7, now())
+      `INSERT INTO carnet_days (station_id, date, hours, extras, grains_orages, observations_speciales, troubles_visibilite, precip_evenements, meta, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, now())
        ON CONFLICT (station_id, date) DO UPDATE
-         SET hours = $3, extras = $4, grains_orages = $5, observations_speciales = $6, meta = $7, updated_at = now()`,
+         SET hours = $3, extras = $4, grains_orages = $5, observations_speciales = $6, troubles_visibilite = $7, precip_evenements = $8, meta = $9, updated_at = now()`,
       [
         req.params.stationId, req.params.date,
         JSON.stringify(hours || {}), JSON.stringify(extras || {}),
         JSON.stringify(grainsOrages || []), JSON.stringify(observationsSpeciales || []),
-        JSON.stringify(meta || null)
+        JSON.stringify(troublesVisibilite || []),
+        JSON.stringify(precipEvenements || []),
+        JSON.stringify(finalMeta)
       ]
+    );
+    res.json({ ok: true, locked: !!(finalMeta && finalMeta.locked) });
+  } catch (e) { console.error(e); res.status(500).json({ error: e.message }); }
+});
+
+// Déverrouille un jour déjà soumis (réservé aux administrateurs) pour permettre à l'observateur
+// de corriger une erreur de saisie.
+app.patch('/api/carnet/:stationId/:date/unlock', requireAdmin, async (req, res) => {
+  try {
+    const r = await pool.query(
+      'SELECT meta FROM carnet_days WHERE station_id = $1 AND date = $2',
+      [req.params.stationId, req.params.date]
+    );
+    if (!r.rows.length) return res.status(404).json({ error: 'Jour introuvable.' });
+    const meta = { ...(r.rows[0].meta || {}), locked: false };
+    await pool.query(
+      'UPDATE carnet_days SET meta = $1, updated_at = now() WHERE station_id = $2 AND date = $3',
+      [JSON.stringify(meta), req.params.stationId, req.params.date]
     );
     res.json({ ok: true });
   } catch (e) { console.error(e); res.status(500).json({ error: e.message }); }
