@@ -10,9 +10,29 @@ CREATE TABLE IF NOT EXISTS stations (
   active BOOLEAN NOT NULL DEFAULT true
 );
 
--- Si vous avez déjà créé la table "stations" avant cette mise à jour, cette ligne
--- la met à niveau sans perdre vos données (sans effet si déjà à jour) :
+-- Si vous avez déjà créé la table "stations" avant cette mise à jour, ces lignes
+-- la mettent à niveau sans perdre vos données (sans effet si déjà à jour) :
 ALTER TABLE stations ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT true;
+-- Champs d'en-tête de la page 1 du TCM officiel (identité de la station et de son équipement) :
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS chef_station TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS etat TEXT DEFAULT 'MALI';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS heures_ouverture_debut TEXT DEFAULT '0000TU';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS heures_ouverture_fin TEXT DEFAULT '2400TU';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS altitude_capteur_baro TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS cor_inst TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS cor_gravite TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS hauteur_capteur_vent TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS type_capteur_vent TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS nature_girouette TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS nature_pluvio TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS cylindre TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS nature_helio TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS nature_evapo TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS nature_actino TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS renseignements_equipement TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS fuseau_horaire TEXT DEFAULT '';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS heure_midi_tu TEXT DEFAULT '1200';
+ALTER TABLE stations ADD COLUMN IF NOT EXISTS heure_midi_legale TEXT DEFAULT '1200';
 
 CREATE TABLE IF NOT EXISTS carnet_days (
   station_id             TEXT NOT NULL REFERENCES stations(id) ON DELETE CASCADE,
@@ -21,13 +41,17 @@ CREATE TABLE IF NOT EXISTS carnet_days (
   extras                 JSONB NOT NULL DEFAULT '{}'::jsonb,
   grains_orages          JSONB NOT NULL DEFAULT '[]'::jsonb,
   observations_speciales JSONB NOT NULL DEFAULT '[]'::jsonb,
+  troubles_visibilite    JSONB NOT NULL DEFAULT '[]'::jsonb,
+  precip_evenements      JSONB NOT NULL DEFAULT '[]'::jsonb,
   meta                   JSONB,
   updated_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (station_id, date)
 );
--- Si la table existait déjà avant cette mise à jour, cette ligne la met à niveau
+-- Si la table existait déjà avant cette mise à jour, ces lignes la mettent à niveau
 -- sans perdre vos données (sans effet si déjà à jour) :
 ALTER TABLE carnet_days ADD COLUMN IF NOT EXISTS meta JSONB;
+ALTER TABLE carnet_days ADD COLUMN IF NOT EXISTS troubles_visibilite JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE carnet_days ADD COLUMN IF NOT EXISTS precip_evenements JSONB NOT NULL DEFAULT '[]'::jsonb;
 
 CREATE TABLE IF NOT EXISTS mensuel (
   station_id     TEXT NOT NULL REFERENCES stations(id) ON DELETE CASCADE,
