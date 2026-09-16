@@ -159,6 +159,66 @@ input[list]{background-image:none;}
 .paper-page .mini-grid div{border-bottom:1px dotted #999;padding:1px 0;font-size:9.5px;}
 .paper-page .mini-grid b{font-weight:600;}
 .paper-page .free-text-box{border:1px solid #333;min-height:60px;padding:4px;font-family:var(--font-sans);font-size:10px;white-space:pre-wrap;}
+.paper-page td.w-pair{padding:1.5px 1px;white-space:nowrap;}
+.paper-page td.w-pair input{width:38%;border:none;text-align:center;padding:0;font:inherit;background:transparent;}
+.paper-page td.w-pair span.sep{display:inline-block;width:8%;color:#888;}
+.ww-icon{display:inline-flex;vertical-align:middle;width:13px;height:13px;color:#111;}
+.ww-icon svg{width:100%;height:100%;}
+.paper-page td.precip-mark{background:#222;position:relative;height:14px;}
+.paper-page td.precip-mark .precip-time{
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  font-size:6.5px;color:#111;white-space:nowrap;background:#fff;padding:0 1px;line-height:1.3;
+}
+/* ---- TCM (toutes les pages) — le vrai formulaire ASECNA est entièrement en rouge/noir : bordures,
+   en-têtes et libellés en rouge, valeurs saisies en noir. S'applique à toutes les pages du TCM
+   (pas au carnet journalier, qui garde son propre style). */
+.tcm-page{--tcm-red:#CC0000;}
+.tcm-page table{border-color:var(--tcm-red);}
+.tcm-page th, .tcm-page td{border-color:var(--tcm-red) !important;}
+.tcm-page th{background:#fff;color:var(--tcm-red);}
+.tcm-page td.rh{background:#fff;color:var(--tcm-red);font-weight:700;}
+.tcm-page h2{color:var(--tcm-red);background:none;border:none;border-bottom:2px solid var(--tcm-red);}
+.tcm-page h3{color:var(--tcm-red);background:none;border:1px solid var(--tcm-red);}
+.tcm-page .help{color:var(--tcm-red);}
+.tcm-page .cap{text-align:center;color:var(--tcm-red);font-weight:700;font-size:9.5px;padding:3px 4px;border:2px solid var(--tcm-red);border-bottom:none;}
+.tcm-page .cap + table{margin-top:0;}
+.tcm-page .cap + table th, .tcm-page .cap + table td{border:1px solid var(--tcm-red);}
+/* ---- Page 1 du TCM (couverture) — reproduction fidèle du formulaire ASECNA (rouge/noir) ---- */
+.tcm-cover{--tcm-red:#CC0000;font-family:var(--font-sans);color:#111;}
+.tcm-cover .tcm-lbl{color:var(--tcm-red);}
+.tcm-cover .tcm-top{display:grid;grid-template-columns:1.3fr 1.6fr 1.3fr;gap:10px;margin-bottom:10px;font-size:10.5px;}
+.tcm-cover .tcm-top .tcm-ident{color:var(--tcm-red);font-weight:700;line-height:1.35;}
+.tcm-cover .tcm-top .tcm-title{text-align:center;}
+.tcm-cover .tcm-top .tcm-title h1{color:var(--tcm-red);font-size:17px;font-weight:700;margin:2px 0;line-height:1.15;}
+.tcm-cover .tcm-top .tcm-title .sub{font-size:10px;}
+.tcm-cover .tcm-top .tcm-meta{text-align:right;line-height:2;}
+.tcm-cover .tcm-top .tcm-meta b{font-size:11px;}
+.tcm-cover .tcm-row2{display:grid;grid-template-columns:1.3fr 1.6fr 1.3fr;gap:10px;margin-bottom:10px;font-size:10.5px;}
+.tcm-cover .tcm-row2 .tcm-ouv{text-align:center;line-height:1.6;}
+.tcm-cover .tcm-row2 .tcm-chef{line-height:1.6;}
+.tcm-cover .tcm-boxes{display:grid;grid-template-columns:1.7fr 1fr;gap:10px;margin-bottom:10px;}
+.tcm-cover .tcm-box{border:2px solid var(--tcm-red);padding:6px 9px;font-size:9.5px;line-height:1.55;}
+.tcm-cover .tcm-box.tcm-box-right{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:600;}
+.tcm-cover .tcm-fuseau{text-align:center;font-size:10px;margin-bottom:8px;}
+.tcm-cover .tcm-fuseau .brace{font-size:16px;vertical-align:middle;}
+.tcm-cover h2.tcm-section{color:var(--tcm-red);text-align:center;font-size:13px;font-weight:700;margin:6px 0 8px;text-transform:none;background:none;border:none;}
+.tcm-cover .tcm-resume{display:grid;grid-template-columns:1fr 1.35fr;gap:14px;align-items:start;}
+.tcm-cover .tcm-resume-text{font-size:9.5px;line-height:1.65;}
+.tcm-cover .tcm-resume-text .grp{color:var(--tcm-red);font-weight:600;margin-top:4px;}
+.tcm-cover .tcm-resume-text .ln{margin-left:8px;}
+.tcm-cover .tcm-resume-text b{font-weight:700;}
+.tcm-cover .tcm-wind-freq table{font-size:7px;}
+.tcm-cover .tcm-wind-freq th, .tcm-cover .tcm-wind-freq td{border:1px solid var(--tcm-red);padding:0.5px 1px;}
+.tcm-cover .tcm-wind-freq caption{color:var(--tcm-red);font-weight:700;font-size:9px;padding:3px 0;caption-side:top;}
+.tcm-cover .tcm-phen-box{border:2px solid var(--tcm-red);margin-top:8px;}
+.tcm-cover .tcm-phen-box .cap{text-align:center;color:var(--tcm-red);font-weight:700;font-size:9.5px;padding:3px 0;border-bottom:2px solid var(--tcm-red);}
+.tcm-cover .tcm-phen-box table{font-size:7px;margin:0;}
+.tcm-cover .tcm-phen-box th, .tcm-cover .tcm-phen-box td{border:1px solid var(--tcm-red);padding:1px 2px;}
+.tcm-cover .tcm-dominant{border:2px solid var(--tcm-red);padding:6px 9px;margin-top:8px;font-size:10px;font-style:italic;line-height:1.5;}
+.tcm-cover .tcm-dominant b{color:var(--tcm-red);font-style:normal;}
+.tcm-cover .tcm-footnote{color:var(--tcm-red);font-size:8.5px;margin-top:6px;}
+.locked-banner{display:flex;align-items:center;gap:10px;justify-content:space-between;background:#fff4e0;border:1px solid var(--brass,#b8860b);border-radius:8px;padding:8px 14px;margin-bottom:10px;font-family:var(--font-sans);font-size:13px;}
+.locked-overlay{pointer-events:none;opacity:.62;filter:grayscale(.15);}
 @media print{
   body *{visibility:hidden;}
   .paper-view, .paper-view *{visibility:visible;}
@@ -239,6 +299,214 @@ const WW_CODES = [
 ['96','Orage faible/modéré, avec grêle'],['97','Orage fort, sans grêle, avec pluie/neige'],
 ['98','Orage combiné à tempête de poussière/sable'],['99','Orage fort avec grêle']
 ];
+/* ---- Symboles meteo officiels OMM (temps present ww, 00-99) ----
+   Jeu de 100 pictogrammes authentiques (un par code ww) fournis par l'utilisateur, dessines
+   professionnellement (kit "Lovable"), a la place de l'ancien moteur genere automatiquement a
+   partir du libelle francais. Convention graphique OMM standard : point = pluie, virgule =
+   bruine, etoile a 6 branches = neige, triangle = averse, losange = grele, barres+crochet =
+   orage, lignes horizontales = brouillard/brume, cercles entrelaces = brume seche/givrant,
+   crochet ] = phenomene des heures precedentes (codes 20-29). Codes 00-03 volontairement vides
+   (pas de pictogramme OMM standard pour "evolution du ciel"). */
+const WW_SYMBOL_SVGS = {
+  '00': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><rect width="0" height="0"/></svg>',
+  '01': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><rect width="0" height="0"/></svg>',
+  '02': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><rect width="0" height="0"/></svg>',
+  '03': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><rect width="0" height="0"/></svg>',
+  '04': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 34.0 60.0 q 0 -22 12 -22 q 8 0 8 8" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 54.0 42.0 q 4 -8 9 -3 q 4 5 9 0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '05': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 50.0 50.0 a 9.0 9.0 0 1 1 -18.0 0 a 9.0 9.0 0 1 1 18.0 0 a 9.0 9.0 0 1 0 18.0 0 a 9.0 9.0 0 1 0 -18.0 0 z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '06': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 59.0 39.0 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '07': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 53.0 39.0 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="62" y1="34" x2="78" y2="66" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70.0" cy="40.0" r="3.0" fill="currentColor" stroke="none"/><circle cx="70.0" cy="60.0" r="3.0" fill="currentColor" stroke="none"/></svg>',
+  '08': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 36.0 36.0 q 22 -4 20 6 q -2 7 -12 8 q 14 1 12 9 q -2 9 -20 5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="66.0" y1="36.5" x2="66.0" y2="63.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '09': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 32.0 35.0 q -9 15.0 0 30.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 68.0 35.0 q 9 15.0 0 30.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 57.2 41.2 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '10': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="30.0" y1="50.0" x2="70.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '11': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="25.0" y1="37.0" x2="47.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="25.0" y1="50.0" x2="47.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="25.0" y1="63.0" x2="47.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="53.0" y1="37.0" x2="75.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="53.0" y1="50.0" x2="75.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="53.0" y1="63.0" x2="75.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '12': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="26.0" y1="37.0" x2="74.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="26.0" y1="50.0" x2="74.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="26.0" y1="63.0" x2="74.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '13': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 62.0 34.0 L 38.0 50.0 L 62.0 66.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '14': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 32 42 q 18 -12 36 0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="60.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '15': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 29.3 32.8 q -9 17.2 0 34.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 70.7 32.8 q 9 17.2 0 34.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '16': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 33.8 36.5 q -9 13.5 0 27.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 66.2 36.5 q 9 13.5 0 27.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '17': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="39.0" y1="37.0" x2="39.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 39.0 37.0 L 62.0 37.0 L 44.0 52.0 L 62.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '18': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 36.0 34.0 L 50.0 66.0 L 64.0 34.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '19': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 40.0 33.0 q -8 17 0 34" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 60.0 33.0 q 8 17 0 34" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '20': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 38.0 41.0 c 4.0 3.0 4.0 8.0 -1.0 14.0 c 2.0 -7.0 1.0 -11.0 -3.0 -14.0 z" fill="currentColor" stroke="none"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '21': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="38.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '22': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="38.0" y1="58.8" x2="38.0" y2="41.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="45.6" y1="45.6" x2="30.4" y2="54.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30.4" y1="45.6" x2="45.6" y2="54.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '23': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="38.0" cy="44.0" r="5.0" fill="currentColor" stroke="none"/><line x1="38.0" y1="65.7" x2="38.0" y2="50.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.7" y1="54.1" x2="31.3" y2="61.9" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="31.3" y1="54.1" x2="44.7" y2="61.9" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '24': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 24.4 50.0 q 6.8 -12.8 13.6 0 q 6.8 12.8 13.6 0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '25': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 27.6 43.0 L 48.4 43.0 L 38.0 62.8 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="38.0" cy="34.0" r="4.0" fill="currentColor" stroke="none"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '26': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 27.6 43.0 L 48.4 43.0 L 38.0 62.8 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="38.0" y1="40.6" x2="38.0" y2="27.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="43.7" y1="30.7" x2="32.3" y2="37.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="32.3" y1="30.7" x2="43.7" y2="37.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '27': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 27.6 43.0 L 48.4 43.0 L 38.0 62.8 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 38.0 26.8 L 45.0 39.4 L 31.0 39.4 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '28': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="25.0" y1="43.5" x2="51.0" y2="43.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="25.0" y1="56.5" x2="51.0" y2="56.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '29': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="28.1" y1="38.3" x2="28.1" y2="61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 28.1 38.3 L 48.8 38.3 L 32.6 51.8 L 48.8 61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 66.0 37.0 L 76.0 37.0 L 76.0 63.0 L 66.0 63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '30': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 51.0 39.0 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="70.0" y1="35.0" x2="70.0" y2="65.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '31': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 59.0 39.0 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '32': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="30.0" y1="35.0" x2="30.0" y2="65.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 67.0 39.0 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '33': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 51.0 39.0 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="70.0" y1="35.0" x2="70.0" y2="65.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="33.0" y1="76.0" x2="67.0" y2="76.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '34': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 59.0 39.0 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="33.0" y1="76.0" x2="67.0" y2="76.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '35': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="30.0" y1="35.0" x2="30.0" y2="65.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 67.0 39.0 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="33.0" y1="76.0" x2="67.0" y2="76.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '36': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="32.0" y1="50.0" x2="68.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 58.0 43.0 L 68.0 50.0 L 58.0 57.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="38.0" x2="50.0" y2="62.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '37': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="28.0" y1="50.0" x2="72.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 62.0 43.0 L 72.0 50.0 L 62.0 57.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.0" y1="36.5" x2="44.0" y2="63.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="56.0" y1="36.5" x2="56.0" y2="63.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '38': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="32.0" y1="50.0" x2="68.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 58.0 43.0 L 68.0 50.0 L 58.0 57.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="38.0" x2="50.0" y2="62.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="37.0" y1="74.0" x2="63.0" y2="74.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '39': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="28.0" y1="50.0" x2="72.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 62.0 43.0 L 72.0 50.0 L 62.0 57.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.0" y1="36.5" x2="44.0" y2="63.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="56.0" y1="36.5" x2="56.0" y2="63.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="37.0" y1="74.0" x2="63.0" y2="74.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '40': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 33.8 36.5 q -9 13.5 0 27.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 66.2 36.5 q 9 13.5 0 27.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="38.0" y1="37.0" x2="62.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="38.0" y1="50.0" x2="62.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="38.0" y1="63.0" x2="62.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '41': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="25.0" y1="37.0" x2="47.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="25.0" y1="50.0" x2="47.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="25.0" y1="63.0" x2="47.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="53.0" y1="37.0" x2="75.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="53.0" y1="50.0" x2="75.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="53.0" y1="63.0" x2="75.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '42': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="27.0" y1="37.0" x2="61.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="27.0" y1="50.0" x2="61.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="27.0" y1="63.0" x2="61.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="78.0" y1="39.5" x2="78.0" y2="60.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '43': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="30.0" y1="37.0" x2="70.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30.0" y1="50.0" x2="70.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30.0" y1="63.0" x2="70.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '44': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="28.0" y1="37.0" x2="72.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="28.0" y1="50.0" x2="72.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="28.0" y1="63.0" x2="72.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '45': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="28.0" y1="37.0" x2="72.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="28.0" y1="50.0" x2="72.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="28.0" y1="63.0" x2="72.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '46': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="22.0" y1="39.5" x2="22.0" y2="60.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="39.0" y1="37.0" x2="73.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="39.0" y1="50.0" x2="73.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="39.0" y1="63.0" x2="73.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '47': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="22.0" y1="39.5" x2="22.0" y2="60.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="39.0" y1="37.0" x2="73.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="39.0" y1="50.0" x2="73.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="39.0" y1="63.0" x2="73.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '48': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="28.0" y1="37.0" x2="72.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="28.0" y1="50.0" x2="72.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="28.0" y1="63.0" x2="72.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="34" y1="34" x2="66" y2="66" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '49': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="28.0" y1="37.0" x2="72.0" y2="37.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="28.0" y1="50.0" x2="72.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="28.0" y1="63.0" x2="72.0" y2="63.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="34" y1="34" x2="66" y2="66" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="33.0" y1="78.0" x2="67.0" y2="78.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '50': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 50.0 42.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/></svg>',
+  '51': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 36.0 42.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 64.0 42.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/></svg>',
+  '52': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 50.0 28.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 50.0 56.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/></svg>',
+  '53': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 36.0 51.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 64.0 51.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 50.0 29.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/></svg>',
+  '54': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 50.0 26.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 50.0 42.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 50.0 58.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/></svg>',
+  '55': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 36.0 30.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 64.0 30.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 50.0 42.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 36.0 54.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/><path d="M 64.0 54.4 c 3.4 2.5 3.4 6.8 -0.8 11.9 c 1.7 -6.0 0.8 -9.3 -2.5 -11.9 z" fill="currentColor" stroke="none"/></svg>',
+  '56': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 33.0 50.0 q 8.5 -16.0 17.0 0 q 8.5 16.0 17.0 0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50.0 43.7 c 2.8 2.1 2.8 5.6 -0.7 9.8 c 1.4 -4.9 0.7 -7.7 -2.1 -9.8 z" fill="currentColor" stroke="none"/></svg>',
+  '57': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 34.7 42.0 q 7.7 -14.4 15.3 0 q 7.7 14.4 15.3 0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 34.7 58.0 q 7.7 -14.4 15.3 0 q 7.7 14.4 15.3 0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50.0 44.6 c 2.4 1.8 2.4 4.8 -0.6 8.4 c 1.2 -4.2 0.6 -6.6 -1.8 -8.4 z" fill="currentColor" stroke="none"/></svg>',
+  '58': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 50.0 28.8 c 3.2 2.4 3.2 6.4 -0.8 11.2 c 1.6 -5.6 0.8 -8.8 -2.4 -11.2 z" fill="currentColor" stroke="none"/><circle cx="50.0" cy="62.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '59': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 50.0 22.8 c 3.2 2.4 3.2 6.4 -0.8 11.2 c 1.6 -5.6 0.8 -8.8 -2.4 -11.2 z" fill="currentColor" stroke="none"/><circle cx="50.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="66.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '60': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="50.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '61': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="36.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="64.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '62': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="50.0" cy="36.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="64.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '63': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="36.0" cy="59.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="64.0" cy="59.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="37.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '64': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="50.0" cy="34.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="66.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '65': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="36.0" cy="38.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="64.0" cy="38.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="36.0" cy="62.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="64.0" cy="62.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '66': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 33.0 50.0 q 8.5 -16.0 17.0 0 q 8.5 16.0 17.0 0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="50.0" r="4.0" fill="currentColor" stroke="none"/></svg>',
+  '67': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 34.7 42.0 q 7.7 -14.4 15.3 0 q 7.7 14.4 15.3 0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 34.7 58.0 q 7.7 -14.4 15.3 0 q 7.7 14.4 15.3 0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="50.0" r="4.0" fill="currentColor" stroke="none"/></svg>',
+  '68': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="50.0" cy="34.0" r="5.0" fill="currentColor" stroke="none"/><line x1="50.0" y1="70.8" x2="50.0" y2="53.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="57.6" y1="57.6" x2="42.4" y2="66.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="42.4" y1="57.6" x2="57.6" y2="66.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '69': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><circle cx="50.0" cy="28.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="46.0" r="5.0" fill="currentColor" stroke="none"/><line x1="50.0" y1="76.8" x2="50.0" y2="59.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="57.6" y1="63.6" x2="42.4" y2="72.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="42.4" y1="63.6" x2="57.6" y2="72.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '70': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="50.0" y1="56.8" x2="50.0" y2="43.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.9" y1="46.6" x2="44.1" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.1" y1="46.6" x2="55.9" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '71': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="36.0" y1="56.8" x2="36.0" y2="43.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="41.9" y1="46.6" x2="30.1" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30.1" y1="46.6" x2="41.9" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="64.0" y1="56.8" x2="64.0" y2="43.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="69.9" y1="46.6" x2="58.1" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="58.1" y1="46.6" x2="69.9" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '72': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="50.0" y1="42.8" x2="50.0" y2="29.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.9" y1="32.6" x2="44.1" y2="39.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.1" y1="32.6" x2="55.9" y2="39.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="70.8" x2="50.0" y2="57.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.9" y1="60.6" x2="44.1" y2="67.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.1" y1="60.6" x2="55.9" y2="67.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '73': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="36.0" y1="65.8" x2="36.0" y2="52.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="41.9" y1="55.6" x2="30.1" y2="62.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30.1" y1="55.6" x2="41.9" y2="62.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="64.0" y1="65.8" x2="64.0" y2="52.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="69.9" y1="55.6" x2="58.1" y2="62.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="58.1" y1="55.6" x2="69.9" y2="62.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="43.8" x2="50.0" y2="30.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.9" y1="33.6" x2="44.1" y2="40.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.1" y1="33.6" x2="55.9" y2="40.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '74': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="50.0" y1="40.8" x2="50.0" y2="27.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.9" y1="30.6" x2="44.1" y2="37.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.1" y1="30.6" x2="55.9" y2="37.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="56.8" x2="50.0" y2="43.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.9" y1="46.6" x2="44.1" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.1" y1="46.6" x2="55.9" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="72.8" x2="50.0" y2="59.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.9" y1="62.6" x2="44.1" y2="69.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.1" y1="62.6" x2="55.9" y2="69.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '75': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="36.0" y1="44.8" x2="36.0" y2="31.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="41.9" y1="34.6" x2="30.1" y2="41.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30.1" y1="34.6" x2="41.9" y2="41.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="64.0" y1="44.8" x2="64.0" y2="31.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="69.9" y1="34.6" x2="58.1" y2="41.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="58.1" y1="34.6" x2="69.9" y2="41.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="56.8" x2="50.0" y2="43.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.9" y1="46.6" x2="44.1" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.1" y1="46.6" x2="55.9" y2="53.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="36.0" y1="68.8" x2="36.0" y2="55.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="41.9" y1="58.6" x2="30.1" y2="65.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30.1" y1="58.6" x2="41.9" y2="65.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="64.0" y1="68.8" x2="64.0" y2="55.2" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="69.9" y1="58.6" x2="58.1" y2="65.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="58.1" y1="58.6" x2="69.9" y2="65.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '76': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="28.0" y1="50.0" x2="72.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 62.0 43.0 L 72.0 50.0 L 62.0 57.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '77': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="28.0" y1="50.0" x2="72.0" y2="50.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50.0 43.4 L 56.4 55.0 L 43.6 55.0 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '78': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="50.0" y1="62.6" x2="50.0" y2="37.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="61.0" y1="43.7" x2="39.0" y2="56.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="39.0" y1="43.7" x2="61.0" y2="56.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="50" x2="70" y2="50" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '79': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 50.0 36.8 L 62.8 59.9 L 37.2 59.9 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '80': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="30.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '81': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="22.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="38.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '82': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="16.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="30.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="44.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '83': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="22.0" r="5.0" fill="currentColor" stroke="none"/><line x1="50.0" y1="44.6" x2="50.0" y2="31.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.7" y1="34.7" x2="44.3" y2="41.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.3" y1="34.7" x2="55.7" y2="41.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '84': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50.0" cy="16.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="50.0" cy="30.0" r="5.0" fill="currentColor" stroke="none"/><line x1="50.0" y1="50.6" x2="50.0" y2="37.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.7" y1="40.7" x2="44.3" y2="47.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.3" y1="40.7" x2="55.7" y2="47.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '85': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="37.7" x2="50.0" y2="22.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="56.7" y1="26.1" x2="43.3" y2="33.9" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="43.3" y1="26.1" x2="56.7" y2="33.9" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '86': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="26.6" x2="50.0" y2="13.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.7" y1="16.7" x2="44.3" y2="23.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.3" y1="16.7" x2="55.7" y2="23.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="50.0" y1="44.6" x2="50.0" y2="31.4" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="55.7" y1="34.7" x2="44.3" y2="41.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="44.3" y1="34.7" x2="55.7" y2="41.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '87': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50.0 21.6 L 58.1 36.3 L 41.9 36.3 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '88': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50.0 14.8 L 57.0 27.4 L 43.0 27.4 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50.0 30.8 L 57.0 43.4 L 43.0 43.4 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '89': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50.0 18.4 L 59.3 35.2 L 40.7 35.2 Z" fill="currentColor" stroke="none"/></svg>',
+  '90': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><path d="M 50.0 18.4 L 59.3 35.2 L 40.7 35.2 Z" fill="currentColor" stroke="none"/><path d="M 37.8 51.5 L 62.2 51.5 L 50.0 74.6 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '91': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="54.1" y1="38.3" x2="54.1" y2="61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 54.1 38.3 L 74.8 38.3 L 58.6 51.8 L 74.8 61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="30.0" cy="50.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '92': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="54.1" y1="38.3" x2="54.1" y2="61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 54.1 38.3 L 74.8 38.3 L 58.6 51.8 L 74.8 61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="28.0" cy="42.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="28.0" cy="58.0" r="5.0" fill="currentColor" stroke="none"/></svg>',
+  '93': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="30.1" y1="38.3" x2="30.1" y2="61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 30.1 38.3 L 50.8 38.3 L 34.6 51.8 L 50.8 61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="74.0" y1="48.0" x2="74.0" y2="36.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="79.2" y1="39.0" x2="68.8" y2="45.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="68.8" y1="39.0" x2="79.2" y2="45.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 74.0 56.0 L 79.8 66.5 L 68.2 66.5 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '94': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="30.1" y1="38.3" x2="30.1" y2="61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 30.1 38.3 L 50.8 38.3 L 34.6 51.8 L 50.8 61.7" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="74.0" y1="42.0" x2="74.0" y2="29.9" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="79.2" y1="33.0" x2="68.8" y2="39.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="68.8" y1="33.0" x2="79.2" y2="39.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="74.0" y1="58.0" x2="74.0" y2="46.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="79.2" y1="49.0" x2="68.8" y2="55.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="68.8" y1="49.0" x2="79.2" y2="55.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 74.0 62.0 L 79.8 72.5 L 68.2 72.5 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '95': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="45.9" y1="39.7" x2="45.9" y2="68.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 45.9 39.7 L 71.2 39.7 L 51.4 56.2 L 71.2 68.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34.0" cy="30.0" r="5.0" fill="currentColor" stroke="none"/><line x1="70.0" y1="31.5" x2="70.0" y2="20.5" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="74.8" y1="23.2" x2="65.2" y2="28.8" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="65.2" y1="23.2" x2="74.8" y2="28.8" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '96': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="37.9" y1="43.7" x2="37.9" y2="72.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 37.9 43.7 L 63.2 43.7 L 43.4 60.2 L 63.2 72.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50.0 17.6 L 58.1 32.3 L 41.9 32.3 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '97': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="36.8" y1="42.4" x2="36.8" y2="73.6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 36.8 42.4 L 64.4 42.4 L 42.8 60.4 L 64.4 73.6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="38.0" cy="24.0" r="5.0" fill="currentColor" stroke="none"/><circle cx="62.0" cy="24.0" r="5.0" fill="currentColor" stroke="none"/><line x1="35.0" y1="84.0" x2="65.0" y2="84.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '98': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="45.9" y1="39.7" x2="45.9" y2="68.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 45.9 39.7 L 71.2 39.7 L 51.4 56.2 L 71.2 68.3" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 34.3 38.3 q -18 -6 -18 6 q 0 8 9 10 q 9 2 9 10 q 0 12 -18 6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  '99': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-hidden="true"><line x1="36.8" y1="42.4" x2="36.8" y2="73.6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 36.8 42.4 L 64.4 42.4 L 42.8 60.4 L 64.4 73.6" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M 50.0 15.6 L 58.1 30.3 L 41.9 30.3 Z" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="35.0" y1="84.0" x2="65.0" y2="84.0" stroke="currentColor" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+// Recherche directe par code ww ("00".."99") dans le jeu de symboles authentiques ci-dessus.
+function wwSymbolByCode(code){
+  const c = String(code||'').trim();
+  return WW_SYMBOL_SVGS[c] || '';
+}
+// Le temps passe (W1/W2) utilise une table a 1 seul chiffre (W_CODES, 0-9) qui n'a pas son propre
+// jeu de pictogrammes OMM -- on associe chaque code W a un code ww representatif pour reutiliser
+// le meme jeu de symboles authentiques plutot que d'improviser un second dessin. 0/1/2 (nebulosite
+// seule, pas de phenomene) n'ont pas d'equivalent ww et restent donc sans symbole.
+const W_CODE_TO_WW = { '0':'', '1':'', '2':'', '3':'09', '4':'45', '5':'51', '6':'61', '7':'71', '8':'80', '9':'95' };
+function wwSymbolFor(code){
+  const c = String(code||'').trim();
+  if(!c) return '';
+  if(c.length===1){ const mapped = W_CODE_TO_WW[c]; return mapped ? wwSymbolByCode(mapped) : ''; }
+  return wwSymbolByCode(c);
+}
+// Detection par mot-cle pour le champ libre "Phenomenes" (colonne horaire) : des qu'un mot du
+// vocabulaire meteo standard apparait dans le texte tape par l'observateur, on affiche le
+// pictogramme ww authentique correspondant (code representatif -- pas de reconstruction
+// d'intensite depuis du texte libre, contrairement a l'ancien moteur generatif).
+const PHEN_KEYWORD_TO_WW = [
+  [/brouillard/i,'45'], [/brume\s*s[eè]che/i,'05'], [/brume/i,'10'],
+  [/orage/i,'95'], [/[ée]clairs/i,'13'], [/gr[êe]le/i,'89'],
+  [/bruine/i,'51'], [/neige/i,'71'], [/pluie/i,'61'],
+  [/chasse.{0,3}sable|temp[êe]te/i,'09'], [/fum[ée]e/i,'04'],
+  [/tourbillon/i,'08'], [/trombe/i,'19']
+];
+function wwCodeFromPhenText(text){
+  const t = (text||'').trim();
+  if(!t) return '';
+  for(const [re, code] of PHEN_KEYWORD_TO_WW){ if(re.test(t)) return code; }
+  return '';
+}
+function phenSymbolUpdate(inp){
+  const val = inp.value.trim();
+  const isNone = val.toLowerCase()==='xxx';
+  // Conteneur direct de l'input (<td> dans le tableau horaire, <div> dans Saisie rapide) — on
+  // n'utilise plus closest('td') car le champ existe maintenant dans les deux contextes.
+  const wrap = inp.parentElement;
+  let span = wrap.querySelector('.phen-sym');
+  if(!val || isNone){
+    if(span) span.remove();
+    inp.style.paddingLeft = '';
+    inp.style.color = isNone ? '#888' : '';
+    inp.style.fontStyle = isNone ? 'italic' : '';
+    return;
+  }
+  inp.style.color = ''; inp.style.fontStyle = '';
+  const wwCode = wwCodeFromPhenText(val);
+  if(!wwCode){
+    if(span) span.remove();
+    inp.style.paddingLeft = '';
+    return;
+  }
+  if(!span){
+    span = document.createElement('span');
+    span.className = 'ww-icon phen-sym';
+    span.style.cssText = 'position:absolute;left:3px;top:50%;transform:translateY(-50%);width:14px;height:14px;pointer-events:none;';
+    wrap.style.position = 'relative';
+    wrap.insertBefore(span, inp);
+  }
+  span.innerHTML = wwSymbolByCode(wwCode);
+  inp.style.paddingLeft = '18px';
+}
+/* ---- Symboles OFFICIELS "Phénomènes divers" du TCM (page Résumé du temps) ----
+   Contrairement au moteur wwSymbol* ci-dessus (dérivé automatiquement des libellés ww, pour le
+   temps présent horaire), ceux-ci sont recopiés fidèlement depuis un vrai TCM ASECNA rempli
+   (Bamako-Sénou juin 2026 + Sélingué juillet 2026) : orage, pluie, éclairs, chasse-sable, grains,
+   brume humide/sèche, rosée, fumée et halo solaire sont CONFIRMÉS (le même symbole apparaît de
+   façon cohérente sur des dizaines de jours, deux stations, deux observateurs différents).
+   Brouillard, grêle, gelée blanche et vent fort ne sont apparus dans aucun des deux mois fournis :
+   ces 4 sont donc une estimation raisonnable, marquée UNCONFIRMED — à valider avec un exemple réel. */
+const PHEN_SYMBOL_CONFIRMED = {
+  phenOrageSansTonnerre:true, phenOrageAvecTonnerre:true, phenEclairsSansTonnerre:true,
+  phenChasseSable:true, phenGrains:true, phenBrumeHumide:true, phenBrumeSeche:true,
+  phenRosee:true, phenFumee:true, phenHalo:true, pluie:true,
+  phenBrouillard:false, phenGrele:false, phenGeleeBlanche:false, phenVentContinu:false, phenVentFort16:false
+};
+function phenSymbolSvg(key, size){
+  const s = size || 16;
+  let inner = '';
+  if(key==='phenHalo') inner = `<circle cx="12" cy="12" r="8"/><path d="M12 6v12M6 12h12"/>`;
+  else if(key==='phenEclairsSansTonnerre') inner = `<path d="M7 8l10 3l-10 3" fill="none"/>`;
+  else if(key==='phenOrageSansTonnerre' || key==='phenOrageAvecTonnerre') inner = `<path d="M8 4v16M8 4l7 5l-7 3" fill="none" stroke-linejoin="round"/>`;
+  else if(key==='pluie') inner = `<circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>`;
+  else if(key==='phenChasseSable') inner = `<text x="6" y="18" font-size="17" font-family="Georgia,serif" fill="currentColor" stroke="none">$</text>`;
+  else if(key==='phenGrains') inner = `<path d="M5 6l7 13l7 -13" fill="none" stroke-linejoin="round"/><path d="M8 11h8"/>`;
+  else if(key==='phenBrumeHumide') inner = `<line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="16" x2="21" y2="16"/>`;
+  else if(key==='phenBrumeSeche') inner = `<path d="M4 12a4 4 0 1 1 8 0a4 4 0 1 0 8 0" fill="none"/>`;
+  else if(key==='phenRosee') inner = `<path d="M16 15c0 3 -8 3 -8 -1c0 -4 6 -3 4 -8c4 2 4 6 4 9z" fill="none" stroke-linejoin="round"/>`;
+  else if(key==='phenFumee') inner = `<path d="M4 16q3 -3 0 -6t0 -6" fill="none"/><path d="M11 16q3 -3 0 -6t0 -6" fill="none"/><path d="M18 16q3 -3 0 -6t0 -6" fill="none"/>`;
+  else if(key==='phenBrouillard') inner = `<line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="10.3" x2="21" y2="10.3"/><line x1="3" y1="13.7" x2="21" y2="13.7"/><line x1="3" y1="17" x2="21" y2="17"/>`;
+  else if(key==='phenGrele') inner = `<path d="M12 3l9 9l-9 9l-9 -9z" fill="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>`;
+  else if(key==='phenGeleeBlanche') inner = `<path d="M12 4v16M4 8l16 8M20 8l-16 8" />`;
+  else if(key==='phenVentContinu' || key==='phenVentFort16') inner = `<path d="M3 9h14a3 3 0 1 0 -3 -3" fill="none"/><path d="M3 15h10a3 3 0 1 1 -3 3" fill="none"/>`;
+  else return '';
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+}
 const W_CODES = [
 ['0','Nébulosité ≤ 4/8 pendant toute la période'],['1','Nébulosité > 4/8 une partie, ≤4/8 le reste'],
 ['2','Nébulosité > 4/8 pendant toute la période'],['3','Tempête de sable, de poussière ou chasse-neige'],
@@ -313,11 +581,40 @@ const DIZAINES_CODES = (function(){
   arr.push(['99','Direction variable']);
   return arr;
 })();
+// Nature du phénomène pour "Troubles de la visibilité" (page TCM dédiée : brouillard, brume,
+// chasse-poussière... avec heure de début, heure de fin, durée et visibilité minimale).
+const TROUBLE_VISI_CODES = [
+  ['Brouillard','Brouillard'], ['Brume humide','Brume humide'], ['Brume sèche','Brume sèche'],
+  ['Chasse de sable','Chasse de sable/poussière'], ['Fumée','Fumée']
+];
 const COMBO_TABLES = {
   ww: WW_CODES, w: W_CODES, cl: CL_CODES, cm: CM_CODES, ch: CH_CODES, n: N_CODES,
-  vis: VISIBILITE_CODES, dir: DIRECTIONS_ROSE, dz: DIZAINES_CODES, c5: C5_CODES, h5: H5_CODES
+  vis: VISIBILITE_CODES, dir: DIRECTIONS_ROSE, dz: DIZAINES_CODES, c5: C5_CODES, h5: H5_CODES,
+  troubleVisi: TROUBLE_VISI_CODES
 };
+// Durée entre deux heures HHMM (4 chiffres), en minutes — gère le passage de minuit
+// (heure de fin plus petite que l'heure de début = l'événement continue le lendemain).
+function hhmmDiffMinutes(start, end){
+  const s = (start||'').trim(), e = (end||'').trim();
+  if(!/^\d{3,4}$/.test(s) || !/^\d{3,4}$/.test(e)) return null;
+  const toMin = v=>{ v=v.padStart(4,'0'); return parseInt(v.slice(0,2),10)*60 + parseInt(v.slice(2),10); };
+  let diff = toMin(e) - toMin(s);
+  if(diff<0) diff += 24*60;
+  return diff;
+}
 function parseKmLabel(label){ const m = label.match(/([\d.]+)/); return m ? parseFloat(m[1]) : null; }
+// Groupe RRR (mesures intermédiaires de pluie, convention OMM) : 000-988 = quantité en
+// dixièmes de mm (ex. "0099" = 9,9 mm), 990 = trace. Affiché à titre indicatif seulement,
+// à côté de la valeur brute — ne remplace ni ne modifie la saisie.
+function rrrToMmLabel(raw){
+  const s = (raw||'').trim();
+  if(!s) return '';
+  const n = parseInt(s, 10);
+  if(isNaN(n) || n<0) return '';
+  if(n===990) return '= trace (< 0,1 mm)';
+  if(n<=988) return `= ${(n/10).toFixed(1).replace('.',',')} mm`;
+  return '';
+}
 function nearestVisibiliteCode(km){
   let best=null, bestDiff=Infinity;
   VISIBILITE_CODES.forEach(([code,label])=>{
@@ -390,9 +687,15 @@ function computeCloudGroup(hourObj){
 // On decompose le code stocke pour piloter 3 mini-champs guides, et on le recompose des que
 // l'un des 3 change — l'observateur n'a jamais a taper le code lui-meme.
 function parseTripletCode(val){
+  // N (quantité, 1 chiffre) et C (genre, 1 chiffre) sont toujours codés sur 1 caractère (tables
+  // OMM officielles à un chiffre) ; h (hauteur) peut faire plus d'1 caractère si l'observateur a
+  // besoin d'un code de hauteur plus précis que la table à un chiffre. Avant ce correctif, tout
+  // code qui n'avait pas EXACTEMENT 3 caractères au total (donc dès que h dépassait 1 chiffre)
+  // était silencieusement remis à vide au rechargement — c'est le bug remonté ("le code se
+  // limitait à 03" au lieu de "030" par ex.).
   const s = (val||'').trim();
-  if(s.length===3) return {n:s[0], c:s[1], h:s[2]};
-  return {n:'', c:'', h:''};
+  if(s.length<3) return {n:'', c:'', h:''};
+  return {n:s[0], c:s[1], h:s.slice(2)};
 }
 function composeTripletCode(n, c, h){
   n=(n||'').trim(); c=(c||'').trim(); h=(h||'').trim();
@@ -460,7 +763,7 @@ const FIELDS_TOUR = [
   {k:'ventVitMs', label:'Vent vit. m/s', quick:true},
   {k:'ventDirDizaines', label:'Vent dir. (dizaines°)', type:'combo', combo:'dz'},
   {k:'ventVitNoeuds', label:'Vent vit. (noeuds)'},
-  {k:'visibiliteDam', label:'Visib. (dam)', quick:true},
+  {k:'visibiliteDam', label:'Visib. (m)', quick:true},
   {k:'visibiliteCode', label:'Visib. code', type:'combo', combo:'vis'},
   {k:'phenomenes', label:'Phénomènes', quick:true},
   {k:'tempsPresent', label:'Temps présent (ww)', type:'combo', combo:'ww', quick:true},
@@ -503,6 +806,12 @@ const FIELDS_PRESSION = [
   {k:'initialesObs', label:'Initiales obs.'}
 ];
 const GRAIN_FIELDS = [
+  // Ces 4 premiers champs alimentent directement la page TCM "Orages et grains" (heures de
+  // début et de fin, durée, caractéristiques) — le reste sert au détail technique du passage
+  // (crochet barographique, coup de vent, grêle...) pour la page 1 du carnet papier.
+  {k:'heureDebut', label:'Heure début (HHMM)'},
+  {k:'heureFin', label:'Heure fin (HHMM)'},
+  {k:'caracteristiques', label:'Caractéristiques (ex: modéré, fort)'},
   {k:'heureCrochet', label:'Heure crochet baro'},
   {k:'dirApparitionCb', label:'Dir. apparition Cb', combo:'dir'},
   {k:'coupVentDirAvant', label:'Coup de vent — dir. avant', combo:'dz'},
@@ -523,6 +832,25 @@ const OBS_SPECIALE_FIELDS = [
   {k:'heure', label:'Heure'},
   {k:'description', label:'Observation'}
 ];
+// "Troubles de la visibilité" — brouillard, brume, chasse-poussière... avec heure de début,
+// heure de fin (durée calculée automatiquement) et visibilité minimale observée. Reproduit la
+// page dédiée du TCM officiel (ASECNA/Mali Météo).
+const TROUBLE_VISI_FIELDS = [
+  {k:'nature', label:'Nature du phénomène', combo:'troubleVisi'},
+  {k:'heureDebut', label:'Heure début (HHMM)'},
+  {k:'heureFin', label:'Heure fin (HHMM)'},
+  {k:'duree', label:'Durée (min, auto)'},
+  {k:'visibiliteMin', label:'Visibilité minimale (m)'}
+];
+// Événements de précipitation (pluie, neige, grésil, grêle...) avec heure de début et de fin
+// exactes — alimente le "Tableau synoptique des précipitations" du TCM (grille date × heure).
+// La quantité en mm reste saisie ailleurs (mesures horaires / hauteur du jour) : cette table ne
+// sert qu'au POSITIONNEMENT dans le temps, comme sur le vrai formulaire papier.
+const PRECIP_EVENT_FIELDS = [
+  {k:'heureDebut', label:'Heure début (HHMM)'},
+  {k:'heureFin', label:'Heure fin (HHMM)'},
+  {k:'duree', label:'Durée (min, auto)'}
+];
 const DIRECTIONS_18 = ['02','04','06','08','10','12','14','16','18','20','22','24','26','28','30','32','34','36'];
 const MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const PHEN_CHECKS = [
@@ -537,7 +865,10 @@ const PHEN_CHECKS = [
   {k:'phenRosee', label:'Rosée'},
   {k:'phenGeleeBlanche', label:'Gelée blanche'},
   {k:'phenVentContinu', label:'Vent continu'},
-  {k:'phenVentFort16', label:'Vent ≥ 16 m/s'}
+  {k:'phenVentFort16', label:'Vent ≥ 16 m/s'},
+  {k:'phenHalo', label:'Halo solaire'},
+  {k:'phenFumee', label:'Fumée'},
+  {k:'phenGrains', label:'Grains'}
 ];
 
 /* ---------------- state ---------------- */
@@ -566,8 +897,11 @@ var state = {
   mensuelData: null,
   mensuelComputing: false,
   stationModalOpen: false,
-  paperView: false,
-  mensuelPaperView: false,
+  // Les observateurs sont habitués au formulaire papier ASECNA — c'est donc la vue par défaut
+  // pour le Carnet complet et le Tableau mensuel (la "Vue avancée" en tableau reste disponible
+  // via le bouton, pour qui la préfère).
+  paperView: true,
+  mensuelPaperView: true,
   stationDraft: {name:'', lat:'', lon:'', alt:''},
   openSections: new Set(['tourHorizon']),
   carnetDirty: false,
@@ -662,8 +996,19 @@ async function saveCarnetRecord(rec){
     Object.keys(rec.hours).forEach(h=>{ rec.hours[h].groupeNhClCmCh = computeCloudGroup(rec.hours[h]); });
     const r = await apiFetch(`/api/carnet/${encodeURIComponent(rec.stationId)}/${rec.date}`, {
       method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({hours: rec.hours, extras: rec.extras, grainsOrages: rec.grainsOrages, observationsSpeciales: rec.observationsSpeciales})
+      body: JSON.stringify({hours: rec.hours, extras: rec.extras, grainsOrages: rec.grainsOrages, observationsSpeciales: rec.observationsSpeciales, troublesVisibilite: rec.troublesVisibilite, precipEvenements: rec.precipEvenements, meta: rec.meta || null})
     });
+    if(r.status===423){
+      const data = await r.json().catch(()=>({}));
+      toast(data.error || 'Ce relevé est verrouillé — seul un administrateur peut le modifier.', true);
+      return false;
+    }
+    return r.ok;
+  }catch(e){ console.error(e); return false; }
+}
+async function unlockCarnetDay(stationId, date){
+  try{
+    const r = await apiFetch(`/api/carnet/${encodeURIComponent(stationId)}/${date}/unlock`, {method:'PATCH'});
     return r.ok;
   }catch(e){ console.error(e); return false; }
 }
@@ -733,12 +1078,13 @@ function emptyExtras(){
     phenGrele:false, phenOrageSansTonnerre:false, phenOrageAvecTonnerre:false, phenEclairsSansTonnerre:false,
     phenBrouillard:false, phenBrumeHumide:false, phenBrumeSeche:false, phenChasseSable:false,
     phenRosee:false, phenGeleeBlanche:false, phenVentContinu:false, phenVentFort16:false,
+    phenHalo:false, phenFumee:false, phenGrains:false,
     phenomenesRemarquables:'', resumeTempsClair:''
   };
 }
 function emptyCarnet(stationId, date){
   const hours={}; ALL_HOURS.forEach(h=>hours[h]=emptyHour());
-  return {stationId, date, hours, extras: emptyExtras(), grainsOrages: [], observationsSpeciales: []};
+  return {stationId, date, hours, extras: emptyExtras(), grainsOrages: [], observationsSpeciales: [], troublesVisibilite: [], precipEvenements: []};
 }
 function withDefaults(rec, stationId, date){
   const base = emptyCarnet(stationId, date);
@@ -748,6 +1094,8 @@ function withDefaults(rec, stationId, date){
   out.extras = {...base.extras, ...(rec.extras||{})};
   out.grainsOrages = rec.grainsOrages || [];
   out.observationsSpeciales = rec.observationsSpeciales || [];
+  out.troublesVisibilite = rec.troublesVisibilite || [];
+  out.precipEvenements = rec.precipEvenements || [];
   return out;
 }
 function emptyDayAgg(date){
@@ -1388,6 +1736,29 @@ function renderUtilisateursView(){
   </div>
   `;
 }
+// Champs d'en-tête technique de la page 1 du TCM officiel (identité du poste et de son
+// équipement) — édités par station, séparément du formulaire "ajouter une station".
+const STATION_META_FIELDS_UI = [
+  {k:'chef_station', label:'Chef de station'},
+  {k:'etat', label:'État'},
+  {k:'heures_ouverture_debut', label:"Heures d'ouverture — début"},
+  {k:'heures_ouverture_fin', label:"Heures d'ouverture — fin"},
+  {k:'altitude_capteur_baro', label:'Altitude du capteur barométrique'},
+  {k:'cor_inst', label:'Correction instrumentale'},
+  {k:'cor_gravite', label:'Correction de gravité'},
+  {k:'hauteur_capteur_vent', label:'Hauteur du capteur vent au-dessus du sol'},
+  {k:'type_capteur_vent', label:'Type de capteur vent'},
+  {k:'nature_girouette', label:'Nombre de contacts du transmetteur de la girouette'},
+  {k:'nature_pluvio', label:'Nature du pluviomètre enregistreur'},
+  {k:'cylindre', label:'Cylindre'},
+  {k:'nature_helio', label:"Nature de l'héliographe"},
+  {k:'nature_evapo', label:'Nature des évaporomètres'},
+  {k:'nature_actino', label:"Nature de l'actinomètre"},
+  {k:'renseignements_equipement', label:"Renseignements sur les changements d'installation et d'équipement"},
+  {k:'fuseau_horaire', label:'Axe du fuseau horaire (ex : 0)'},
+  {k:'heure_midi_tu', label:'Heure TU quand il est midi au fuseau'},
+  {k:'heure_midi_legale', label:'Heure légale quand il est midi au fuseau'}
+];
 function renderStationsView(){
   const isAdmin = state.currentUser && state.currentUser.role==='admin';
   return `
@@ -1408,6 +1779,15 @@ function renderStationsView(){
     </table>
   </div>
   ${isAdmin?'<button class="btn primary" id="addStationBtn2">+ Ajouter une station</button>':''}
+
+  ${isAdmin ? state.stations.map(s=>`
+  <details class="card" style="margin-top:12px;" data-station-meta-panel="${s.id}">
+    <summary style="cursor:pointer;font-weight:600;">Détails techniques — ${escapeHtml(s.name)} <span class="help" style="font-weight:400;">(en-tête page 1 du TCM)</span></summary>
+    <div class="row" style="margin-top:12px;flex-wrap:wrap;">
+      ${STATION_META_FIELDS_UI.map(f=>`<div class="field" style="min-width:220px;"><label>${escapeHtml(f.label)}</label><input type="text" data-station-meta="${f.k}" data-station-meta-id="${s.id}" value="${escapeAttr(s[f.k]||'')}"></div>`).join('')}
+    </div>
+    <button class="btn sm primary" style="margin-top:10px;" data-save-station-meta="${s.id}">Enregistrer ces détails</button>
+  </details>`).join('') : ''}
   <p class="help">Archiver une station la retire de la liste active sans rien effacer : tous ses jours et tableaux mensuels restent en base, et elle peut être réactivée à tout moment ci-dessous.</p>
 
   ${isAdmin && state.archivedStations && state.archivedStations.length ? `
@@ -1446,8 +1826,27 @@ function section(id, title, bodyHtml, countBadge){
     <div class="section-body">${bodyHtml}</div>
   </details>`;
 }
-function hourCell(rec, h, f){
+function hourCell(rec, h, f, paper){
   const val = rec.hours[h][f.k];
+  // Vue papier uniquement : la colonne 10 du formulaire officiel ("W½") est UNE seule case
+  // qui contient W1 et W2 côte à côte séparés par "/" (ex. "9/6") — pas deux colonnes séparées,
+  // sinon toutes les colonnes suivantes (CL, CM, CH, N) se décalent d'une case vers la gauche.
+  if(paper && f.k==='tempsPasse'){
+    const w1 = rec.hours[h].tempsPasse, w2 = rec.hours[h].tempsPasse2;
+    return `<td class="w-pair">
+      ${w1?`<span class="ww-icon" title="W1">${wwSymbolFor(w1)}</span>`:''}
+      <input type="text" data-hour="${h}" data-field="tempsPasse" data-combo="w" list="dl-w" autocomplete="off" value="${escapeAttr(w1)}">
+      <span class="sep">/</span>
+      <input type="text" data-hour="${h}" data-field="tempsPasse2" data-combo="w" list="dl-w" autocomplete="off" value="${escapeAttr(w2)}">
+      ${w2?`<span class="ww-icon" title="W2">${wwSymbolFor(w2)}</span>`:''}
+    </td>`;
+  }
+  if(paper && f.k==='tempsPresent'){
+    return `<td class="w-pair">
+      ${val?`<span class="ww-icon" title="${escapeAttr(val)}">${wwSymbolFor(val)}</span>`:''}
+      <input type="text" data-hour="${h}" data-field="${f.k}" data-combo="ww" list="dl-ww" autocomplete="off" value="${escapeAttr(val)}" style="width:60%;">
+    </td>`;
+  }
   if(f.computed){
     const computedVal = computeCloudGroup(rec.hours[h]);
     return `<td><input type="text" data-hour="${h}" data-field="${f.k}" value="${escapeAttr(computedVal)}" disabled title="Calculé automatiquement à partir de N, CL, CM, CH" style="background:var(--surface-2);font-weight:600;text-align:center;"></td>`;
@@ -1455,9 +1854,9 @@ function hourCell(rec, h, f){
   if(f.type==='triplet'){
     const p = parseTripletCode(val);
     return `<td class="triplet-cell">
-      <input type="text" class="triplet-part" data-hour="${h}" data-triplet-field="${f.k}" data-triplet-part="n" data-combo="n" list="dl-n" autocomplete="off" value="${escapeAttr(p.n)}" title="N5 — quantité de la couche (octas)" placeholder="N5">
-      <input type="text" class="triplet-part" data-hour="${h}" data-triplet-field="${f.k}" data-triplet-part="c" data-combo="c5" list="dl-c5" autocomplete="off" value="${escapeAttr(p.c)}" title="C5 — genre du nuage" placeholder="C5">
-      <input type="text" class="triplet-part" data-hour="${h}" data-triplet-field="${f.k}" data-triplet-part="h" data-combo="h5" list="dl-h5" autocomplete="off" value="${escapeAttr(p.h)}" title="h5 — hauteur de la base" placeholder="h5">
+      <input type="text" class="triplet-part" data-hour="${h}" data-triplet-field="${f.k}" data-triplet-part="n" data-combo="n" list="dl-n" autocomplete="off" maxlength="1" value="${escapeAttr(p.n)}" title="N5 — quantité de la couche (octas, 1 chiffre)" placeholder="N5">
+      <input type="text" class="triplet-part" data-hour="${h}" data-triplet-field="${f.k}" data-triplet-part="c" data-combo="c5" list="dl-c5" autocomplete="off" maxlength="1" value="${escapeAttr(p.c)}" title="C5 — genre du nuage (1 chiffre)" placeholder="C5">
+      <input type="text" class="triplet-part" data-hour="${h}" data-triplet-field="${f.k}" data-triplet-part="h" data-combo="h5" list="dl-h5" autocomplete="off" maxlength="3" style="width:34px;" value="${escapeAttr(p.h)}" title="h5 — hauteur de la base (1 à 3 chiffres selon la précision de votre table)" placeholder="h5">
     </td>`;
   }
   if(f.k==='nuagesDesc'){
@@ -1469,7 +1868,40 @@ function hourCell(rec, h, f){
     </td>`;
   }
   if(f.type==='combo'){
+    // Symbole OMM visible directement dans la case de saisie (pas seulement à l'impression) pour
+    // le temps présent/passé (ww) — l'observateur voit tout de suite le pictogramme du code tapé.
+    if((f.combo==='ww' || f.combo==='w') && val){
+      return `<td style="position:relative;">
+        <span class="ww-icon" style="position:absolute;left:3px;top:50%;transform:translateY(-50%);width:14px;height:14px;pointer-events:none;" title="${escapeAttr(val)}">${wwSymbolFor(val)}</span>
+        <input type="text" data-hour="${h}" data-field="${f.k}" data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off" value="${escapeAttr(val)}" style="padding-left:18px;">
+      </td>`;
+    }
     return `<td><input type="text" data-hour="${h}" data-field="${f.k}" data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off" value="${escapeAttr(val)}"></td>`;
+  }
+  if(f.k==='mesuresIntermediaires'){
+    return `<td><input type="text" data-hour="${h}" data-field="${f.k}" value="${escapeAttr(val)}" oninput="this.nextElementSibling.textContent=rrrToMmLabel(this.value)"><span style="display:block;font-size:8.5px;color:#888;">${escapeHtml(rrrToMmLabel(val))}</span></td>`;
+  }
+  if(f.k==='phenomenes'){
+    // Convention : "xxx" saisi tel quel signifie "aucun phénomène observé cette heure"
+    // (confirmation explicite de l'observateur) — distinct d'une case vide (non renseignée).
+    // Le symbole OMM s'affiche en direct dès qu'un mot reconnu apparaît dans le texte tapé
+    // (brouillard, orage, pluie forte...) — même moteur que pour les codes ww, mais appliqué
+    // directement au texte libre de l'observateur plutôt qu'à un code officiel à 2 chiffres.
+    // Heure de début = l'heure de la ligne elle-même ; heure de fin saisie directement dans la
+    // même case (petit champ "fin") — pas besoin d'aller dans la section événements séparée.
+    const isNone = (val||'').trim().toLowerCase()==='xxx';
+    const phenWwCode = val && !isNone ? wwCodeFromPhenText(val) : '';
+    const hasSymbol = !!phenWwCode;
+    const finVal = rec.hours[h].phenomenesFin;
+    return `<td>
+      <div style="display:flex;align-items:center;gap:2px;">
+        <div style="position:relative;flex:1;min-width:0;">
+          ${hasSymbol?`<span class="ww-icon phen-sym" style="position:absolute;left:3px;top:50%;transform:translateY(-50%);width:14px;height:14px;pointer-events:none;">${wwSymbolByCode(phenWwCode)}</span>`:''}
+          <input type="text" data-hour="${h}" data-field="${f.k}" value="${escapeAttr(val)}" title="Tapez xxx pour indiquer explicitement qu'aucun phénomène n'a été observé. Un mot reconnu (brouillard, orage, pluie, neige, bruine, grêle...) affiche son symbole automatiquement." style="width:100%;${isNone?'color:#888;font-style:italic;':''}${hasSymbol?'padding-left:18px;':''}" oninput="phenSymbolUpdate(this)">
+        </div>
+        <input type="text" data-hour="${h}" data-field="phenomenesFin" value="${escapeAttr(finVal)}" maxlength="4" placeholder="fin" title="Heure de fin du phénomène (HHMM) si différente de ${h}h — laisser vide si le phénomène ne dure qu'une heure ou si l'heure de fin n'est pas connue." style="width:34px;flex:none;padding:2px 3px;font-size:10px;text-align:center;">
+      </div>
+    </td>`;
   }
   return `<td><input type="text" data-hour="${h}" data-field="${f.k}" value="${escapeAttr(val)}"></td>`;
 }
@@ -1516,7 +1948,15 @@ function rapideField(rec, f){
   }
   const val = rec.hours[state.rapideHour][f.k];
   const comboAttrs = f.type==='combo' ? `data-combo="${f.combo}" list="dl-${f.combo}" autocomplete="off"` : '';
-  return `<div class="field"><label>${f.label}</label><input type="text" data-hour="${state.rapideHour}" data-field="${f.k}" ${comboAttrs} value="${escapeAttr(val)}"></div>`;
+  const symbol = (f.combo==='ww' || f.combo==='w') && val ? `<span class="ww-icon" style="width:16px;height:16px;margin-right:5px;" title="${escapeAttr(val)}">${wwSymbolFor(val)}</span>` : '';
+  if(f.k==='phenomenes'){
+    const finVal = rec.hours[state.rapideHour].phenomenesFin;
+    return `<div class="field"><label>${f.label}</label><div style="display:flex;align-items:center;gap:4px;">
+      <input type="text" data-hour="${state.rapideHour}" data-field="${f.k}" value="${escapeAttr(val)}" style="flex:1;" oninput="phenSymbolUpdate(this)">
+      <input type="text" data-hour="${state.rapideHour}" data-field="phenomenesFin" value="${escapeAttr(finVal)}" maxlength="4" placeholder="fin HHMM" title="Heure de fin du phénomène (HHMM), si connue" style="width:70px;flex:none;">
+    </div></div>`;
+  }
+  return `<div class="field"><label>${f.label}</label><div style="display:flex;align-items:center;gap:2px;">${symbol}<input type="text" data-hour="${state.rapideHour}" data-field="${f.k}" ${comboAttrs} value="${escapeAttr(val)}"></div></div>`;
 }
 function renderRapideView(station){
   const rec = state.carnetRecord || emptyCarnet(station.id, state.carnetDate);
@@ -1524,6 +1964,9 @@ function renderRapideView(station){
   const essential = quickFieldsAll.filter(f=>f.quick);
   const advanced = quickFieldsAll.filter(f=>!f.quick);
   const filledCount = STANDARD_HOURS.filter(h=>hourHasData(rec.hours[h])).length;
+  const isAdmin = state.currentUser && state.currentUser.role==='admin';
+  const locked = !!(rec.meta && rec.meta.locked);
+  const readOnly = locked && !isAdmin;
   return `
   <div class="card">
     <div class="row" style="justify-content:space-between;align-items:center;">
@@ -1541,12 +1984,15 @@ function renderRapideView(station){
 
   <div class="card">
     <h3>Relevé de ${state.rapideHour}h TU</h3>
-    ${rec.hours[state.rapideHour].meta ? `<p class="help" style="margin-top:-6px;">${escapeHtml(formatGeoStamp(rec.hours[state.rapideHour].meta))}</p>` : ''}
+    ${isAdmin && rec.hours[state.rapideHour].meta ? `<p class="help" style="margin-top:-6px;">${escapeHtml(formatGeoStamp(rec.hours[state.rapideHour].meta))}</p>` : ''}
+    ${locked ? `<div class="locked-banner"><span>🔒 Ce jour est verrouillé — ${isAdmin ? 'modifiable par vous en tant qu’administrateur.' : 'seul un administrateur peut encore le modifier.'}</span></div>` : ''}
+    ${readOnly ? '<div class="locked-overlay">' : ''}
     <div class="row">${essential.map(f=>rapideField(rec, f)).join('')}</div>
     ${state.rapideShowAdvanced ? `<div class="row" style="margin-top:14px;border-top:1px dashed var(--border);padding-top:14px;">${advanced.map(f=>rapideField(rec, f)).join('')}</div>` : ''}
+    ${readOnly ? '</div>' : ''}
     <div class="row" style="margin-top:16px;justify-content:space-between;">
       <button class="btn sm" id="toggleAdvancedBtn">${state.rapideShowAdvanced?'Masquer les champs avancés':'+ Champs avancés (pression détaillée, tension de vapeur...)'}</button>
-      <button class="btn primary" id="saveRapideBtn">Enregistrer ${state.rapideHour}h</button>
+      <button class="btn primary" id="saveRapideBtn" ${readOnly?'disabled':''}>Enregistrer ${state.rapideHour}h</button>
     </div>
   </div>
 
@@ -1557,6 +2003,9 @@ function renderRapideView(station){
 }
 function renderCarnetView(station){
   const rec = state.carnetRecord || emptyCarnet(station.id, state.carnetDate);
+  const isAdmin = state.currentUser && state.currentUser.role==='admin';
+  const locked = !!(rec.meta && rec.meta.locked);
+  const readOnly = locked && !isAdmin;
   return `
   <div class="card">
     <div class="row" style="justify-content:space-between;">
@@ -1570,13 +2019,16 @@ function renderCarnetView(station){
           </div>
         </div>
       </div>
-      <div class="row"><span id="saveIndicator"></span><button class="btn" id="togglePaperViewBtn">${state.paperView?'← Retour à la saisie':'🖨️ Vue carnet papier (4 pages)'}</button><button class="btn primary" id="saveCarnetBtn">Enregistrer ce jour</button></div>
+      <div class="row"><span id="saveIndicator"></span><button class="btn" id="togglePaperViewBtn">${state.paperView?'📋 Vue avancée (tableau)':'🖨️ Vue carnet papier (5 pages)'}</button><button class="btn primary" id="saveCarnetBtn" ${readOnly?'disabled':''}>Enregistrer ce jour</button></div>
     </div>
+    ${locked ? `<div class="locked-banner"><span>🔒 Ce relevé a déjà été soumis et est verrouillé — ${isAdmin ? 'vous pouvez le modifier en tant qu’administrateur, ou le rouvrir à l’observateur.' : 'seul un administrateur peut encore le modifier.'}</span>${isAdmin ? `<button class="btn sm" id="unlockCarnetBtn">🔓 Déverrouiller pour l’observateur</button>` : ''}</div>` : ''}
     ${renderCalendarStrip(station)}
-    ${rec.meta ? `<p class="help">${escapeHtml(formatGeoStamp(rec.meta))} (dernier enregistrement global du jour — voir aussi l\u2019horodatage propre à chaque heure dans la Saisie rapide)</p>` : ''}
+    ${isAdmin && rec.meta && rec.meta.savedAt ? `<p class="help">${escapeHtml(formatGeoStamp(rec.meta))} (dernier enregistrement global du jour — voir aussi l\u2019horodatage propre à chaque heure dans la Saisie rapide)</p>` : ''}
   </div>
 
+  ${readOnly ? '<div class="locked-overlay" title="Verrouillé — seul un administrateur peut modifier.">' : ''}
   ${state.paperView ? renderPaperView(rec, station) : renderCarnetBody(rec)}
+  ${readOnly ? '</div>' : ''}
   `;
 }
 function renderCarnetBody(rec){
@@ -1706,6 +2158,10 @@ function renderCarnetBody(rec){
       <textarea class="wide" id="resumeTempsClair">${escapeHtml(rec.extras.resumeTempsClair)}</textarea>
     </div>
     <button class="btn sm" id="genDayResumeBtn" style="margin-top:8px;">Générer le résumé automatiquement</button>`)}
+
+  ${section('troublesVisibilite', '17. Troubles de la visibilité (événements — brouillard, brume, chasse-poussière...)', renderEventList(rec.troublesVisibilite, TROUBLE_VISI_FIELDS, 'troublesVisibilite', '+ Ajouter un événement'), rec.troublesVisibilite.length||'')}
+
+  ${section('precipEvenements', '18. Précipitations — heures de début et de fin (pour le Tableau synoptique du TCM)', renderEventList(rec.precipEvenements, PRECIP_EVENT_FIELDS, 'precipEvenements', '+ Ajouter un événement'), rec.precipEvenements.length||'')}
   `;
 }
 /* ================= Vue carnet papier (4 pages conformes au formulaire ASECNA) ================= */
@@ -1716,11 +2172,11 @@ function renderCarnetBody(rec){
 function paperHeader(rec, station, pageNum){
   const dateObj = new Date(rec.date+'T00:00:00');
   const dateLabel = dateObj.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-  const circled = ['①','②','③','④'][pageNum-1] || pageNum;
+  const circled = ['①','②','③','④','⑤'][pageNum-1] || pageNum;
   return `
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;font-family:var(--font-sans);font-size:9.5px;">
     <div><b>MétéoCarnet Mali</b> — ${escapeHtml(station.name)}</div>
-    <div>Page ${pageNum}/4</div>
+    <div>Page ${pageNum}/5</div>
   </div>
   <h2>${circled} DATE : ${escapeHtml(dateLabel)}</h2>`;
 }
@@ -1741,7 +2197,7 @@ function paperHourTable(rec, fields, extraHeadRow){
   return `<table>
     <thead>${extraHeadRow || paperFieldsHeadRow(fields)}</thead>
     <tbody>
-      ${ALL_HOURS.map(h=> `<tr><td class="rh">${h}</td>${fields.map(f=> hourCell(rec, h, f)).join('')}</tr>`).join('')}
+      ${ALL_HOURS.map(h=> `<tr><td class="rh">${h}</td>${fields.map(f=> hourCell(rec, h, f, true)).join('')}</tr>`).join('')}
     </tbody>
   </table>`;
 }
@@ -1749,7 +2205,9 @@ function extraFieldBare(key, rec){
   return `<input type="text" data-extra="${key}" value="${escapeAttr(rec.extras[key])}" style="width:100%;">`;
 }
 function paperPage1(rec, station){
-  const fields = FIELDS_TOUR.filter(f=> f.k!=='groupeNhClCmCh' && f.k!=='notes');
+  // tempsPasse2 (W2) n'a pas sa propre colonne imprimée : elle est fusionnée dans la case
+  // "W½" (col. 10) avec tempsPasse (W1), au format "W1/W2" — cf. hourCell(..., paper=true).
+  const fields = FIELDS_TOUR.filter(f=> f.k!=='groupeNhClCmCh' && f.k!=='notes' && f.k!=='tempsPasse2');
   const head = `
     <tr><th rowspan="2" style="width:32px;">Heure<br>TU<span class="colnum">1</span></th>
       <th colspan="4">Vents (d et f)</th><th colspan="2">V — Visibilité</th>
@@ -1860,15 +2318,32 @@ function paperPage4(rec, station){
     <textarea data-extra="phenomenesRemarquables" class="free-text-box" style="width:100%;border:1px solid #333;font-family:var(--font-sans);font-size:10px;">${escapeHtml(rec.extras.phenomenesRemarquables||'')}</textarea>
   </div>`;
 }
+function paperPage5(rec, station){
+  return `
+  <div class="paper-page">
+    ${paperHeader(rec, station, 5)}
+    <h3>Phénomènes observés ce jour (pour comptage mensuel)</h3>
+    <div class="check-grid">
+      ${PHEN_CHECKS.map(p=>`<label class="check-item"><input type="checkbox" data-phen="${p.k}" ${rec.extras[p.k]?'checked':''}> ${escapeHtml(p.label)}</label>`).join('')}
+    </div>
+    <h3>Résumé du temps en clair</h3>
+    <textarea data-extra="resumeTempsClair" class="free-text-box" style="width:100%;border:1px solid #333;font-family:var(--font-sans);font-size:10px;">${escapeHtml(rec.extras.resumeTempsClair||'')}</textarea>
+    <h3>Troubles de la visibilité — brouillard, brume... (heures de début/fin, durée, visibilité minimale)</h3>
+    ${renderEventList(rec.troublesVisibilite, TROUBLE_VISI_FIELDS, 'troublesVisibilite', '+ Ajouter un événement')}
+    <h3>Précipitations — heures de début et de fin (pour le tableau synoptique du TCM)</h3>
+    ${renderEventList(rec.precipEvenements, PRECIP_EVENT_FIELDS, 'precipEvenements', '+ Ajouter un événement')}
+  </div>`;
+}
 
 function renderPaperView(rec, station){
   return `
   <div class="paper-view">
-    <div class="paper-toolbar"><button class="btn" id="printPaperBtn">🖨️ Imprimer / PDF (4 pages)</button></div>
+    <div class="paper-toolbar"><button class="btn" id="printPaperBtn">🖨️ Imprimer / PDF (5 pages)</button></div>
     ${paperPage1(rec, station)}
     ${paperPage2(rec, station)}
     ${paperPage3(rec, station)}
     ${paperPage4(rec, station)}
+    ${paperPage5(rec, station)}
   </div>`;
 }
 
@@ -1876,10 +2351,12 @@ function renderPaperView(rec, station){
    Même principe que la vue carnet papier : les cases se remplissent directement, mais comme
    ces tables croisent plusieurs jours, chaque modification sauvegarde IMMÉDIATEMENT le jour
    concerné (pas besoin de revenir sur le Carnet), puis rafraîchit les totaux/moyennes affichés. */
-function tcmPageWrap(station, monthLabel, title, bodyHtml){
-  return `<div class="paper-page">
-    <div style="display:flex;justify-content:space-between;font-family:var(--font-sans);font-size:9.5px;margin-bottom:2px;">
-      <div><b>Station : ${escapeHtml(station.name)}</b></div><div>Mois : ${escapeHtml(monthLabel)}</div>
+function tcmPageWrap(station, monthLabel, title, bodyHtml, year){
+  return `<div class="paper-page tcm-page">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;font-family:var(--font-sans);font-size:11px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--tcm-red);">
+      <div><span class="tcm-lbl" style="font-weight:700;">Station :</span> <b>${escapeHtml(station.name.toUpperCase())}</b></div>
+      <div><span class="tcm-lbl" style="font-weight:700;">Mois :</span> <b>${escapeHtml(monthLabel.split(' ')[0].toUpperCase())}</b></div>
+      <div><b>${escapeHtml(year!==undefined ? String(year) : monthLabel.split(' ').pop())}</b></div>
     </div>
     <h2>${escapeHtml(title)}</h2>
     ${bodyHtml}
@@ -1912,6 +2389,8 @@ function paperMonthlyHourGrid(m, dates, field){
     </tbody>
   </table>`;
 }
+// Reflète directement, sur la première page du TCM, les phénomènes cochés ce jour-là dans
+// le Carnet (onglet "15. Phénomènes observés ce jour") — plus besoin de les re-saisir.
 function tcmVentBody(m, dates, summary){
   let grandTotalVit=0, grandCountVit=0;
   const rows = dates.map((dateStr,i)=>{
@@ -1979,12 +2458,47 @@ function tcmNebuloBody(m, dates){
     <tbody>${dates.map((dateStr,i)=> `<tr><td class="rh">${i+1}</td>${['00','06','12','18'].map(h=>monthlyDayHourCell(m,dateStr,h,'niveauMerPression',44)).join('')}</tr>`).join('')}</tbody>
   </table>`;
 }
+// Page "Troubles de la visibilité" + "Orages et grains" — reproduit la page 3 du TCM officiel :
+// deux listes en texte phrasé par date, avec heures de début/fin exactes (pas un tableau de
+// champs bruts comme l'ancienne version de cette page).
+function tcmTroublesOragesBody(dates, m){
+  const troublesRows = [];
+  const oragesRows = [];
+  dates.forEach(dateStr=>{
+    const rec = m.byDate[dateStr];
+    if(!rec) return;
+    const day = dateStr.slice(8,10);
+    (rec.troublesVisibilite||[]).forEach(ev=>{
+      if(!ev.heureDebut && !ev.heureFin) return;
+      const mins = toNum(ev.duree)!==null ? toNum(ev.duree) : hhmmDiffMinutes(ev.heureDebut, ev.heureFin);
+      const phrase = `${escapeHtml(ev.nature||'Phénomène')} de ${escapeHtml(ev.heureDebut||'xxx')} à ${escapeHtml(ev.heureFin||'xxx')}`
+        + (ev.visibiliteMin?` visi mini ${escapeHtml(ev.visibiliteMin)} m`:'') + `, ${mins!==null?mins:'xx'} minutes.`;
+      troublesRows.push({day, phrase});
+    });
+    (rec.grainsOrages||[]).forEach(ev=>{
+      if(!ev.heureDebut && !ev.heureFin) return;
+      const mins = toNum(ev.duree)!==null ? toNum(ev.duree) : hhmmDiffMinutes(ev.heureDebut, ev.heureFin);
+      const dureeTxt = mins===null ? 'xxmin' : mins>=60 ? `${Math.floor(mins/60)}h${String(mins%60).padStart(2,'0')}min` : `${mins} minutes.`;
+      const phrase = `Orage ${escapeHtml(ev.caracteristiques||'')} de ${escapeHtml(ev.heureDebut||'xxx')} à ${escapeHtml(ev.heureFin||'xxx')}, ${dureeTxt}`;
+      oragesRows.push({day, phrase});
+    });
+  });
+  const col = (title, rows)=> `
+    <div style="flex:1;">
+      <div class="cap">${title}</div>
+      <table><thead><tr><th style="width:24px;">Dates</th><th style="text-align:left;">Détail</th></tr></thead>
+      <tbody>${rows.length? rows.map(r=>`<tr><td class="rh">${r.day}</td><td style="text-align:left;white-space:normal;font-style:italic;">${r.phrase}</td></tr>`).join('') : '<tr><td colspan="2" style="text-align:left;">—</td></tr>'}</tbody></table>
+    </div>`;
+  return `<div style="display:flex;gap:10px;align-items:flex-start;">
+    ${col('Troubles de la visibilité : brouillard, brume... (nature, heures de début et de fin, durée, visibilité minimale)', troublesRows)}
+    ${col('Orages et grains (heures de début et de fin, durée, caractéristiques)', oragesRows)}
+  </div>`;
+}
 function tcmMonthEventsList(dates, m){
   const rows = [];
   dates.forEach(dateStr=>{
     const rec = m.byDate[dateStr];
     if(!rec) return;
-    (rec.grainsOrages||[]).forEach(ev=> rows.push({date:dateStr, type:'Grain/orage/grêle', desc: GRAIN_FIELDS.map(f=>ev[f.k]).filter(Boolean).join(' · ')}));
     (rec.observationsSpeciales||[]).forEach(ev=> rows.push({date:dateStr, type:'Observation spéciale', desc: OBS_SPECIALE_FIELDS.map(f=>ev[f.k]).filter(Boolean).join(' · ')}));
   });
   if(!rows.length) return `<p class="help">Aucun événement enregistré ce mois-ci.</p>`;
@@ -2010,19 +2524,195 @@ function tcmPrecipEvapBody(m, dates, summary){
     <div><b>Max 24h :</b> ${fmt(summary.precipMax)} mm — ${escapeHtml(summary.precipMaxDate||'—')}</div>
     <div><b>Intensité remarquable :</b> ${fmt(m.intensiteRemarquable.value)} mm/h — ${m.intensiteRemarquable.date?`${escapeHtml(m.intensiteRemarquable.date)} à ${escapeHtml(m.intensiteRemarquable.hour)}TU`:'—'}</div>
   </div>
-  <h3>Orages, grains et observations spéciales du mois</h3>
+  <h3>Observations spéciales du mois</h3>
   ${tcmMonthEventsList(dates, m)}`;
+}
+// Tableau synoptique des précipitations : reproduit fidèlement la page dédiée du TCM officiel
+// (grille date × heure TU, une barre par événement de pluie allant de son heure de début à son
+// heure de fin, avec les heures HHMM affichées aux deux extrémités) — construite à partir d'un
+// vrai exemplaire ASECNA rempli (Bamako-Sénou juin 2026 + Sélingué juillet 2026). Le style de
+// hachure (plein/tramé) du papier n'a pas de valeur officielle distincte au-delà de la durée —
+// simplifié ici en une seule barre pleine, ce qui garde l'information utile : le positionnement
+// exact dans le temps de chaque épisode pluvieux.
+function tcmPrecipSynoptiqueBody(m, dates){
+  const rows = dates.map((dateStr,i)=>{
+    const rec = m.byDate[dateStr];
+    const events = (rec && rec.precipEvenements) || [];
+    const cells = ALL_HOURS.map(()=> ({marked:false, startLabel:'', endLabel:''}));
+    events.forEach(ev=>{
+      const s = (ev.heureDebut||'').trim(), e = (ev.heureFin||'').trim();
+      if(!/^\d{3,4}$/.test(s) || !/^\d{3,4}$/.test(e)) return;
+      const sh = Math.min(23, parseInt(s.padStart(4,'0').slice(0,2),10));
+      let eh = Math.min(23, parseInt(e.padStart(4,'0').slice(0,2),10));
+      if(eh<sh) eh = 23; // événement à cheval sur minuit : affiché jusqu'à 23h ce jour-là
+      for(let h=sh; h<=eh; h++) cells[h].marked = true;
+      cells[sh].startLabel = s;
+      cells[eh].endLabel = e;
+    });
+    const tds = cells.map(c=>{
+      if(!c.marked) return '<td></td>';
+      const label = [c.startLabel, c.endLabel].filter(Boolean).join(c.startLabel && c.endLabel && c.startLabel!==c.endLabel ? '–' : '');
+      return `<td class="precip-mark">${label?`<span class="precip-time">${escapeHtml(label)}</span>`:''}</td>`;
+    }).join('');
+    return `<tr><td class="rh">${i+1}</td>${tds}</tr>`;
+  }).join('');
+  return `
+  <p class="help" style="margin:0 0 4px;">Une barre par épisode de pluie, positionnée de l'heure de début à l'heure de fin (saisies dans le Carnet, section 18). Les heures HHMM s'affichent au-dessus des extrémités.</p>
+  <table style="table-layout:auto;">
+    <thead><tr><th style="width:24px;">Date</th>${ALL_HOURS.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+function dayPhenSymbols(rec){
+  if(!rec) return [];
+  const keys = PHEN_CHECKS.filter(p=> rec.extras && rec.extras[p.k]).map(p=>p.k);
+  const anyPrecip = ALL_HOURS.some(h=> rec.hours[h] && toNum(rec.hours[h].intensitePrecip)>0)
+    || toNum(rec.extras && rec.extras.precipitation24h) > 0;
+  if(anyPrecip) keys.push('pluie');
+  return keys;
 }
 function tcmResumeBody(dates, m){
   return `<table>
-    <thead><tr><th>Date</th><th style="text-align:left;">Résumé du temps (en clair)</th></tr></thead>
+    <thead><tr><th style="width:26px;">Date</th><th style="text-align:left;">Résumé du temps (en clair)</th><th style="width:90px;">Phénomènes<br>divers — Symboles</th></tr></thead>
     <tbody>
       ${dates.map((dateStr,i)=>{
         const rec = m.byDate[dateStr]; const val = rec ? (rec.extras.resumeTempsClair||'') : '';
-        return `<tr><td class="rh">${i+1}</td><td style="text-align:left;"><input type="text" class="monthly-extra-input" data-m-date="${dateStr}" data-m-extra="resumeTempsClair" value="${escapeAttr(val)}" style="width:100%;text-align:left;"></td></tr>`;
+        const symbols = dayPhenSymbols(rec);
+        const symbolsHtml = symbols.map(k=>{
+          const unconfirmed = PHEN_SYMBOL_CONFIRMED[k]===false;
+          const label = k==='pluie' ? 'Pluie' : (PHEN_CHECKS.find(p=>p.k===k)||{label:k}).label;
+          return `<span class="ww-icon" style="width:15px;height:15px;${unconfirmed?'opacity:.55;':''}" title="${escapeAttr(label)}${unconfirmed?' (symbole non confirmé)':''}">${phenSymbolSvg(k,15)}</span>`;
+        }).join('');
+        return `<tr><td class="rh">${i+1}</td><td style="text-align:left;"><input type="text" class="monthly-extra-input" data-m-date="${dateStr}" data-m-extra="resumeTempsClair" value="${escapeAttr(val)}" style="width:100%;text-align:left;"></td><td style="white-space:normal;">${symbolsHtml}</td></tr>`;
       }).join('')}
     </tbody>
-  </table>`;
+  </table>
+  <p class="help">Symboles grisés = non confirmés par un exemple réel (brouillard, grêle, gelée blanche, vent fort) — les autres reproduisent exactement un TCM officiel rempli.</p>`;
+}
+// Page 1 du TCM officiel (couverture + résumé climatologique du mois) — les données existaient
+// déjà (calculées pour la vue tableau interactive) mais n'étaient jamais affichées dans la vue
+// papier, qui sautait directement à la page vent. Reproduit la mise en page réelle ASECNA.
+// Compte les jours où AU MOINS UN des indicateurs donnés est vrai (pas une somme indépendante —
+// utilisé pour la colonne "Orage ou tonnerre", qui fusionne avec/sans tonnerre sur le vrai TCM).
+function countDaysAnyOf(m, keys){
+  let n = 0;
+  Object.values(m.byDate||{}).forEach(rec=>{
+    if(rec && rec.extras && keys.some(k=> rec.extras[k])) n++;
+  });
+  return n;
+}
+function tcmPage1Body(m, summary, station, monthLabel, year){
+  const j = (n)=> n||0;
+  const tn = toNum(summary.moyTn), tx = toNum(summary.moyTx);
+  const moyTnTx = (tn!==null && tx!==null) ? (tn+tx)/2 : null;
+  const st = station || {};
+  const orageDays = countDaysAnyOf(m, ['phenOrageSansTonnerre','phenOrageAvecTonnerre']);
+  const tnBins = tempBins(m.days, 'Tn', [15,20,25,30]);
+  const txBins = tempBins(m.days, 'Tx', [30,35,40,45]);
+  return `
+  <div class="paper-page tcm-cover tcm-page">
+    <div class="tcm-top">
+      <div class="tcm-ident">ASECNA<br><span style="color:#111;font-weight:400;">DIRECTION DE L'EXPLOITATION<br>MÉTÉOROLOGIQUE</span></div>
+      <div class="tcm-title"><h1>TABLEAU CLIMATOLOGIQUE<br>MENSUEL</h1><div class="sub">(8 observations par jour)</div></div>
+      <div class="tcm-meta">
+        <div><span class="tcm-lbl">ANNÉE :</span> <b>${escapeHtml(String(year))}</b></div>
+        <div><span class="tcm-lbl">MOIS :</span> <b>${escapeHtml(monthLabel.split(' ')[0]).toUpperCase()}</b></div>
+        <div><span class="tcm-lbl">LATITUDE :</span> <b>${escapeHtml(st.lat||'—')}</b></div>
+        <div><span class="tcm-lbl">LONGITUDE :</span> <b>${escapeHtml(st.lon||'—')}</b></div>
+        <div><span class="tcm-lbl">ALTITUDE STATION :</span> <b>${escapeHtml(st.alt||'—')}m</b></div>
+      </div>
+    </div>
+    <div class="tcm-row2">
+      <div class="tcm-ouv"><span class="tcm-lbl">Heures d'ouverture<br>de la station :</span><br><b>${escapeHtml(st.heures_ouverture_debut||'0000TU')}</b><br><b>${escapeHtml(st.heures_ouverture_fin||'2400TU')}</b></div>
+      <div class="tcm-chef">
+        <span class="tcm-lbl">CHEF DE STATION :</span> <b>${escapeHtml(st.chef_station||'')}</b><br>
+        <span class="tcm-lbl">STATION :</span> <b>${escapeHtml(st.name)}</b><br>
+        <span class="tcm-lbl">ÉTAT :</span> <b>${escapeHtml(st.etat||'MALI')}</b>
+      </div>
+      <div></div>
+    </div>
+    <div class="tcm-boxes">
+      <div class="tcm-box">
+        <span class="tcm-lbl">Altitude du capteur barométrique :</span> <b>${escapeHtml(st.altitude_capteur_baro||'—')}</b>
+        &nbsp; <span class="tcm-lbl">Cor. Inst<sup>ale</sup> :</span> <b>${escapeHtml(st.cor_inst||'—')}</b>
+        &nbsp; <span class="tcm-lbl">Cor Gravité :</span> <b>${escapeHtml(st.cor_gravite||'—')}</b><br>
+        <span class="tcm-lbl">Hauteur du capteur au dessus du sol :</span> <b>${escapeHtml(st.hauteur_capteur_vent||'—')}</b><br>
+        <span class="tcm-lbl">Type de capteur vent :</span> <b>${escapeHtml(st.type_capteur_vent||'—')}</b><br>
+        <span class="tcm-lbl">Nombre de contacts du transmetteur de la girouette :</span> <b>${escapeHtml(st.nature_girouette||'—')}</b><br>
+        <span class="tcm-lbl">Nature du pluviomètre enregistreur :</span> <b>${escapeHtml(st.nature_pluvio||'—')}</b>
+        &nbsp; <span class="tcm-lbl">Cylindre :</span> <b>${escapeHtml(st.cylindre||'—')}</b><br>
+        <span class="tcm-lbl">Nature de l'héliographe :</span> <b>${escapeHtml(st.nature_helio||'—')}</b><br>
+        <span class="tcm-lbl">Nature des évaporomètres :</span> <b>${escapeHtml(st.nature_evapo||'—')}</b><br>
+        <span class="tcm-lbl">Nature de l'actinomètre :</span> <b>${escapeHtml(st.nature_actino||'—')}</b>
+      </div>
+      <div class="tcm-box tcm-box-right">
+        <div>Renseignements sur les changements d'installation et d'équipement de la station :<br><br><b>${escapeHtml(st.renseignements_equipement||'R.A.S')}</b></div>
+      </div>
+    </div>
+    <div class="tcm-fuseau">
+      Axe du fuseau horaire de la région à laquelle la station est rattachée : <b>${escapeHtml(st.fuseau_horaire||'0')}</b><sup>ème</sup>.<br>
+      LORSQU'IL EST MIDI, HEURE DU FUSEAU, IL EST <span class="brace">{</span> <b>${escapeHtml(st.heure_midi_tu||'1200')}</b> heures T.U. (méridien international) · <b>${escapeHtml(st.heure_midi_legale||'1200')}</b> heures légales.
+    </div>
+
+    <h2 class="tcm-section">RÉSUMÉ CLIMATOLOGIQUE DU MOIS</h2>
+    <div class="tcm-resume">
+      <div class="tcm-resume-text">
+        <div class="grp">Température (en degrés Celsius et dixièmes) :</div>
+        <div class="ln">Moyenne mensuelle des minimums Tn : <b>${fmt(summary.moyTn)}</b></div>
+        <div class="ln">Moyenne mensuelle des maximums Tx : <b>${fmt(summary.moyTx)}</b></div>
+        <div class="ln">Moyenne (Tn+Tx)/2 : <b>${fmt(moyTnTx)}</b></div>
+        <div class="ln">Minimum absolu : <b>${fmt(summary.minAbs)}</b> date : <b>${escapeHtml(summary.minAbsDate||'—')}</b></div>
+        <div class="ln">Maximum absolu : <b>${fmt(summary.maxAbs)}</b> date : <b>${escapeHtml(summary.maxAbsDate||'—')}</b></div>
+        <div class="ln">Moyenne quotidienne la plus basse : <b>${fmt(summary.moyBasse)}</b> date : <b>${escapeHtml(summary.moyBasseDate||'—')}</b></div>
+        <div class="ln">Moyenne quotidienne la plus élevée : <b>${fmt(summary.moyHaute)}</b> date : <b>${escapeHtml(summary.moyHauteDate||'—')}</b></div>
+        <div class="grp">Précipitations :</div>
+        <div class="ln">Hauteur d'eau recueillie en mm : <b>${fmt(summary.precipTotal)}</b></div>
+        <div class="ln">Durée totale en heures et dixièmes : <b>${fmt(summary.dureePrecipTotal)}</b></div>
+        <div class="ln">Hauteur maximale en 24 heures : <b>${fmt(summary.precipMax)}</b> date : <b>${escapeHtml(summary.precipMaxDate||'—')}</b></div>
+        <div class="ln">Intensité remarquable : <b>${fmt(m.intensiteRemarquable.value)}</b> mm/heure${m.intensiteRemarquable.date?` — ${escapeHtml(m.intensiteRemarquable.date)} à ${escapeHtml(m.intensiteRemarquable.hour)}TU`:''}</div>
+        <div class="grp">Évaporation : <span style="color:#111;font-weight:400;">Hauteur totale en mm : PICHE <b>${fmt(summary.evapPicheTotal)}</b> BAC <b>${fmt(summary.evapBacTotal)}</b></span></div>
+        <div class="grp">Insolation : <span style="color:#111;font-weight:400;">durée totale en heures : <b>${fmt(summary.insolTotal)}</b></span></div>
+        <div class="grp">Vitesse maximale instantanée du vent : <span style="color:#111;font-weight:400;"><b>${fmt(summary.ventMax)}</b> m/s date : <b>${escapeHtml(summary.ventMaxDate||'—')}</b></span></div>
+      </div>
+      <div class="tbl-wrap tcm-wind-freq">
+        <table>
+          <caption>Nombre de fois que pour ${escapeHtml(String(m.windFreq.total))} observations la vitesse du vent a été, selon les directions, égale ou supérieure à 1m/s.</caption>
+          <thead><tr><th></th>${DIRECTIONS_18.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr></thead>
+          <tbody>
+            ${m.windFreq.rows.map(sp=>{
+              const rowTotal = DIRECTIONS_18.reduce((a,d)=> a+(m.windFreq.table[d][sp]||0), 0);
+              return `<tr><td class="rh">${sp}</td>${DIRECTIONS_18.map(d=>`<td>${m.windFreq.table[d][sp]||''}</td>`).join('')}<td>${rowTotal}</td></tr>`;
+            }).join('')}
+            <tr><td colspan="${DIRECTIONS_18.length+1}" style="text-align:left;">Nombre de vents &lt; 1m/s : <b>${j(m.windFreq.under1)}</b></td><td>Nombre de vents &lt; 2m/s : <b>${j(m.windFreq.under2)}</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tcm-phen-box">
+      <div class="cap">Nombre de jours où les phénomènes suivants ont été observés</div>
+      <table>
+        <thead><tr><th colspan="3">Précipitations</th><th rowspan="2">Chute<br>de<br>grêle</th><th rowspan="2">Orage<br>ou<br>tonnerre</th><th rowspan="2">Éclairs<br>sans<br>tonnerre</th><th rowspan="2">Brouil-<br>lard</th><th rowspan="2">Brume<br>humi-<br>de</th><th rowspan="2">Brume<br>sèche</th><th rowspan="2">Chasse<br>sable</th></tr>
+        <tr><th>mm<br>≥ 0,1</th><th>mm<br>≥ 1,0</th><th>mm<br>≥ 10,0</th></tr></thead>
+        <tbody><tr>
+          <td>${j(summary.jGE01)}</td><td>${j(summary.jGE1)}</td><td>${j(summary.jGE10)}</td>
+          <td>${j(m.phenCounts.phenGrele)}</td><td>${orageDays}</td><td>${j(m.phenCounts.phenEclairsSansTonnerre)}</td>
+          <td>${j(m.phenCounts.phenBrouillard)}</td><td>${j(m.phenCounts.phenBrumeHumide)}</td><td>${j(m.phenCounts.phenBrumeSeche)}</td><td>${j(m.phenCounts.phenChasseSable)}</td>
+        </tr></tbody>
+      </table>
+      <table>
+        <thead><tr><th rowspan="2">Vent<br>de<br>sable</th><th rowspan="2">rosée</th><th rowspan="2">Gelée<br>blanche</th><th colspan="2">Insolation</th><th rowspan="2">Vent<br>≥16m/s</th><th colspan="4">Tn</th><th colspan="4">Tx</th></tr>
+        <tr><th>nulle</th><th>con-<br>tinue</th>${tnBins.map(b=>`<th>${escapeHtml(b.label)}</th>`).join('')}${txBins.map(b=>`<th>${escapeHtml(b.label)}</th>`).join('')}</tr></thead>
+        <tbody><tr>
+          <td>—</td><td>${j(m.phenCounts.phenRosee)}</td><td>${j(m.phenCounts.phenGeleeBlanche)}</td><td>—</td><td>—</td><td>${j(m.phenCounts.phenVentFort16)}</td>
+          ${tnBins.map(b=>`<td>${b.count}</td>`).join('')}${txBins.map(b=>`<td>${b.count}</td>`).join('')}
+        </tr></tbody>
+      </table>
+    </div>
+
+    <div class="tcm-dominant"><b>CARACTÈRES DOMINANTS DU MOIS :</b> ${escapeHtml(m.dominantText || '')}</div>
+    <p class="tcm-footnote">Dans le présent document, toutes les heures sont exprimées en heures T.U.</p>
+  </div>`;
 }
 function renderMensuelPaperView(m, station){
   const year = state.mensuelYear, month = state.mensuelMonth;
@@ -2033,16 +2723,25 @@ function renderMensuelPaperView(m, station){
   return `
   <div class="paper-view">
     <div class="paper-toolbar"><button class="btn" id="printPaperBtn">🖨️ Imprimer / PDF</button></div>
-    ${tcmPageWrap(station, monthLabel, 'Direction et vitesse du vent — par heure synoptique', tcmVentBody(m, dates, summary))}
-    ${tcmPageWrap(station, monthLabel, "Température de l'air sous abri et thermomètre mouillé", tcmTempBody(m, dates))}
-    ${tcmPageWrap(station, monthLabel, 'Tension de vapeur, humidité relative et pression atmosphérique', tcmTensionHumiditeBody(m, dates))}
-    ${tcmPageWrap(station, monthLabel, 'Nébulosité, insolation, température du sol et pression au niveau de la mer', tcmNebuloBody(m, dates))}
-    ${tcmPageWrap(station, monthLabel, 'Précipitations, évaporation et événements du mois', tcmPrecipEvapBody(m, dates, summary))}
-    ${tcmPageWrap(station, monthLabel, 'Résumé du temps en clair', tcmResumeBody(dates, m))}
-    <div class="paper-page" style="font-family:var(--font-sans);font-size:11px;">
-      <h3>Pas encore inclus dans cette vue</h3>
-      <p>Le message CLIMAT/CREX chiffré (transmission internationale) et le tableau synoptique horaire détaillé des précipitations sont des formats très spécialisés et sensibles à l'erreur — je préfère les traiter séparément, avec plus de vérifications, plutôt que de les improviser ici. Dites-moi si vous en avez besoin en priorité et on s'y attaque proprement.</p>
-    </div>
+    ${tcmPage1Body({...m, dominantText: m.dominantText || dominantParagraph(m, summary, station.name, monthLabel)}, summary, station, monthLabel, year)}
+    ${tcmPageWrap(station, monthLabel, 'Tableau synoptique des précipitations', tcmPrecipSynoptiqueBody(m, dates), year)}
+    ${tcmPageWrap(station, monthLabel, 'Troubles de la visibilité — Orages et grains', tcmTroublesOragesBody(dates, m), year)}
+    ${tcmPageWrap(station, monthLabel, "Température de l'air sous abri et thermomètre mouillé", tcmTempBody(m, dates), year)}
+    ${tcmPageWrap(station, monthLabel, 'Tension de vapeur, humidité relative et pression atmosphérique', tcmTensionHumiditeBody(m, dates), year)}
+    ${tcmPageWrap(station, monthLabel, 'Nébulosité, insolation, température du sol et pression au niveau de la mer', tcmNebuloBody(m, dates), year)}
+    ${tcmPageWrap(station, monthLabel, 'Direction et vitesse du vent — par heure synoptique', tcmVentBody(m, dates, summary), year)}
+    ${tcmPageWrap(station, monthLabel, 'Précipitations, évaporation et observations du mois', tcmPrecipEvapBody(m, dates, summary), year)}
+    ${tcmPageWrap(station, monthLabel, 'Résumé du temps en clair', tcmResumeBody(dates, m), year)}
+    ${(()=>{ const climat = buildClimatDraft(m, summary, station, year, month); return tcmPageWrap(station, monthLabel, 'Message CLIMAT — moyennes et brouillon de chiffrement', `
+      <div class="mini-grid" style="font-family:var(--font-sans);font-size:10px;">
+        <div><b>Pression station moy. :</b> ${fmt(climat.pressionStation)} hPa</div>
+        <div><b>Pression mer moy. :</b> ${fmt(climat.pressionMer)} hPa</div>
+        <div><b>Température sous abri moy. :</b> ${fmt(climat.tempAbri)} °C</div>
+        <div><b>Tension de vapeur moy. :</b> ${fmt(climat.tension)} hPa</div>
+      </div>
+      <div class="free-text-box" style="white-space:pre-wrap;">${escapeHtml(climat.text)}</div>
+      <p class="help">Le chiffrement CLIMAT/CREX complet (groupes numériques OMM) n'est pas généré automatiquement — il exige une vérification experte avant transmission officielle. Les moyennes ci-dessus servent de base de saisie dans votre outil de codage habituel.</p>
+    `, year); })()}
   </div>`;
 }
 function renderScanBox(){
@@ -2300,6 +2999,22 @@ function bindEvents(){
     } else toast('Échec de l\u2019archivage.', true);
     render();
   });
+  document.querySelectorAll('[data-save-station-meta]').forEach(b=> b.onclick = async ()=>{
+    const id = b.dataset.saveStationMeta;
+    const station = state.stations.find(s=>s.id===id);
+    if(!station) return;
+    const payload = { id: station.id, name: station.name, lat: station.lat, lon: station.lon, alt: station.alt };
+    document.querySelectorAll(`[data-station-meta][data-station-meta-id="${id}"]`).forEach(inp=>{
+      payload[inp.dataset.stationMeta] = inp.value;
+    });
+    b.disabled = true; const prevLabel = b.textContent; b.textContent = 'Enregistrement…';
+    const ok = await addStationApi(payload);
+    if(ok){
+      state.stations = await loadStations();
+      toast('Détails enregistrés.');
+    } else toast('Échec de l’enregistrement.', true);
+    render();
+  });
   document.querySelectorAll('[data-restore-station]').forEach(b=> b.onclick = async ()=>{
     const ok = await restoreStationApi(b.dataset.restoreStation);
     if(ok){
@@ -2337,9 +3052,11 @@ function bindEvents(){
     state.carnetRecord.hours[h][f] = e.target.value;
     state.carnetDirty = true; updateSaveIndicator();
     if(f==='visibiliteDam' && !state.carnetRecord.hours[h].visibiliteCode){
-      const dam = toNum(e.target.value);
-      if(dam!==null){
-        const km = dam*10/1000;
+      // La valeur saisie est la distance de visibilité en mètres (ex. 10000 = 10 km) — confirmé
+      // par un relevé réel (10000 → code 60 = "10 km" dans la table OMM, correct).
+      const metres = toNum(e.target.value);
+      if(metres!==null){
+        const km = metres/1000;
         const code = nearestVisibiliteCode(km);
         if(code){
           state.carnetRecord.hours[h].visibiliteCode = code;
@@ -2419,9 +3136,10 @@ function bindEvents(){
   const genDayResumeBtn = document.getElementById('genDayResumeBtn');
   if(genDayResumeBtn) genDayResumeBtn.onclick = ()=>{ state.carnetRecord.extras.resumeTempsClair = dailyResume(state.carnetRecord); state.carnetDirty = true; render(); };
 
+  const EVENT_ARRAY_FIELDS = { grainsOrages: GRAIN_FIELDS, observationsSpeciales: OBS_SPECIALE_FIELDS, troublesVisibilite: TROUBLE_VISI_FIELDS, precipEvenements: PRECIP_EVENT_FIELDS };
   document.querySelectorAll('[data-add-event]').forEach(b=> b.onclick = ()=>{
     const arr = b.dataset.addEvent;
-    const fields = arr==='grainsOrages' ? GRAIN_FIELDS : OBS_SPECIALE_FIELDS;
+    const fields = EVENT_ARRAY_FIELDS[arr] || OBS_SPECIALE_FIELDS;
     const obj = {id: uid()}; fields.forEach(f=> obj[f.k]='');
     state.carnetRecord[arr].push(obj);
     state.carnetDirty = true;
@@ -2435,7 +3153,35 @@ function bindEvents(){
   });
   document.querySelectorAll('[data-event-field]').forEach(inp=> inp.onchange = (e)=>{
     const arr = e.target.dataset.eventArray; const idx = parseInt(e.target.dataset.eventIdx); const f = e.target.dataset.eventField;
-    state.carnetRecord[arr][idx][f] = e.target.value;
+    const ev = state.carnetRecord[arr][idx];
+    ev[f] = e.target.value;
+    if((arr==='troublesVisibilite' || arr==='precipEvenements') && (f==='heureDebut' || f==='heureFin')){
+      const mins = hhmmDiffMinutes(ev.heureDebut, ev.heureFin);
+      ev.duree = mins!==null ? String(mins) : ev.duree;
+      const dureeInput = document.querySelector(`[data-event-array="${arr}"][data-event-idx="${idx}"][data-event-field="duree"]`);
+      if(dureeInput && mins!==null) dureeInput.value = ev.duree;
+    }
+    // Relie "Troubles de la visibilité" (heure début/fin) à la colonne horaire "Phénomènes" du
+    // Tour d'horizon : dès que nature + début + fin sont renseignés, le nom du phénomène (et donc
+    // son symbole, déjà détecté sur ce champ) apparaît automatiquement sur chaque heure couverte —
+    // sans écraser une case déjà remplie par autre chose. C'est ce qui manquait pour relier les
+    // deux : la saisie précise (début/fin) et l'affichage horaire attendu.
+    if(arr==='troublesVisibilite' && (f==='heureDebut' || f==='heureFin' || f==='nature') && ev.nature){
+      const sh = /^\d{3,4}$/.test(ev.heureDebut||'') ? parseInt((ev.heureDebut).padStart(4,'0').slice(0,2),10) : null;
+      let eh = /^\d{3,4}$/.test(ev.heureFin||'') ? parseInt((ev.heureFin).padStart(4,'0').slice(0,2),10) : null;
+      if(sh!==null && eh!==null){
+        if(eh<sh) eh=23;
+        let filled = false;
+        for(let hnum=sh; hnum<=eh; hnum++){
+          const hh = padHour(hnum);
+          if(!state.carnetRecord.hours[hh].phenomenes){
+            state.carnetRecord.hours[hh].phenomenes = ev.nature;
+            filled = true;
+          }
+        }
+        if(filled) render();
+      }
+    }
     state.carnetDirty = true; updateSaveIndicator();
   });
 
@@ -2444,6 +3190,13 @@ function bindEvents(){
     saveCarnetBtn.disabled = true; const prevLabel = saveCarnetBtn.textContent; saveCarnetBtn.innerHTML = '<span class="spinner"></span> Localisation…';
     await saveCurrentDay('Jour enregistré.', 'day');
     saveCarnetBtn.disabled = false; saveCarnetBtn.textContent = prevLabel;
+  };
+  const unlockCarnetBtn = document.getElementById('unlockCarnetBtn');
+  if(unlockCarnetBtn) unlockCarnetBtn.onclick = async ()=>{
+    unlockCarnetBtn.disabled = true;
+    const ok = await unlockCarnetDay(state.currentStationId, state.carnetDate);
+    if(ok){ await loadCarnetForCurrent(); toast('Relevé déverrouillé — l’observateur peut de nouveau le modifier.'); render(); }
+    else { toast('Échec du déverrouillage.', true); unlockCarnetBtn.disabled = false; }
   };
   const saveRapideBtn = document.getElementById('saveRapideBtn');
   if(saveRapideBtn) saveRapideBtn.onclick = async ()=>{
@@ -2558,7 +3311,10 @@ function onComboFocusOrInput(e){
   const v = inp.value.trim();
   if(!v){ hint.style.display='none'; return; }
   const match = table.find(([c])=> c.toLowerCase()===v.toLowerCase());
-  hint.textContent = match ? `${match[0]} — ${match[1]}` : `« ${v} » — code inconnu dans cette table`;
+  const withSymbol = match && (inp.dataset.combo==='ww' || inp.dataset.combo==='w');
+  hint.innerHTML = match
+    ? `${withSymbol?`<span class="ww-icon" style="display:inline-flex;vertical-align:middle;margin-right:6px;width:16px;height:16px;">${wwSymbolFor(match[0])}</span>`:''}${escapeHtml(match[0])} — ${escapeHtml(match[1])}`
+    : `« ${escapeHtml(v)} » — code inconnu dans cette table`;
   hint.classList.toggle('unknown', !match);
   const rect = inp.getBoundingClientRect();
   hint.style.left = Math.max(4, rect.left) + 'px';
